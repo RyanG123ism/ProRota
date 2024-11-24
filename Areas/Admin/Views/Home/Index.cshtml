@@ -1,0 +1,44 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-header text-center bg-warning text-dark">
+                    <h1 class="display-4">Admin Dashboard</h1>
+                    <p class="lead text-muted">(This page currently has no functionality)</p>
+                </div>
+                <div class="card-body">
+                    <!-- Active Links Section -->
+                    <h4 class="mb-3">Active Links</h4>
+                    <ul class="list-group mb-4">
+                        <a asp-area="Management" asp-controller="ApplicationUser" asp-action="Index" class="list-group-item list-group-item-action">
+                            <i class="fas fa-user-cog mr-2"></i> User Management
+                        </a>
+                        <!-- Add more active links here -->
+                    </ul>
+
+                    <!-- Unused Links Section -->
+                    <h4 class="mb-3 text-muted">Unused Links</h4>
+                    <ul class="list-group">
+                        <li class="list-group-item list-group-item-secondary">
+                            <i class="fas fa-shield-alt mr-2"></i> Security Settings (Unused)
+                        </li>
+                        <li class="list-group-item list-group-item-secondary">
+                            <i class="fas fa-database mr-2"></i> Database Management (Unused)
+                        </li>
+                        <li class="list-group-item list-group-item-secondary">
+                            <i class="fas fa-chart-line mr-2"></i> Analytics Dashboard (Unused)
+                        </li>
+                        <!-- Add more unused links here -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

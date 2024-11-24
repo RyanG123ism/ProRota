@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace RotaPro.Models
+namespace ProRota.Models
 {
     public class Company
     {

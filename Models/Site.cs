@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RotaPro.Models
+namespace ProRota.Models
 {
     public class Site
     {

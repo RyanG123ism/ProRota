@@ -2,7 +2,72 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container-fluid p-0">
+    <!-- Hero Section -->
+    <header class="hero">
+        <div class="container text-center">
+            <h1 class="display-4 fw-bold">Welcome to ProRota</h1>
+            <p class="lead">Your ultimate solution for rota and scheduling management.</p>
+            <a href="#" class="btn btn-primary btn-lg mt-3">Get Started</a>
+            <a href="#" class="btn btn-outline-light btn-lg mt-3">Learn More</a>
+        </div>
+    </header>
+
+    <!-- Features Section -->
+    <section class="features py-5">
+        <div class="container text-center">
+            <h2 class="fw-bold mb-4">Why Choose ProRota?</h2>
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="feature-box">
+                        <i class="fas fa-calendar-alt fa-3x text-primary mb-3"></i>
+                        <h4>Efficient Scheduling</h4>
+                        <p>Create and manage schedules effortlessly with ProRota's user-friendly tools.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="feature-box">
+                        <i class="fas fa-users fa-3x text-success mb-3"></i>
+                        <h4>Team Collaboration</h4>
+                        <p>Enhance team communication and keep everyone on the same page.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="feature-box">
+                        <i class="fas fa-chart-line fa-3x text-warning mb-3"></i>
+                        <h4>Analytics & Insights</h4>
+                        <p>Track performance and gain insights to make better decisions.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about py-5 bg-light">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h2 class="fw-bold">About ProRota</h2>
+                    <p>
+                        ProRota is designed to make rota management seamless and hassle-free. Whether you're managing a small team or a large workforce, ProRota has the tools to keep your operations running smoothly.
+                    </p>
+                    <a href="#" class="btn btn-outline-primary">Learn More</a>
+                </div>
+                <div class="col-md-6 text-center">
+                    <img src="https://via.placeholder.com/500x300" alt="About ProRota" class="img-fluid rounded">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer Section -->
+    <footer class="footer text-center">
+        <div class="container">
+            <p class="mb-0">&copy; @DateTime.Now.Year ProRota. All Rights Reserved.</p>
+            <p class="small">
+                <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a>
+            </p>
+        </div>
+    </footer>
 </div>

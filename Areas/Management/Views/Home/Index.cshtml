@@ -1,0 +1,43 @@
+﻿@{
+    ViewData["Title"] = "Index";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-header text-center bg-primary text-white">
+                    <h1 class="display-4">Management Dashboard</h1>
+                </div>
+                <div class="card-body">
+                    <!-- Active Links Section -->
+                    <h4 class="mb-3">Active Links</h4>
+                    <ul class="list-group mb-4">
+                        <a asp-area="Management" asp-controller="ApplicationUser" asp-action="Index" class="list-group-item list-group-item-action">
+                            <i class="fas fa-users mr-2"></i> Manage Users
+                        </a>
+                        <!-- Add more active links here -->
+                        <a asp-area="" asp-controller="Home" asp-action="Index" class="list-group-item list-group-item-action">
+                            <i class="fas fa-users mr-2"></i> Home
+                        </a>
+                    </ul>
+
+                    <!-- Unused Links Section -->
+                    <h4 class="mb-3 text-muted">Unused Links</h4>
+                    <ul class="list-group">
+                        <li class="list-group-item list-group-item-secondary">
+                            <i class="fas fa-cogs mr-2"></i> Feature 1 (Unused)
+                        </li>
+                        <li class="list-group-item list-group-item-secondary">
+                            <i class="fas fa-chart-bar mr-2"></i> Feature 2 (Unused)
+                        </li>
+                        <li class="list-group-item list-group-item-secondary">
+                            <i class="fas fa-tasks mr-2"></i> Feature 3 (Unused)
+                        </li>
+                        <!-- Add more unused links here -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

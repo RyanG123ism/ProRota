@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using RotaPro.Models;
+using ProRota.Models;
 
 namespace ProRota.Data
 {

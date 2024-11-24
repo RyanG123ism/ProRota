@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using RotaPro.Models;
+using ProRota.Models;
 
 namespace ProRota.Areas.Identity.Pages.Account.Manage
 {

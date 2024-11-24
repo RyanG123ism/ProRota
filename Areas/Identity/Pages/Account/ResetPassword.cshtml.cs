@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
-using RotaPro.Models;
+using ProRota.Models;
 
 namespace ProRota.Areas.Identity.Pages.Account
 {

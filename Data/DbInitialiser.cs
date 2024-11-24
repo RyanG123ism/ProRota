@@ -1,7 +1,7 @@
 ﻿using Bogus;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using RotaPro.Models;
+using ProRota.Models;
 
 namespace ProRota.Data
 {

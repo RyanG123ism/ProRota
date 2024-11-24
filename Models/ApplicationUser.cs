@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.Tracing;
 
-namespace RotaPro.Models
+namespace ProRota.Models
 {
     public class ApplicationUser : IdentityUser
     {
