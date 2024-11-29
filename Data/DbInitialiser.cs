@@ -87,6 +87,7 @@ namespace ProRota.Data
                         EmailConfirmed = true,
                         LockoutEnabled = true,
                         PhoneNumberConfirmed = true,
+                       
                     };
 
                     await userManager.CreateAsync(admin, "admin");
@@ -112,6 +113,10 @@ namespace ProRota.Data
                         EmailConfirmed = true,
                         LockoutEnabled = true,
                         PhoneNumberConfirmed = true,
+                        Salary = 15,
+                        ContractualHours = 45,
+                        Notes = "none"
+                        
                     };
 
                     await userManager.CreateAsync(operationsManager, "sbn");
@@ -136,6 +141,9 @@ namespace ProRota.Data
                         EmailConfirmed = true,
                         LockoutEnabled = true,
                         PhoneNumberConfirmed = true,
+                        Salary = 15,
+                        ContractualHours = 45,
+                        Notes = "none"
                     };
 
                     await userManager.CreateAsync(generalManager, "sbn");
@@ -160,6 +168,9 @@ namespace ProRota.Data
                         EmailConfirmed = true,
                         LockoutEnabled = true,
                         PhoneNumberConfirmed = true,
+                        Salary = 15,
+                        ContractualHours = 45,
+                        Notes = "none"
                     };
 
                     await userManager.CreateAsync(assistantManager, "sbn");
@@ -184,6 +195,9 @@ namespace ProRota.Data
                         EmailConfirmed = true,
                         LockoutEnabled = true,
                         PhoneNumberConfirmed = true,
+                        Salary = 15,
+                        ContractualHours = 45,
+                        Notes = "none"
                     };
 
                     await userManager.CreateAsync(supervisor, "sbn");
@@ -205,6 +219,9 @@ namespace ProRota.Data
                         EmailConfirmed = true,
                         LockoutEnabled = true,
                         PhoneNumberConfirmed = true,
+                        Salary = 15,
+                        ContractualHours = 45,
+                        Notes = "none"
                     },
 
                     new ApplicationUser
@@ -219,6 +236,9 @@ namespace ProRota.Data
                         EmailConfirmed = true,
                         LockoutEnabled = true,
                         PhoneNumberConfirmed = true,
+                        Salary = 15,
+                        ContractualHours = 45,
+                        Notes = "none"
                     },
 
                     new ApplicationUser
@@ -233,6 +253,9 @@ namespace ProRota.Data
                         EmailConfirmed = true,
                         LockoutEnabled = true,
                         PhoneNumberConfirmed = true,
+                        Salary = 15,
+                        ContractualHours = 45,
+                        Notes = "none"
                     },
 
                     new ApplicationUser
@@ -247,6 +270,9 @@ namespace ProRota.Data
                         EmailConfirmed = true,
                         LockoutEnabled = true,
                         PhoneNumberConfirmed = true,
+                        Salary = 15,
+                        ContractualHours = 45,
+                        Notes = "none"
                     },
 
                     new ApplicationUser
@@ -261,6 +287,9 @@ namespace ProRota.Data
                         EmailConfirmed = true,
                         LockoutEnabled = true,
                         PhoneNumberConfirmed = true,
+                        Salary = 15,
+                        ContractualHours = 45,
+                        Notes = "none"
                     },
 
                     new ApplicationUser
@@ -275,6 +304,9 @@ namespace ProRota.Data
                         EmailConfirmed = true,
                         LockoutEnabled = true,
                         PhoneNumberConfirmed = true,
+                        Salary = 15,
+                        ContractualHours = 45,
+                        Notes = "none"
                     },
 
                     new ApplicationUser
@@ -289,6 +321,9 @@ namespace ProRota.Data
                         EmailConfirmed = true,
                         LockoutEnabled = true,
                         PhoneNumberConfirmed = true,
+                        Salary = 15,
+                        ContractualHours = 45,
+                        Notes = "none"
                     },
 
                     new ApplicationUser
@@ -303,6 +338,9 @@ namespace ProRota.Data
                         EmailConfirmed = true,
                         LockoutEnabled = true,
                         PhoneNumberConfirmed = true,
+                        Salary = 15,
+                        ContractualHours = 45,
+                        Notes = "none"
                     },
 
                     new ApplicationUser
@@ -317,6 +355,9 @@ namespace ProRota.Data
                         EmailConfirmed = true,
                         LockoutEnabled = true,
                         PhoneNumberConfirmed = true,
+                        Salary = 15,
+                        ContractualHours = 45,
+                        Notes = "none"
                     },
 
                     new ApplicationUser
@@ -331,6 +372,9 @@ namespace ProRota.Data
                         EmailConfirmed = true,
                         LockoutEnabled = true,
                         PhoneNumberConfirmed = true,
+                        Salary = 15,
+                        ContractualHours = 45,
+                        Notes = "none"
                     },
 
                 };
@@ -362,6 +406,9 @@ namespace ProRota.Data
                         EmailConfirmed = true,
                         LockoutEnabled = true,
                         PhoneNumberConfirmed = true,
+                        Salary = 15,
+                        ContractualHours = 45,
+                        Notes = "none"
                     },
 
                     new ApplicationUser
@@ -376,6 +423,9 @@ namespace ProRota.Data
                         EmailConfirmed = true,
                         LockoutEnabled = true,
                         PhoneNumberConfirmed = true,
+                        Salary = 15,
+                        ContractualHours = 45,
+                        Notes = "none"
                     }
                 };
 

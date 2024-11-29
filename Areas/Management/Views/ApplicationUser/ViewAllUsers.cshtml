@@ -27,6 +27,7 @@
             @foreach (var role in ViewBag.Roles)
             {
                 <option value="@role.Id">@role.Name</option>
+                
             }
         </select>
         <button type="submit">Search</button>
@@ -35,61 +36,71 @@
 
 <!-- Button to create new user -->
 <div style="margin-top: 10px;">
-    <a asp-area="Admin" asp-controller="ApplicationUser" asp-action="CreateApplicationUser" class="btn btn-primary">Create User</a>
+    <a asp-area="Management" asp-controller="ApplicationUser" asp-action="CreateApplicationUser" class="btn btn-primary">Create User</a>
 </div>
 
 <!-- Link to return to original "View All Users" view -->
 <div style="margin-top: 10px;">
-    <a asp-area="Admin" asp-controller="ApplicationUser" asp-action="Index" class="btn btn-primary">Reset</a>
+    <a asp-area="Management" asp-controller="ApplicationUser" asp-action="Index" class="btn btn-primary">Reset</a>
 </div>
 
 <!-- Count of the users -->
 <h3 class="font-weight-bold text-center text-black" style="padding-top: 10px;">@Model.Count() USERS</h3>
 
-<!-- Table of users -->
-<div class="table-responsive">
-    <table class="table table-bordered table-striped table-hover" style="border-color:black;">
-        <tr class="text-black">
-            <th>@Html.DisplayNameFor(model => model.Email)</th>
-            <th>@Html.DisplayNameFor(model => model.FirstName)</th>
-            <th>@Html.DisplayNameFor(model => model.LastName)</th>
-            <th>Roles</th>
-            <th>Actions</th>
-        </tr>
-
-        @foreach (var user in Model)
-        {
+@if (Model == null || !Model.Any())
+{
+    <p>@ViewBag.ErrorMessage </p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped table-hover" style="border-color:black;">
             <tr class="text-black">
-                <td>
-                    @Html.DisplayFor(modelItem => user.Email)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => user.FirstName)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => user.LastName)
-                </td>
-
-                <!-- Display roles for the user -->
-                <td>
-                    @{
-                        var roles = await UserManager.GetRolesAsync(user);
-                        @foreach (var role in roles)
-                        {
-                            @role <br />
-                        }
-                    }
-                </td>
-
-                <td class="text-black">
-                    @Html.ActionLink("Edit", "EditApplicationUser", new { id = user.Id }) |
-                    @Html.ActionLink("Details", "Details", new { id = user.Id }) |
-                    @Html.ActionLink("Deactivate", "DeactivateUser", new { id = user.Id }) |
-                    @Html.ActionLink("Change Role", "ChangeRole", new { id = user.Id }) |
-                </td>
+                <th>@Html.DisplayNameFor(model => model.Email)</th>
+                <th>@Html.DisplayNameFor(model => model.FirstName)</th>
+                <th>@Html.DisplayNameFor(model => model.LastName)</th>
+                <th>Roles</th>
+                <th>Actions</th>
             </tr>
 
-        }
-    </table>
-</div>
+            @foreach (var user in Model)
+            {
+                <tr class="text-black">
+                    <td>
+                        @Html.DisplayFor(modelItem => user.Email)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => user.FirstName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => user.LastName)
+                    </td>
+
+                    <!-- Display roles for the user -->
+                    <td>
+                        @{
+                            var roles = await UserManager.GetRolesAsync(user);
+                            @foreach (var role in roles)
+                            {
+                                @role <br />
+                            }
+                        }
+                    </td>
+
+                    <td class="text-black">
+                        @Html.ActionLink("Edit", "EditApplicationUser", new { id = user.Id }) |
+                        @Html.ActionLink("Details", "Details", new { id = user.Id }) |
+                        @Html.ActionLink("Deactivate", "DeactivateUser", new { id = user.Id }) |
+                        @Html.ActionLink("Change Role", "ChangeRole", new { id = user.Id }) |
+                    </td>
+                </tr>
+
+            }
+        </table>
+    </div>
+}
+
+
+<!-- Table of users -->
+
 

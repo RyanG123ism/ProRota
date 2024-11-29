@@ -198,6 +198,14 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSWRlbnRpdHlcUGFnZXNcX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/grant/OneDrive/Desktop/UNI/Year 4/Honours Project/ProRota/Areas/Management/Views/ApplicationUser/CreateApplicationUser.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcTWFuYWdlbWVudFxWaWV3c1xBcHBsaWNhdGlvblVzZXJcQ3JlYXRlQXBwbGljYXRpb25Vc2VyLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/grant/OneDrive/Desktop/UNI/Year 4/Honours Project/ProRota/Areas/Management/Views/ApplicationUser/EditApplicationUser.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcTWFuYWdlbWVudFxWaWV3c1xBcHBsaWNhdGlvblVzZXJcRWRpdEFwcGxpY2F0aW9uVXNlci5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/grant/OneDrive/Desktop/UNI/Year 4/Honours Project/ProRota/Areas/Management/Views/ApplicationUser/ViewAllUsers.cshtml]
 build_metadata.AdditionalFiles.TargetPath = QXJlYXNcTWFuYWdlbWVudFxWaWV3c1xBcHBsaWNhdGlvblVzZXJcVmlld0FsbFVzZXJzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 

@@ -15,10 +15,10 @@ namespace ProRota.Models
         public string LastName { get; set; } = string.Empty;
 
         [Display(Name = "Salary")]
-        public float Salary { get; set; }
+        public float Salary { get; set; } = 10.50f;
 
         [Display(Name = "Contractual Hours")]
-        public int ContractualHours { get; set; } = 0;
+        public int ContractualHours { get; set; } = 8;//minimum contract
 
         [Display(Name = "Employee Notes")]
         public string Notes { get; set; } = string.Empty; //for things like 'childcare on mondays' etc
