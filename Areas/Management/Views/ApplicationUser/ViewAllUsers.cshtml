@@ -1,6 +1,7 @@
 ﻿@model IEnumerable<ProRota.Models.ApplicationUser>
 @using Microsoft.AspNetCore.Identity
 @using ProRota.Models
+@using System.Security.Claims;
 
 @inject UserManager<ApplicationUser> UserManager
 
@@ -88,10 +89,19 @@ else
                     </td>
 
                     <td class="text-black">
-                        @Html.ActionLink("Edit", "EditApplicationUser", new { id = user.Id }) |
-                        @Html.ActionLink("Details", "Details", new { id = user.Id }) |
-                        @Html.ActionLink("Deactivate", "DeactivateUser", new { id = user.Id }) |
-                        @Html.ActionLink("Change Role", "ChangeRole", new { id = user.Id }) |
+
+                        @if(User.FindFirstValue(ClaimTypes.NameIdentifier.ToString()) == user.Id)
+                        {
+                            @* if the Id is the same as the logged in user - take to their own accoutns edit page *@
+                            @Html.ActionLink("Edit", "EditApplicaitonUser", new { id = user.Id, area = "AREANAMEHERE" })
+                        }
+                        else
+                        {
+                            @Html.ActionLink("Edit", "EditApplicationUser", new { id = user.Id })
+                        }
+                        
+                        | @Html.ActionLink("Details", "Details", new { id = user.Id }) |
+                        @Html.ActionLink("Deactivate", "DeactivateUser", new { id = user.Id }) 
                     </td>
                 </tr>
 

@@ -1,0 +1,71 @@
+﻿@model Dictionary<string, List<Shift>>
+@using ProRota.Models
+
+<div class="container">
+    <h2 class="text-center text-black font-weight-bold" style="padding-top: 10px;">Weekly Rotas</h2>
+
+    @if (Model == null || !Model.Any())
+    {
+        <p class="text-center">@ViewBag.ErrorMessage</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped table-hover" style="border-color: black;">
+                <thead>
+                    <tr class="text-black">
+                        <th>Week Ending</th>
+                        <th>Total Shifts</th>
+                        <th>Is Published?</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var entry in Model)
+                    {
+                        var weekEnding = entry.Key;
+                        var shifts = entry.Value;
+                        //var isPublished = shifts.Any(shift => shift.IsPublished); // Assuming `IsPublished` is a property in Shift
+
+                        <tr class="text-black">
+                            <!-- Week Ending Key -->
+                            <td>
+                                Week Ending: @weekEnding
+                            </td>
+
+                            <!-- Total Shifts -->
+                            <td>
+                                @shifts.Count
+                            </td>
+
+                            <!-- Is Published? -->
+                            <td>
+                                @* @if (isPublished)
+                                {
+                                    <span class="text-success font-weight-bold">Yes</span>
+                                }
+                                else
+                                {
+                                    <span class="text-danger font-weight-bold">No</span>
+                                } *@
+
+                                No
+                            </td>
+
+                            <!-- Actions -->
+                            <td>
+                                @Html.ActionLink("View", "ViewWeek", new { key = weekEnding }) |
+                                @Html.ActionLink("Edit", "EditWeek", new { key = weekEnding }) |
+                                @Html.ActionLink("Publish", "PublishWeek", new { key = weekEnding })
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+}
+
+
+
+

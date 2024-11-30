@@ -60,6 +60,15 @@
           }
         }
       },
+      "DayPilot/5.0.303": {
+        "type": "package",
+        "compile": {
+          "lib/DayPilot.dll": {}
+        },
+        "runtime": {
+          "lib/DayPilot.dll": {}
+        }
+      },
       "Humanizer/2.14.1": {
         "type": "package",
         "dependencies": {
@@ -3133,6 +3142,18 @@
         "lib/netstandard1.3/Bogus.xml",
         "lib/netstandard2.0/Bogus.dll",
         "lib/netstandard2.0/Bogus.xml"
+      ]
+    },
+    "DayPilot/5.0.303": {
+      "sha512": "TpgkBj9kliqpqHR1w3uLY7XgmTccB2zZFCr/koTh3lghDUCNRB7h0xWYKz52MHJkA80pFh0CRBrG27vZN+ylvA==",
+      "type": "package",
+      "path": "daypilot/5.0.303",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "daypilot.5.0.303.nupkg.sha512",
+        "daypilot.nuspec",
+        "lib/DayPilot.dll"
       ]
     },
     "Humanizer/2.14.1": {
@@ -8381,6 +8402,7 @@
   "projectFileDependencyGroups": {
     "net8.0": [
       "Bogus >= 35.6.1",
+      "DayPilot >= 5.0.303",
       "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore >= 8.0.2",
       "Microsoft.AspNetCore.Identity.EntityFrameworkCore >= 8.0.11",
       "Microsoft.AspNetCore.Identity.UI >= 8.0.11",
@@ -8438,6 +8460,10 @@
             "target": "Package",
             "version": "[35.6.1, )"
           },
+          "DayPilot": {
+            "target": "Package",
+            "version": "[5.0.303, )"
+          },
           "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore": {
             "target": "Package",
             "version": "[8.0.2, )"
@@ -8491,5 +8517,17 @@
         "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.200/PortableRuntimeIdentifierGraph.json"
       }
     }
-  }
+  },
+  "logs": [
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'DayPilot 5.0.303' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net8.0'. This package may not be fully compatible with your project.",
+      "libraryId": "DayPilot",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    }
+  ]
 }

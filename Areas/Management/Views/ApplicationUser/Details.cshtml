@@ -1,0 +1,78 @@
+﻿@model ApplicationUser
+@using Microsoft.AspNetCore.Identity;
+@using System.Security.Claims;
+
+<div class="container">
+    <h2>User Details</h2>
+
+    <div>
+        <dl class="row">
+
+            <dt class="col-sm-3">Email:</dt>
+            <dd class="col-sm-9">@Model.Email</dd>
+
+            <dt class="col-sm-3">First Name:</dt>
+            <dd class="col-sm-9">@Model.FirstName</dd>
+
+            <dt class="col-sm-3">Last Name:</dt>
+            <dd class="col-sm-9">@Model.LastName</dd>
+
+            <dt class="col-sm-3">Salary:</dt>
+            <dd class="col-sm-9">@Model.Salary</dd>
+
+            <dt class="col-sm-3">Contractual Hours:</dt>
+            <dd class="col-sm-9">@Model.ContractualHours</dd>
+
+            <dt class="col-sm-3">Employee Notes:</dt>
+            <dd class="col-sm-9">                        
+                @if (Model.Notes != null)
+                {
+                    <span>@Model.Notes</span>
+                }
+                else
+                {
+                    <span>N/A</span>
+                }
+            </dd>
+
+            <dt class="col-sm-3">Role:</dt>
+            <dd class="col-sm-9">
+                @if (ViewBag.UserRole != null)
+                {
+                    <span>@ViewBag.UserRole</span>
+                }
+                else
+                {
+                    <span>No role assigned</span>
+                }
+            </dd>
+
+            <!-- Placeholder for displaying shifts -->
+            <dt class="col-sm-3">Pending Shifts:</dt>
+            <dd class="col-sm-9">
+                <span>Placeholder: In the future, shifts will be displayed here.</span>
+            </dd>
+
+            <!-- Placeholder for displaying time-off requests -->
+            <dt class="col-sm-3">Time-Off Requests:</dt>
+            <dd class="col-sm-9">
+                <span>Placeholder: In the future, time-off requests will be displayed here.</span>
+            </dd>
+
+            @if (User.FindFirstValue(ClaimTypes.NameIdentifier.ToString()) == Model.Id)
+            {
+                @* if the Id is the same as the logged in user - take to their own accoutns edit page *@
+                @Html.ActionLink("Edit", "EditUser", new { id = Model.Id, area = "ADDAREAHERE" })
+            }
+            else
+            {
+                @Html.ActionLink("Edit", "EditApplicationUser", new { id = Model.Id })
+            }
+        </dl>
+    </div>
+
+    <div>
+        @Html.ActionLink("Back to User List", "Index", "ApplicationUser", null, new { @class = "btn btn-secondary" })
+    </div>
+
+</div>

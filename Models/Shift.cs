@@ -16,6 +16,9 @@ namespace ProRota.Models
         [Display(Name = "End Time")]
         public DateTime? EndDateTime { get; set; } = DateTime.MinValue;
 
+        [DataType(DataType.Text)]
+        public string? ShiftNotes { get; set; } = string.Empty; //eg. bar today / break cover
+
         //navigational properties
 
         [ForeignKey("ApplicationUserId")]

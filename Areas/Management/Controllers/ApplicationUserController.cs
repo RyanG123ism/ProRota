@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using ProRota.Areas.Management.Models;
 using ProRota.Data;
 using ProRota.Models;
+using System.Security.Claims;
 
 namespace ProRota.Areas.Management.Controllers
 {
@@ -310,6 +311,94 @@ namespace ProRota.Areas.Management.Controllers
 
             //If ModelState is invalid or if something goes wrong, return to the view with the model
             return View(model);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> Details(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest();
+            }
+
+            ApplicationUser user = _context.ApplicationUsers.Find(id);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            // Get the roles of the user
+            var roles = await _userManager.GetRolesAsync(user);
+
+            // Pass the first role of the user to the view
+            ViewBag.UserRole = roles.FirstOrDefault();
+
+            return View(user);
+        }
+
+        public async Task<ActionResult> DeactivateUser(string id)
+        {
+            //Check if the ID is null or empty
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest(); //If ID is null or empty, return a BadRequest response
+            }
+
+            //Retrieve the user by id
+            ApplicationUser user = await _context.ApplicationUsers.FindAsync(id); //If user is not found, return a NotFound response
+
+            // Check if the user exists
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            //Pass the user model to the DeactivateUser view
+            return View(user);
+        }
+
+        public async Task<ActionResult> ConfirmDeactivateUser(string id)
+        {
+            if (id == null)
+            {
+                return new StatusCodeResult(StatusCodes.Status400BadRequest);
+            }
+
+            //Get the user by id
+            ApplicationUser user = await _context.ApplicationUsers.FindAsync(id);
+
+            //Return to index if user tries to delete their own account
+            if (id == User.FindFirstValue(ClaimTypes.NameIdentifier))
+            {
+                return RedirectToAction("Index", "ApplicationUser");
+            }
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            //Get roles of the user
+            var roles = await _userManager.GetRolesAsync(user);
+
+            if (roles.Any())
+            {
+                //Remove user from all roles
+                foreach (var role in roles)
+                {
+                    await _userManager.RemoveFromRoleAsync(user, role);
+                }
+            }
+
+            //Add user to the "Deactivated" role
+            await _userManager.AddToRoleAsync(user, "Deactivated");
+
+            //Log the user deactivation action
+            var deactivatedUser = await _context.ApplicationUsers.FindAsync(id);
+
+            //Return to the Index action of ApplicationUser controller
+            return RedirectToAction("Index", "ApplicationUser");
         }
     }
 

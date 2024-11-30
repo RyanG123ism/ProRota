@@ -54,11 +54,12 @@ namespace ProRota.Data
                     "Assistant Manager",
                     "General Manager",
                     "Operations Manager",
-                    "Bartened",
+                    "Bartender",
                     "Chef de Partie",
                     "Sous Chef",
                     "Head Chef",
-                    "Executive Chef"
+                    "Executive Chef",
+                    "Deactivated"
                 };
 
                 foreach (var role in roles)
@@ -477,13 +478,17 @@ namespace ProRota.Data
                     var endOfWeek = startOfWeek.AddDays(7).AddSeconds(-1); // End of the week
 
                     var faker = new Faker<Shift>()
-                        .RuleFor(s => s.StartDateTime, f => f.Date.Recent())
-                        .RuleFor(s => s.EndDateTime, f => f.Date.Future())
+                        //Start Date between NOW and -70 days ago and a TIME betwen 10:00 and 13:00
+                        .RuleFor(s => s.StartDateTime, f => f.Date.Between(DateTime.Now.AddDays(-70), DateTime.Now).Date.Add(
+                            f.Date.Between(DateTime.Now.Date, DateTime.Now.Date).TimeOfDay.Add(TimeSpan.FromHours(f.Random.Int(10, 13)))))
+                        //End Date between startDate time and 10+ hours after
+                        .RuleFor(s => s.EndDateTime, (f, s) => f.Date.Between(s.StartDateTime.Value, s.StartDateTime.Value.AddHours(10)))
+                        .RuleFor(s => s.ShiftNotes, f => f.Lorem.Word())
                         .RuleFor(s => s.ApplicationUser, (f) => f.PickRandom(users))
                         .RuleFor(s => s.Site, (f, s) => s.ApplicationUser.Site);//chooses the site from the randomly assigned user
 
                     //generate 50 shifts
-                    var shifts = faker.Generate(20);
+                    var shifts = faker.Generate(150);
 
                     foreach (var shift in shifts)
                     {
