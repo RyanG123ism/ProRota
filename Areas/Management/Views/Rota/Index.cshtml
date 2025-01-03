@@ -16,7 +16,7 @@
                     <tr class="text-black">
                         <th>Week Ending</th>
                         <th>Total Shifts</th>
-                        <th>Is Published?</th>
+                        <th>Is Published? (IMPLEMENT THIS)</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -54,9 +54,9 @@
 
                             <!-- Actions -->
                             <td>
-                                @Html.ActionLink("View", "ViewWeek", new { key = weekEnding }) |
-                                @Html.ActionLink("Edit", "EditWeek", new { key = weekEnding }) |
-                                @Html.ActionLink("Publish", "PublishWeek", new { key = weekEnding })
+                                @Html.ActionLink("View", "ViewWeeklyRota", new { weekEnding = weekEnding }) |
+                                @Html.ActionLink("Edit", "EditWeeklyRota", new { weekEnding = weekEnding }) |
+                                @Html.ActionLink("Publish", "PublishWeeklyRota", new { weekEnding = weekEnding })
                             </td>
                         </tr>
                     }

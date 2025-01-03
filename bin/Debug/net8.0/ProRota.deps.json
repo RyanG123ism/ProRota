@@ -9,6 +9,7 @@
       "ProRota/1.0.0": {
         "dependencies": {
           "Bogus": "35.6.1",
+          "DayPilot": "5.0.303",
           "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore": "8.0.2",
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "8.0.11",
           "Microsoft.AspNetCore.Identity.UI": "8.0.11",
@@ -61,6 +62,14 @@
           "lib/net6.0/Bogus.dll": {
             "assemblyVersion": "35.6.1.0",
             "fileVersion": "35.6.1.0"
+          }
+        }
+      },
+      "DayPilot/5.0.303": {
+        "runtime": {
+          "lib/DayPilot.dll": {
+            "assemblyVersion": "5.0.303.0",
+            "fileVersion": "5.0.303.0"
           }
         }
       },
@@ -2214,6 +2223,13 @@
       "sha512": "sha512-QPJ8zLL0ScEunEoUNhMDigD4ykA/n7vXCZUQdGCFGHBfP2mNYjiCzR9Cj12eaFaDlwkhIC1HKQZihWl8OgbLsw==",
       "path": "bogus/35.6.1",
       "hashPath": "bogus.35.6.1.nupkg.sha512"
+    },
+    "DayPilot/5.0.303": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-TpgkBj9kliqpqHR1w3uLY7XgmTccB2zZFCr/koTh3lghDUCNRB7h0xWYKz52MHJkA80pFh0CRBrG27vZN+ylvA==",
+      "path": "daypilot/5.0.303",
+      "hashPath": "daypilot.5.0.303.nupkg.sha512"
     },
     "Humanizer/2.14.1": {
       "type": "package",

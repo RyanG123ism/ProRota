@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ProRota.Data;
 using ProRota.Models;
 using System.Collections;
@@ -33,15 +34,21 @@ namespace ProRota.Areas.Management.Controllers
             return View(rotas);
         }
 
-        public void getWeekEndings()
+        public async Task<ActionResult> ViewWeeklyRota(string weekEnding)
         {
+            var weekEndingDate = DateTime.Parse(weekEnding);
+            var weekStartingDate = weekEndingDate.AddDays(-7); // Week start date from the end date 
 
+            // Get all users and include the shifts within the given date parameters
+            var usersAndShifts = await _context.ApplicationUsers
+                .Include(u => u.Shifts.Where(s => s.StartDateTime >= weekStartingDate && s.StartDateTime <= weekEndingDate))
+                .ToListAsync();
+
+            ViewBag.WeekStartingDate = weekStartingDate;//passing starting date to view to help format dates
+
+            return View(usersAndShifts);
         }
 
-
-
-
-        //DONT NEED ANY OF THIS -------------------------------------------------------------------------
         private async Task<Dictionary<string, List<Shift>>> GeterateWeeklyRotaListForSiteAsync()
         {
             //get user
@@ -79,7 +86,7 @@ namespace ProRota.Areas.Management.Controllers
         {
             var shiftDate = shift.StartDateTime.Value;
 
-            // adss seven to dayofWeek enum then calculates the remainder
+            // adds seven to dayofWeek enum then calculates the remainder
             // using % 7 operator so that if shift is on a sunday (7) then it divides by 7 and gives us 0
             var daysUntilSunday = ((int)DayOfWeek.Sunday - (int)shiftDate.DayOfWeek + 7) % 7;
             var endOfWeekDate = shiftDate.AddDays(daysUntilSunday);

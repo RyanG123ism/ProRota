@@ -1,0 +1,142 @@
+﻿@model IEnumerable<ProRota.Models.ApplicationUser>
+@using ProRota.Models
+
+@{
+    ViewData["Title"] = "ViewWeeklyRota";
+    var weekStartingDate = (DateTime)ViewBag.WeekStartingDate;
+}
+
+<h1>Week Commencing - @weekStartingDate</h1>
+
+<div class="table-responsive">
+
+    <table class="table table-bordered table-striped table-hover" style="border-color:black;">
+        <thead>
+            <tr>
+                <th>Employee</th>
+                <th>Monday</th>
+                <th>Tuesday</th>
+                <th>Wednesday</th>
+                <th>Thursday</th>
+                <th>Friday</th>
+                <th>Saturday</th>
+                <th>Sunday</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var employee in Model)
+            {
+                <tr>
+                    <td>@employee.FirstName @employee.LastName</td>
+                    <td>
+                        @{
+                            var mondayDate = weekStartingDate.AddDays((int)DayOfWeek.Monday - (int)weekStartingDate.DayOfWeek);
+                            var monday = employee.Shifts.FirstOrDefault(s => s.StartDateTime.HasValue && s.StartDateTime.Value.Date == mondayDate.Date);
+                        }
+                        @if (monday != null)
+                        {
+                            <span>@monday.StartDateTime.Value.ToString("HH:mm") - @monday.EndDateTime.Value.ToString("HH:mm")</span>
+                        }
+                        else
+                        {
+                            <span>HOLIDAY</span>
+                        }
+                    </td>
+                    <td>
+                        @{
+                            var tuesdayDate = weekStartingDate.AddDays((int)DayOfWeek.Tuesday - (int)weekStartingDate.DayOfWeek);
+                            var tuesday = employee.Shifts.FirstOrDefault(s => s.StartDateTime.HasValue && s.StartDateTime.Value.Date == tuesdayDate.Date);
+                        }
+                        @if (tuesday != null)
+                        {
+                            <span>@tuesday.StartDateTime.Value.ToString("HH:mm") - @tuesday.EndDateTime.Value.ToString("HH:mm")</span>
+                        }
+                        else
+                        {
+                            <span>OFF</span>
+                        }
+                    </td>
+                    <td>
+                        @{
+                            var wednesdayDate = weekStartingDate.AddDays((int)DayOfWeek.Wednesday - (int)weekStartingDate.DayOfWeek);
+                            var wednesday = employee.Shifts.FirstOrDefault(s => s.StartDateTime.HasValue && s.StartDateTime.Value.Date == wednesdayDate.Date);
+                        }
+                        @if (wednesday != null)
+                        {
+                            <span>@wednesday.StartDateTime.Value.ToString("HH:mm") - @wednesday.EndDateTime.Value.ToString("HH:mm")</span>
+                        }
+                        else
+                        {
+                            <span>OFF</span>
+                        }
+                    </td>
+                    <td>
+                        @{
+                            var thursdayDate = weekStartingDate.AddDays((int)DayOfWeek.Thursday - (int)weekStartingDate.DayOfWeek);
+                            var thursday = employee.Shifts.FirstOrDefault(s => s.StartDateTime.HasValue && s.StartDateTime.Value.Date == thursdayDate.Date);
+                        }
+                        @if (thursday != null)
+                        {
+                            <span>@thursday.StartDateTime.Value.ToString("HH:mm") - @thursday.EndDateTime.Value.ToString("HH:mm")</span>
+                        }
+                        else
+                        {
+                            <span>OFF</span>
+                        }
+                    </td>
+                    <td>
+                        @{
+                            var fridayDate = weekStartingDate.AddDays((int)DayOfWeek.Friday - (int)weekStartingDate.DayOfWeek);
+                            var friday = employee.Shifts.FirstOrDefault(s => s.StartDateTime.HasValue && s.StartDateTime.Value.Date == fridayDate.Date);
+                        }
+                        @if (friday != null)
+                        {
+                            <span>@friday.StartDateTime.Value.ToString("HH:mm") - @friday.EndDateTime.Value.ToString("HH:mm")</span>
+                        }
+                        else
+                        {
+                            <span>OFF</span>
+                        }
+                    </td>
+                    <td>
+                        @{
+                            var saturdayDate = weekStartingDate.AddDays((int)DayOfWeek.Saturday - (int)weekStartingDate.DayOfWeek);
+                            var saturday = employee.Shifts.FirstOrDefault(s => s.StartDateTime.HasValue && s.StartDateTime.Value.Date == saturdayDate.Date);
+                        }
+                        @if (saturday != null)
+                        {
+                            <span>@saturday.StartDateTime.Value.ToString("HH:mm") - @saturday.EndDateTime.Value.ToString("HH:mm")</span>
+                        }
+                        else
+                        {
+                            <span>OFF</span>
+                        }
+                    </td>
+                    <td>
+                        @{
+                            var sundayDate = weekStartingDate.AddDays((int)DayOfWeek.Sunday - (int)weekStartingDate.DayOfWeek);
+                            var sunday = employee.Shifts.FirstOrDefault(s => s.StartDateTime.HasValue && s.StartDateTime.Value.Date == sundayDate.Date);
+                        }
+                        @if (sunday != null)
+                        {
+                            <span>@sunday.StartDateTime.Value.ToString("HH:mm") - @sunday.EndDateTime.Value.ToString("HH:mm")</span>
+                        }
+                        else
+                        {
+                            <span>OFF</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        highlightTableCells(); // Call the specific function
+    });
+</script>
+
+
