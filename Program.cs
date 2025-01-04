@@ -35,7 +35,19 @@ builder.Services.AddRazorPages();
 //    .AddDefaultTokenProviders();
 builder.Services.AddControllersWithViews();
 
+// Add session services
+builder.Services.AddDistributedMemoryCache(); // Required for session storage
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30); // Set session timeout
+    options.Cookie.HttpOnly = true; // Make the cookie accessible only by the server
+    options.Cookie.IsEssential = true; // Required for GDPR compliance
+});
+
 var app = builder.Build();
+
+// Use session
+app.UseSession();
 
 // Get the scope factory
 using var scope = app.Services.CreateScope();

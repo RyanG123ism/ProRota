@@ -93,7 +93,7 @@ else
                         @if(User.FindFirstValue(ClaimTypes.NameIdentifier.ToString()) == user.Id)
                         {
                             @* if the Id is the same as the logged in user - take to their own accoutns edit page *@
-                            @Html.ActionLink("Edit", "EditApplicaitonUser", new { id = user.Id, area = "AREANAMEHERE" })
+                            @Html.ActionLink("Edit", "Manage", "Account", new { area = "Identity" })
                         }
                         else
                         {

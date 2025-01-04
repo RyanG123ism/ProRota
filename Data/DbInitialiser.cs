@@ -446,8 +446,15 @@ namespace ProRota.Data
                 var faker = new Faker();
 
                 foreach (var user in users)
-                {
-                    user.Site = faker.PickRandom(sites);
+                {                 
+                    if(user.Email != "admin@admin.com")
+                    {
+                        user.Site = faker.PickRandom(sites.Where((site, index) => index != 2)); //any site bu index 2 - No Site - for admin and other special users
+                    }
+                    else
+                    {
+                        user.Site = sites[2]; //gives admin a "No Site" site. 
+                    }
                 }
 
                 await dbContext.SaveChangesAsync();
@@ -523,7 +530,8 @@ namespace ProRota.Data
                 var sites = new List<Site>()
                 {
                     new Site {SiteName = "Merchant City"},
-                    new Site {SiteName = "Southside"}
+                    new Site {SiteName = "Southside"},
+                    new Site {SiteName = "No Site"}
                 };
 
                 foreach (var site in sites)

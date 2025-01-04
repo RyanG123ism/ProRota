@@ -8,10 +8,11 @@ using ProRota.Areas.Management.Models;
 using ProRota.Data;
 using ProRota.Models;
 using System.Security.Claims;
+using System.Security.Policy;
 
 namespace ProRota.Areas.Management.Controllers
 {
-    [Authorize(Roles = "Admin, General Manager, Assistant Manager, Head Chef, Executive Chef")]
+    [Authorize(Roles = "Admin, General Manager, Assistant Manager, Head Chef, Executive Chef, Operations Manager")]
     [Area("Management")]
     public class ApplicationUserController : Controller
     {
@@ -27,17 +28,30 @@ namespace ProRota.Areas.Management.Controllers
             _roleManager = roleManager;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(bool isAdmin = false)//default value is false for when no admins access index page
         {
+
+            IEnumerable<ApplicationUser> users;
+
+            if (isAdmin)
+            {
+                var adminSession = HttpContext.Session.GetInt32("AdminsCurrentSiteId");
+
+                users = adminSession != null ? ViewAllUsersBySite() : ViewAllUsers();
+
+                return View("ViewAllUsers", users);
+
+            }
+
             //Calls the ViewAllUsers method to retrieve the list of users
-            var users = ViewAllUsers();
+            users = ViewAllUsersBySite();
 
-            // Returns the ViewAllUsers view with the list of users
             return View("ViewAllUsers", users);
+       
         }
-
+        
         public IEnumerable<ApplicationUser> ViewAllUsers()
-        {
+        {    
             //Get all the users
             var users = _context.ApplicationUsers.ToList();
 
@@ -54,8 +68,31 @@ namespace ProRota.Areas.Management.Controllers
             return users;
         }
 
+        public IEnumerable<ApplicationUser> ViewAllUsersBySite()
+        {
+            var siteId = GetSiteIdFromSessionOrUser();
+
+            //Get all the users
+            var users = _context.ApplicationUsers.Where(u => u.SiteId == siteId).ToList();
+
+            //Refresh the list if any changes are made
+            foreach (var item in users)
+            {
+                _context.Entry(item).Reload();
+            }
+
+            //Pass all the roles to the view so that you can search users by role
+            ViewBag.Roles = _context.Roles.ToList();
+
+            //Returns list of users
+            return users;
+        }
+
         public ActionResult SearchForUser(string fullName)
         {
+
+            var siteId = GetSiteIdFromSessionOrUser();
+
             //Check if the fullName parameter is null or empty
             if (string.IsNullOrEmpty(fullName))
             {
@@ -75,7 +112,7 @@ namespace ProRota.Areas.Management.Controllers
                 lName = names[1];
 
                 //Retrieve users with matching first names
-                var usersFirstNames = _context.ApplicationUsers.Where(u => u.FirstName.Equals(fName)).ToList();
+                var usersFirstNames = _context.ApplicationUsers.Where(u => u.SiteId == siteId).Where(u => u.FirstName.Equals(fName)).ToList();
 
                 List<ApplicationUser> results = new List<ApplicationUser>();
 
@@ -87,7 +124,7 @@ namespace ProRota.Areas.Management.Controllers
                         results.Add(item);
                     }
                 }
-                return View("ViewAllUsers", results); //Return the ViewAllUsers view with filtered results
+                return View("ViewAllUsersBySite", results); //Return the ViewAllUsers view with filtered results
             }
             else//Searching for first names AND last names seperately
             {
@@ -95,26 +132,29 @@ namespace ProRota.Areas.Management.Controllers
                 lName = null;
 
                 //Retrieve users with matching first names
-                var usersFirstNames = _context.ApplicationUsers.Where(u => u.FirstName.Equals(fName)).ToList();
+                var usersFirstNames = _context.ApplicationUsers.Where(u => u.SiteId == siteId).Where(u => u.FirstName.Equals(fName)).ToList();
                 //Retrieve users with matching last names
-                var usersLastNames = _context.ApplicationUsers.Where(u => u.LastName.Equals(fName)).ToList();
+                var usersLastNames = _context.ApplicationUsers.Where(u => u.SiteId == siteId).Where(u => u.LastName.Equals(fName)).ToList();
 
                 //Joins the list of first names and last name search results together
                 var results = usersFirstNames.Concat(usersLastNames);
 
-                return View("ViewAllUsers", results); //Return the ViewAllUsers view with filtered results
+                return View("ViewAllUsersBySite", results); //Return the ViewAllUsers view with filtered results
             }
 
         }
 
         public async Task<ActionResult> ViewAllUsersByRole(string id)
         {
+            var siteId = GetSiteIdFromSessionOrUser();
+
             //Find the role via the Id
             var role = await _context.Roles.FindAsync(id);
             var roleName = role.Name;
 
-            //Get users in the specified role
+            //Get users in the specified role then filters to the specific site
             var usersInRole = await _userManager.GetUsersInRoleAsync(roleName);
+            var usersInRoleBySite = usersInRole.Where(u => u.SiteId == siteId).ToList();
 
             //Passing users in the specified role to the view
             ViewBag.Roles = await _context.Roles.ToListAsync(); // Ensure this operation is awaited
@@ -124,7 +164,7 @@ namespace ProRota.Areas.Management.Controllers
                 ViewBag.ErrorMessage = $"There are no users belonging to the role {roleName} ";
             }
 
-            return View("ViewAllUsers", usersInRole);
+            return View("ViewAllUsersBySite", usersInRoleBySite);
         }
 
         [HttpGet]
@@ -400,6 +440,33 @@ namespace ProRota.Areas.Management.Controllers
             //Return to the Index action of ApplicationUser controller
             return RedirectToAction("Index", "ApplicationUser");
         }
+
+        public int GetSiteIdFromSessionOrUser()
+        {
+            var siteId = HttpContext.Session.GetInt32("AdminsCurrentSiteId");
+
+            if (siteId == null)
+            {
+                //gets current users ID and then gets the user object
+                var userId = _userManager.GetUserId(User);
+                var user = _context.ApplicationUsers.FirstOrDefault(u => u.Id == userId);
+
+                //if not found
+                if (user == null)
+                {
+                    throw new Exception("Current user not found.");
+                }
+
+                if(user.SiteId == null)
+                {
+                    throw new Exception("Current site not found.");
+                }
+
+                siteId = user.SiteId;
+            }
+
+            return (int)siteId;
+        }       
     }
 
 }

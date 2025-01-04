@@ -8,33 +8,50 @@
             <div class="card">
                 <div class="card-header text-center bg-primary text-white">
                     <h1 class="display-4">Management Dashboard</h1>
+                    <h3 >for Six by Nico @ViewBag.SiteName</h3>
                 </div>
-                <div class="card-body">
+                <div class="card-body text-center">
+                    <!-- Center all text within the card body -->
                     <!-- Active Links Section -->
-                    <h4 class="mb-3">Active Links</h4>
+                    <h4 class="mb-3">Manage your Operations</h4>
                     <ul class="list-group mb-4">
-                        <a asp-area="Management" asp-controller="ApplicationUser" asp-action="Index" class="list-group-item list-group-item-action">
+                        <a asp-area="Management" asp-controller="ApplicationUser" asp-action="Index" class="list-group-item list-group-item-action text-center">
                             <i class="fas fa-users mr-2"></i> Manage Users
                         </a>
-                        <!-- Add more active links here -->
-                        <a asp-area="Management" asp-controller="Rota" asp-action="Index" class="list-group-item list-group-item-action">
-                            <i class="fas fa-users mr-2"></i> Manage Rotas
+                        <a asp-area="Management" asp-controller="Rota" asp-action="Index" class="list-group-item list-group-item-action text-center">
+                            <i class="fas fa-users mr-2"></i> Manage Weekly Rotas
+                        </a>
+                        <a asp-area="Management" asp-controller="Rota" asp-action="Index" class="list-group-item list-group-item-action text-center">
+                            <i class="fas fa-users mr-2"></i> Manage Holiday Requests
+                        </a>
+                    </ul>
+
+                    <h4 class="mb-3">Configure your Site</h4>
+                    <ul class="list-group mb-4">
+                        <a asp-area="Management" asp-controller="ApplicationUser" asp-action="Index" class="list-group-item list-group-item-action text-center">
+                            <i class="fas fa-users mr-2"></i> Site Configuration
+                        </a>
+                    </ul>
+
+                    <h4 class="mb-3">Site Analytics</h4>
+                    <ul class="list-group mb-4">
+                        <a asp-area="Management" asp-controller="ApplicationUser" asp-action="Index" class="list-group-item list-group-item-action text-center">
+                            <i class="fas fa-users mr-2"></i> See How Your Site is Performing
                         </a>
                     </ul>
 
                     <!-- Unused Links Section -->
                     <h4 class="mb-3 text-muted">Unused Links</h4>
                     <ul class="list-group">
-                        <li class="list-group-item list-group-item-secondary">
+                        <li class="list-group-item list-group-item-secondary text-center">
                             <i class="fas fa-cogs mr-2"></i> Feature 1 (Unused)
                         </li>
-                        <li class="list-group-item list-group-item-secondary">
+                        <li class="list-group-item list-group-item-secondary text-center">
                             <i class="fas fa-chart-bar mr-2"></i> Feature 2 (Unused)
                         </li>
-                        <li class="list-group-item list-group-item-secondary">
+                        <li class="list-group-item list-group-item-secondary text-center">
                             <i class="fas fa-tasks mr-2"></i> Feature 3 (Unused)
                         </li>
-                        <!-- Add more unused links here -->
                     </ul>
                 </div>
             </div>
