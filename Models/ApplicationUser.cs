@@ -20,6 +20,12 @@ namespace ProRota.Models
         [Display(Name = "Contractual Hours")]
         public int ContractualHours { get; set; } = 8;//minimum contract
 
+        [Display(Name = "Holidays per Year")]
+        public int HolidaysPerYear { get; set; } = 25;
+
+        [Display(Name = "Remaining Holidays")]
+        public int RemainingHolidays { get; set; } = 25;
+
         [Display(Name = "Employee Notes")]
         public string Notes { get; set; } = string.Empty; //for things like 'childcare on mondays' etc
 

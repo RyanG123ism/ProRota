@@ -18,6 +18,8 @@ namespace ProRota.Models
         [Display(Name = "Use a Holiday?")]
         public bool IsHoliday { get; set; }
 
+        public bool IsApproved { get; set; } = false;
+
         //navigational properties
 
         [ForeignKey("ApplicationUserId")]

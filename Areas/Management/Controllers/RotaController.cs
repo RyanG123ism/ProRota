@@ -74,7 +74,11 @@ namespace ProRota.Areas.Management.Controllers
                 //add shift to existing key and list value
                 weeklyRotas[weekEnding].Add(shift);                           
             }
-            return weeklyRotas;
+
+            //orders the dictionary by decending date key values
+            var sortedWeeklyRotas = weeklyRotas.OrderByDescending(r => DateTime.Parse(r.Key)).ToDictionary(r => r.Key, r => r.Value);
+
+            return sortedWeeklyRotas;
         }
 
         private string CalculateNextSundayDateToString(Shift shift)

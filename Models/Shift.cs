@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Newtonsoft.Json;
 
 namespace ProRota.Models
 {
@@ -22,7 +23,10 @@ namespace ProRota.Models
         //navigational properties
 
         [ForeignKey("ApplicationUserId")]
+        [JsonIgnore]
         public string? ApplicationUserId { get; set; }
+
+        [JsonIgnore]
         public ApplicationUser? ApplicationUser { get; set; }
 
         [ForeignKey("SiteId")]
