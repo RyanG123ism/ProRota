@@ -9,6 +9,7 @@ C:\Users\grant\OneDrive\Desktop\UNI\Year 4\Honours Project\ProRota\bin\Debug\net
 C:\Users\grant\OneDrive\Desktop\UNI\Year 4\Honours Project\ProRota\bin\Debug\net8.0\Azure.Core.dll
 C:\Users\grant\OneDrive\Desktop\UNI\Year 4\Honours Project\ProRota\bin\Debug\net8.0\Azure.Identity.dll
 C:\Users\grant\OneDrive\Desktop\UNI\Year 4\Honours Project\ProRota\bin\Debug\net8.0\Bogus.dll
+C:\Users\grant\OneDrive\Desktop\UNI\Year 4\Honours Project\ProRota\bin\Debug\net8.0\DayPilot.dll
 C:\Users\grant\OneDrive\Desktop\UNI\Year 4\Honours Project\ProRota\bin\Debug\net8.0\Humanizer.dll
 C:\Users\grant\OneDrive\Desktop\UNI\Year 4\Honours Project\ProRota\bin\Debug\net8.0\Microsoft.AspNetCore.Cryptography.Internal.dll
 C:\Users\grant\OneDrive\Desktop\UNI\Year 4\Honours Project\ProRota\bin\Debug\net8.0\Microsoft.AspNetCore.Cryptography.KeyDerivation.dll
@@ -277,6 +278,7 @@ C:\Users\grant\OneDrive\Desktop\UNI\Year 4\Honours Project\ProRota\obj\Debug\net
 C:\Users\grant\OneDrive\Desktop\UNI\Year 4\Honours Project\ProRota\obj\Debug\net8.0\ProRota.MvcApplicationPartsAssemblyInfo.cache
 C:\Users\grant\OneDrive\Desktop\UNI\Year 4\Honours Project\ProRota\obj\Debug\net8.0\ProRota.RazorAssemblyInfo.cache
 C:\Users\grant\OneDrive\Desktop\UNI\Year 4\Honours Project\ProRota\obj\Debug\net8.0\ProRota.RazorAssemblyInfo.cs
+C:\Users\grant\OneDrive\Desktop\UNI\Year 4\Honours Project\ProRota\obj\Debug\net8.0\ProRota.sourcelink.json
 C:\Users\grant\OneDrive\Desktop\UNI\Year 4\Honours Project\ProRota\obj\Debug\net8.0\staticwebassets.build.json
 C:\Users\grant\OneDrive\Desktop\UNI\Year 4\Honours Project\ProRota\obj\Debug\net8.0\staticwebassets.development.json
 C:\Users\grant\OneDrive\Desktop\UNI\Year 4\Honours Project\ProRota\obj\Debug\net8.0\staticwebassets\msbuild.ProRota.Microsoft.AspNetCore.StaticWebAssets.props
@@ -293,5 +295,3 @@ C:\Users\grant\OneDrive\Desktop\UNI\Year 4\Honours Project\ProRota\obj\Debug\net
 C:\Users\grant\OneDrive\Desktop\UNI\Year 4\Honours Project\ProRota\obj\Debug\net8.0\ProRota.pdb
 C:\Users\grant\OneDrive\Desktop\UNI\Year 4\Honours Project\ProRota\obj\Debug\net8.0\ProRota.genruntimeconfig.cache
 C:\Users\grant\OneDrive\Desktop\UNI\Year 4\Honours Project\ProRota\obj\Debug\net8.0\ref\ProRota.dll
-C:\Users\grant\OneDrive\Desktop\UNI\Year 4\Honours Project\ProRota\obj\Debug\net8.0\ProRota.sourcelink.json
-C:\Users\grant\OneDrive\Desktop\UNI\Year 4\Honours Project\ProRota\bin\Debug\net8.0\DayPilot.dll

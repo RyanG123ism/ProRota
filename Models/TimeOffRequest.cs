@@ -5,7 +5,7 @@ namespace ProRota.Models
 {
     public class TimeOffRequest
     {
-        
+        [Key]
         public int Id { get; set; }
 
         [Required]

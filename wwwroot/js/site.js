@@ -3,7 +3,6 @@
 function highlightTableCellsforWeeklyRota() {
     const tableRows = document.querySelectorAll("#weeklyRotaTable tbody tr");
     
-
     tableRows.forEach(row => {
         const cells = row.querySelectorAll("td");
 
@@ -134,8 +133,30 @@ function initialisePendingShifts(shiftsJson) {
     document.getElementById("next-week-btn").addEventListener("click", () => navigateWeek(1));
 }
 
-// Export to global scope (or use export if using ES modules)
-/*window.initialisePendingShifts = initialisePendingShifts;*/
+function showDeleteConfirmationPopUp(id, date) {
+    let message;
+
+    if (id == 0) {
+        message = "Error: Time-off Request was not found"
+    }
+    else {
+        message = `Are you sure you want to delete the time-off request dated: ${date}?, ID: ${id}`;
+
+        //send the req ID to the form through a hidden input value
+        const hiddenInput = document.querySelector('#deleteConfirmationPopUp input[name="requestId"]');
+        hiddenInput.value = id;
+    }
+
+    //sets the message
+    document.getElementById('deleteConfirmationMessage').textContent = message;
+   
+    //show the popUp
+    const popUp = new bootstrap.Modal(document.getElementById('deleteConfirmationPopUp'));
+    popUp.show();
+}
+
+
+
 
 
 

@@ -1,13 +1,21 @@
 ﻿@model ApplicationUser
 @using ProRota.Models
 
+@{
+    // Hardcoded TimeOffRequests for demonstration - REPLACE WITH MODEL DATA BELOW
+    var timeOffRequests = new List<dynamic>
+                {
+                new { Id = 1, Date = "2025-01-01", IsHoliday = true, Notes = "New Year's Day", IsApproved = true },
+                new { Id = 2, Date = "2025-02-14", IsHoliday = false, Notes = "Valentine's Day", IsApproved = false },
+                new { Id = 3, Date = "2025-03-17", IsHoliday = true, Notes = "St. Patrick's Day", IsApproved = true },
+                new { Id = 4, Date = "2025-04-01", IsHoliday = false, Notes = "April Fool's Day", IsApproved = false }
+                };
+}
 
 <div class="card shadow-sm p-3 mb-5" style="background-color: #f8f9fa; border: none;">
     <div class="card-body">
-        <!-- Dashboard Title -->
         <h1 class="card-title text-center mb-4" style="font-weight: bold; color: #343a40;">Welcome to your Dashboard, @Model.FirstName</h1>
 
-        <!-- Upcoming Shifts Section -->
         <h2 class="text-center mb-3" style="font-weight: bold;">Your Upcoming Shifts</h2>
 
         <div id="table-container" class="table-responsive">
@@ -43,28 +51,16 @@
 
         <div id="table-container" class="table-responsive">
 
-            <!-- Shifts Table -->
+            <!-- Time of Request Shifts Table -->
             <table id="timeOffRequestsTable" class="table table-bordered table-striped table-hover" style="border-color: lightgray;">
                 <thead id="table-header" class="table-dark">
                     <th>Request Date</th>
                     <th>Paid?</th>
                     <th>Notes</th>
                     <th>Approved?</th>
-                </thead>
-
-                @{
-                    // Hardcoded TimeOffRequests for demonstration
-                    var timeOffRequests = new List<dynamic>
-                {
-                new { Date = "2025-01-01", IsHoliday = true, Notes = "New Year's Day", IsApproved = true },
-                new { Date = "2025-02-14", IsHoliday = false, Notes = "Valentine's Day", IsApproved = false },
-                new { Date = "2025-03-17", IsHoliday = true, Notes = "St. Patrick's Day", IsApproved = true },
-                new { Date = "2025-04-01", IsHoliday = false, Notes = "April Fool's Day", IsApproved = false }
-                };
-                }
-
+                </thead>              
                 <tbody id="table-body">
-                    @foreach(var req in timeOffRequests)
+                    @foreach(var req in timeOffRequests) @* REPLACE WITH MODEL DATA *@
                     {
                         <tr>
                             <td>@req.Date</td>
@@ -75,6 +71,11 @@
                             <td class="text-center" style="background-color: @(req.IsApproved ? "lightgreen" : "lightcoral"); color: black; font-weight: bold;">
                                 @(req.IsApproved ? "Approved" : "Denied")
                             </td>
+                            <td class="text-center">
+                                <a href="javascript:void(0);" onclick="showDeleteConfirmationPopUp('@req.Id', '@req.Date')">
+                                    Delete Request
+                                </a>
+                            </td>
                         </tr>
                     }
                 </tbody>
@@ -83,100 +84,39 @@
     </div>
 </div>
 
+@* Hidden Error Message *@
+<div id="errorMessage" style="color: red; display: none;"></div>
+
+@* Hidden pop up message for when a user deletes a time off request *@
+<div class="modal fade" id="deleteConfirmationPopUp" tabindex="-1" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteConfirmationModalLabel">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="deleteConfirmationMessage">Are you sure you want to delete this request?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form action="/UserDashboard/ConfirmDeleteTimeOffRequest" method="post">
+                    <input type="hidden" name="requestId" value="" />
+                    <button type="submit" class="btn btn-danger" id="confirmDeleteButton">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        // Call the function defined in site.js
         const shiftsJson = '@Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Shifts))';
         console.log("Shifts JSON:", shiftsJson); // Debugging: Check JSON structure
         initialisePendingShifts(JSON.parse(shiftsJson));
         highlightTableCellsforPendingShifts();
     });
+
+
 </script>
-
-@* <script>
-    const shifts = JSON.parse('@Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Shifts))');
-
-    let currentWeekStart; // Tracks the current week's Monday
-    const oneWeekMilliseconds = 7 * 24 * 60 * 60 * 1000; // Number of milliseconds in a week
-
-    // Function to initialize the current week based on the earliest shift
-    function initializeWeek() {
-        const sortedShifts = shifts.map(shift => ({
-            ...shift,
-            StartDate: shift.StartDateTime ? new Date(shift.StartDateTime).toISOString().split('T')[0] : null
-        })).filter(shift => shift.StartDate !== null)
-            .sort((a, b) => new Date(a.StartDateTime) - new Date(b.StartDateTime));
-
-        const firstShiftDate = sortedShifts.length > 0 ? new Date(sortedShifts[0].StartDateTime) : new Date();
-        currentWeekStart = new Date(firstShiftDate);
-        currentWeekStart.setDate(currentWeekStart.getDate() - currentWeekStart.getDay() + 1); // Adjust to Monday
-    }
-
-    // Function to populate the table for the current week
-    function populateTable() {
-        const tableHeader = document.getElementById("pendingShifts-table-header");
-        const tableBody = document.getElementById("pendingShifts-table-body");
-
-        // Clear existing content
-        tableHeader.innerHTML = "";
-        tableBody.innerHTML = "";
-
-        // Build the date range for the current week (Monday to Sunday)
-        const dateRange = [];
-        for (let i = 0; i < 7; i++) {
-            const date = new Date(currentWeekStart);
-            date.setDate(currentWeekStart.getDate() + i);
-            dateRange.push(date);
-        }
-
-        // Generate table headers (Dates)
-        const headerRow = document.createElement("tr");
-        const dateHeader = document.createElement("th");
-        dateHeader.textContent = "Shift Date";
-        headerRow.appendChild(dateHeader);
-
-        dateRange.forEach(date => {
-            const th = document.createElement("th");
-            th.textContent = date.toLocaleDateString();
-            headerRow.appendChild(th);
-        });
-        tableHeader.appendChild(headerRow);
-
-        // Generate table rows (Shift times or "OFF")
-        const row = document.createElement("tr");
-        const detailsHeader = document.createElement("td");
-        detailsHeader.textContent = "Shift Times";
-        row.appendChild(detailsHeader);
-
-        dateRange.forEach(date => {
-            const shift = shifts.find(s => new Date(s.StartDateTime).toDateString() === date.toDateString());
-            const td = document.createElement("td");
-            if (shift) {
-                td.textContent =
-                    new Date(shift.StartDateTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) +
-                    " - " +
-                    new Date(shift.EndDateTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-            } else {
-                td.textContent = "OFF";
-            }
-            row.appendChild(td);
-        });
-        tableBody.appendChild(row);
-    }
-
-    // Function to navigate weeks
-    function navigateWeek(direction) {
-        currentWeekStart = new Date(currentWeekStart.getTime() + direction * oneWeekMilliseconds); // Adjust week
-        populateTable(); // Re-populate the table with the new week
-        highlightTableCellsforPendingShifts(); // highlight cells after table change
-    }
-
-    // Initialize the table on page load
-    document.addEventListener("DOMContentLoaded", () => {
-        initializeWeek();
-        populateTable();
-        highlightTableCellsforPendingShifts();
-    });
-
-</script> *@
  
