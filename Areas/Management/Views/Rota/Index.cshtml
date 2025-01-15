@@ -1,70 +1,83 @@
 ﻿@model Dictionary<string, List<Shift>>
 @using ProRota.Models
 
-<div class="container">
-    <h2 class="text-center text-black font-weight-bold" style="padding-top: 10px;">Weekly Rotas</h2>
 
-    @if (Model == null || !Model.Any())
-    {
-        <p class="text-center">@ViewBag.ErrorMessage</p>
-    }
-    else
-    {
-        <div class="table-responsive">
-            <table class="table table-bordered table-striped table-hover" style="border-color: black;">
-                <thead>
-                    <tr class="text-black">
-                        <th>Week Ending</th>
-                        <th>Total Shifts</th>
-                        <th>Is Published? (IMPLEMENT THIS)</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var entry in Model)
-                    {
-                        var weekEnding = entry.Key;
-                        var shifts = entry.Value;
-                        //var isPublished = shifts.Any(shift => shift.IsPublished); // Assuming `IsPublished` is a property in Shift
+<div class="card shadow-sm p-3 mb-5" style="background-color: #f8f9fa; border: none;">
+    <div class="card-header text-center">
+        <h1 class="display-4">Rota Management</h1>
+        <h3>Weekly Rotas</h3>
+    </div>
+    <div class="card-body text-center">
+        <div class="container">
+            <h2 class="text-center text-black font-weight-bold" style="padding-top: 10px;">Weekly Rotas</h2>
 
-                        <tr class="text-black">
-                            <!-- Week Ending Key -->
-                            <td>
-                                Week Ending: @weekEnding
-                            </td>
+            @if (Model == null || !Model.Any())
+            {
+                <p class="text-center">@ViewBag.ErrorMessage</p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped table-hover" style="border-color: black;">
+                        <thead>
+                            <tr class="text-black">
+                                <th>Week Ending</th>
+                                <th>Total Shifts</th>
+                                <th>Is Published? (IMPLEMENT THIS)</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var entry in Model)
+                            {
+                                var weekEnding = entry.Key;
+                                var shifts = entry.Value;
+                                //var isPublished = shifts.Any(shift => shift.IsPublished); // Assuming `IsPublished` is a property in Shift
 
-                            <!-- Total Shifts -->
-                            <td>
-                                @shifts.Count
-                            </td>
+                                <tr class="text-black">
+                                    <!-- Week Ending Key -->
+                                    <td>
+                                        Week Ending: @weekEnding
+                                    </td>
 
-                            <!-- Is Published? -->
-                            <td>
-                                @* @if (isPublished)
+                                    <!-- Total Shifts -->
+                                    <td>
+                                        @shifts.Count
+                                    </td>
+
+                                    <!-- Is Published? -->
+                                    <td>
+                                        @* @if (isPublished)
                                 {
-                                    <span class="text-success font-weight-bold">Yes</span>
+                                <span class="text-success font-weight-bold">Yes</span>
                                 }
                                 else
                                 {
-                                    <span class="text-danger font-weight-bold">No</span>
+                                <span class="text-danger font-weight-bold">No</span>
                                 } *@
 
-                                No
-                            </td>
+                                        No
+                                    </td>
 
-                            <!-- Actions -->
-                            <td>
-                                @Html.ActionLink("View", "ViewWeeklyRota", new { weekEnding = weekEnding }) |
-                                @Html.ActionLink("Edit", "EditWeeklyRota", new { weekEnding = weekEnding }) |
-                                @Html.ActionLink("Publish", "PublishWeeklyRota", new { weekEnding = weekEnding })
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                                    <!-- Actions -->
+                                    <td>
+                                        @Html.ActionLink("View", "ViewWeeklyRota", new { weekEnding = weekEnding }) |
+                                        @Html.ActionLink("Edit", "EditWeeklyRota", new { weekEnding = weekEnding }) |
+                                        @Html.ActionLink("Publish", "PublishWeeklyRota", new { weekEnding = weekEnding })
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
         </div>
-    }
-}
+    </div>
+</div>
+
+
+
+
 
 
 

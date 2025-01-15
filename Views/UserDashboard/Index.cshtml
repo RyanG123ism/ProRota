@@ -1,122 +1,204 @@
 ﻿@model ApplicationUser
 @using ProRota.Models
 
-@{
-    // Hardcoded TimeOffRequests for demonstration - REPLACE WITH MODEL DATA BELOW
-    var timeOffRequests = new List<dynamic>
-                {
-                new { Id = 1, Date = "2025-01-01", IsHoliday = true, Notes = "New Year's Day", IsApproved = true },
-                new { Id = 2, Date = "2025-02-14", IsHoliday = false, Notes = "Valentine's Day", IsApproved = false },
-                new { Id = 3, Date = "2025-03-17", IsHoliday = true, Notes = "St. Patrick's Day", IsApproved = true },
-                new { Id = 4, Date = "2025-04-01", IsHoliday = false, Notes = "April Fool's Day", IsApproved = false }
-                };
-}
-
 <div class="card shadow-sm p-3 mb-5" style="background-color: #f8f9fa; border: none;">
-    <div class="card-body">
-        <h1 class="card-title text-center mb-4" style="font-weight: bold; color: #343a40;">Welcome to your Dashboard, @Model.FirstName</h1>
+    <div class="card-header text-center">
+        <h1 class="display-4">Your Dashboard</h1>
+        <h3>Welcome to your Dashboard, @Model.FirstName</h3>
+    </div>
+    <div class="card-body text-center">
+        @* Table to display users shifts *@
+        <div class="card shadow-sm mb-4" style="background-color: #e9ecef; border: none;">
+            <div class="card-body">
+                <h2 class="text-center mb-3" style="font-weight: bold;">Your Upcoming Shifts</h2>
 
-        <h2 class="text-center mb-3" style="font-weight: bold;">Your Upcoming Shifts</h2>
+                <div id="table-container" class="table-responsive">
+                    <!-- Navigation Buttons -->
+                    <div class="d-flex justify-content-between mb-3">
+                        <div>
+                            <button id="prev-week-btn" class="btn btn-primary btn-sm me-2" onclick="navigateWeek(-1)">Previous Week</button>
+                            <button id="current-week-btn" class="btn btn-secondary btn-sm me-2" onclick="navigateToCurrentWeek(@ViewBag.Today)">Back to This Week</button>
+                        </div>
+                        <button id="next-week-btn" class="btn btn-primary btn-sm" onclick="navigateWeek(1)">Next Week</button>
+                    </div>
 
-        <div id="table-container" class="table-responsive">
-            <!-- Navigation Buttons -->
-            <div class="d-flex justify-content-between mb-3">
-                <div>
-                    <button id="prev-week-btn" class="btn btn-primary btn-sm me-2" onclick="navigateWeek(-1)">Previous Week</button>
-                    <button id="current-week-btn" class="btn btn-secondary btn-sm me-2" onclick="initializeWeek()">Back to This Week</button>
+                    <!-- Shifts Table -->
+                    <table id="pendingShiftsTable" class="table table-bordered table-striped table-hover" style="border-color: lightgray;">
+                        <thead id="pendingShifts-table-header" class="table-dark">
+                            <!-- Header will be populated by JavaScript -->
+                        </thead>
+                        <tbody id="pendingShifts-table-body">
+                            <!-- Rows will be populated by JavaScript -->
+                        </tbody>
+                    </table>
                 </div>
-                <button id="next-week-btn" class="btn btn-primary btn-sm" onclick="navigateWeek(1)">Next Week</button>
             </div>
-
-            <!-- Shifts Table -->
-            <table id="pendingShiftsTable" class="table table-bordered table-striped table-hover" style="border-color: lightgray;">
-                <thead id="pendingShifts-table-header" class="table-dark">
-                    <!-- Header will be populated by JavaScript -->
-                </thead>
-                <tbody id="pendingShifts-table-body">
-                    <!-- Rows will be populated by JavaScript -->
-                </tbody>
-            </table>
         </div>
+
+        @* Time off requests Card *@
+        <div class="card shadow-sm p-3 mb-4" style="background-color: #e9ecef; border: none;">
+            <div class="card-body">
+                <!-- Time-Off Requests Section -->
+                <h2 class="card-title text-center mb-4" style="font-weight: bold; color: #343a40;">Your Time-Off Requests</h2>
+                <h3 class="text-center" style="font-weight: 500; color: #495057;">
+                    You've taken <span style="font-weight: bold;">@ViewBag.HolidaysTaken</span> out of <span style="font-weight: bold;">@Model.HolidaysPerYear</span> paid days off.
+                </h3>
+                <h5 class="text-center" style="font-weight: 500;">
+                    <a href="javascript:void(0);" onclick="showCreateTimeOffRequestPopUp()">
+                        Create a new Request
+                    </a>
+                </h5>
+
+                <div id="table-container" class="table-responsive">
+
+                    <!-- Time of Request Shifts Table -->
+                    <table id="timeOffRequestsTable" class="table table-bordered table-striped table-hover" style="border-color: lightgray;">
+                        <thead id="table-header" class="table-dark">
+                        <th>Request Date</th>
+                        <th>Paid?</th>
+                        <th>Notes</th>
+                        <th>Approved?</th>
+                        <th> </th>
+                        </thead>
+                        <tbody id="table-body">
+                            @if (Model.TimeOffRequests != null)
+                            {
+                                @foreach (var req in Model.TimeOffRequests)
+                                {
+                                    <tr>
+                                        <td>@req.Date</td>
+                                        <td>
+                                            <input type="checkbox" disabled @(req.IsHoliday ? "checked" : "") />
+                                        </td>
+                                        <td>@req.Notes</td>
+                                        @if (req.IsApproved == ApprovedStatus.Approved)
+                                        {
+                                            <td class="text-center" style="background-color: lightgreen; color: black; font-weight: bold;">
+                                                Approved
+                                            </td>
+                                        }
+                                        else if (req.IsApproved == ApprovedStatus.Denied)
+                                        {
+                                            <td class="text-center" style="background-color: lightcoral; color: black; font-weight: bold;">
+                                                Denied
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td class="text-center" style="color: black; font-weight: bold;">
+                                                Pending
+                                            </td>
+                                        }
+                                        <td class="text-center">
+                                            @* initiates pop up script *@
+                                            @if (req.Date > ViewBag.Today)
+                                            {
+                                                <a href="javascript:void(0);" onclick="showDeleteConfirmationPopUp('@req.Id', '@req.Date')">
+                                                    Delete Request
+                                                </a>
+                                            }
+
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td>No Requests to display</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        @*hidden pop up message for when a user deletes a time off request *@
+        <div class="modal fade" id="deleteConfirmationPopUp" tabindex="-1" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteConfirmationModalLabel">Confirm Delete</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p id="deleteConfirmationMessage">Are you sure you want to delete this request?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <form action="/UserDashboard/ConfirmDeleteTimeOffRequest" method="post">
+                            <input type="hidden" name="requestId" value="" />
+                            <button type="submit" class="btn btn-danger" id="confirmDeleteButton">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @*hidden pop up to create a new time-off request *@
+        <div class="modal fade" id="CreateTimeOffRequestPopUp" tabindex="-1" aria-labelledby="createTimeOffRequestModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="createTimeOffRequestModalLabel">Create Time-Off Request</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="/UserDashboard/CreateTimeOffRequest" method="post">
+                            <!-- Request Date -->
+                            <div class="mb-3">
+                                <label for="requestDate" class="form-label">Request Date</label>
+                                <input type="date" class="form-control" id="requestDate" name="requestDate" required />
+                            </div>
+
+                            <!-- Notes -->
+                            <div class="mb-3">
+                                <label for="requestNotes" class="form-label">Notes</label>
+                                <textarea class="form-control" id="requestNotes" name="requestNotes" rows="3" placeholder="Tell us why you need the time off..." maxlength="500"></textarea>
+                                <small class="form-text text-muted">Maximum 500 characters.</small>
+                            </div>
+
+                            <!-- Paid Holiday -->
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="isPaidHoliday" name="isPaidHoliday" value="true" />
+                                <label class="form-check-label" for="isPaidHoliday">
+                                    Paid Holiday?
+                                </label>
+                            </div>
+
+                            <div class="modal-footer">
+                                <!-- Cancel Button -->
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <!-- Submit Button -->
+                                <button type="submit" class="btn btn-primary" id="submitButton">Submit</button>
+                                <!-- Error Messaage -->
+                                <div class="text-center">
+                                    <span id="errorMessage" style="color: red; display: none;"></span>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 
-<div class="card shadow-sm p-3 mb-5" style="background-color: #f8f9fa; border: none;">
-    <div class="card-body">
-        <!-- Time-Off Requests Section -->
-        <h1 class="card-title text-center mb-4" style="font-weight: bold; color: #343a40;">Your Time-Off Requests</h1>
-        <h2 class="text-center" style="font-weight: 500; color: #495057;">
-            You've taken <span style="font-weight: bold;">@ViewBag.HolidaysTaken</span> out of <span style="font-weight: bold;">@Model.HolidaysPerYear</span> paid days off.
-        </h2>
 
-        <div id="table-container" class="table-responsive">
-
-            <!-- Time of Request Shifts Table -->
-            <table id="timeOffRequestsTable" class="table table-bordered table-striped table-hover" style="border-color: lightgray;">
-                <thead id="table-header" class="table-dark">
-                    <th>Request Date</th>
-                    <th>Paid?</th>
-                    <th>Notes</th>
-                    <th>Approved?</th>
-                </thead>              
-                <tbody id="table-body">
-                    @foreach(var req in timeOffRequests) @* REPLACE WITH MODEL DATA *@
-                    {
-                        <tr>
-                            <td>@req.Date</td>
-                            <td>
-                                <input type="checkbox" disabled @(req.IsHoliday ? "checked" : "") />
-                            </td>
-                            <td>@req.Notes</td>
-                            <td class="text-center" style="background-color: @(req.IsApproved ? "lightgreen" : "lightcoral"); color: black; font-weight: bold;">
-                                @(req.IsApproved ? "Approved" : "Denied")
-                            </td>
-                            <td class="text-center">
-                                <a href="javascript:void(0);" onclick="showDeleteConfirmationPopUp('@req.Id', '@req.Date')">
-                                    Delete Request
-                                </a>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-@* Hidden Error Message *@
-<div id="errorMessage" style="color: red; display: none;"></div>
-
-@* Hidden pop up message for when a user deletes a time off request *@
-<div class="modal fade" id="deleteConfirmationPopUp" tabindex="-1" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="deleteConfirmationModalLabel">Confirm Delete</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p id="deleteConfirmationMessage">Are you sure you want to delete this request?</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <form action="/UserDashboard/ConfirmDeleteTimeOffRequest" method="post">
-                    <input type="hidden" name="requestId" value="" />
-                    <button type="submit" class="btn btn-danger" id="confirmDeleteButton">Delete</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
+@* Scripts *@
 <script>
+    // Scripts that will be loaded when DOM is initiated
     document.addEventListener("DOMContentLoaded", function () {
         const shiftsJson = '@Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Shifts))';
         console.log("Shifts JSON:", shiftsJson); // Debugging: Check JSON structure
         initialisePendingShifts(JSON.parse(shiftsJson));
         highlightTableCellsforPendingShifts();
-    });
 
 
+        // Scripts for specific changes to the page
+        document.getElementById("requestDate").addEventListener("change", validateRequestDate);
+    }); 
 </script>
  

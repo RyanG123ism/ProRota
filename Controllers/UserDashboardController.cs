@@ -25,6 +25,14 @@ namespace ProRota.Controllers
 
         public IActionResult Index()
         {
+            var user = getUserInfo();
+            ViewBag.HolidaysTaken = user.HolidaysPerYear - user.RemainingHolidays;
+            ViewBag.Today = DateTime.Now.Date;
+            return View(user);
+        }
+
+        public ApplicationUser getUserInfo()
+        {
             //gets current users ID and then gets the user object
             var userId = _userManager.GetUserId(User);
             var user = _context.ApplicationUsers
@@ -33,9 +41,64 @@ namespace ProRota.Controllers
                 .Include(u => u.TimeOffRequests)
                 .FirstOrDefault();
 
-            ViewBag.HolidaysTaken = user.HolidaysPerYear - user.RemainingHolidays;
+            //reloads the current db instance to include shifts and requests added at runtime
+            if (user != null)
+            {
+                _context.Entry(user).Collection(u => u.TimeOffRequests).Load();
+                _context.Entry(user).Collection(u => u.Shifts).Load();
+            }
 
-            return View(user);
+            return user;
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateTimeOffRequest(DateTime requestDate, string requestNotes, bool isPaidHoliday)
+        {
+            //find user ID
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if(userId == null)
+            {
+                return NotFound();
+            }
+
+            //gets todays date
+            var today = DateTime.Today.Date;
+
+            //if date is null or a date in the past
+            if (requestDate == DateTime.MinValue || requestDate <= today)
+            {
+                //sends an error message to the view
+                var errorMessage = $"Request date must be a date after {today.ToShortDateString()}";
+                ViewBag.ErrorMessage = errorMessage;
+            }
+
+            //checking for null
+            if(requestNotes == null)
+            {
+                requestNotes = "";
+            }
+            //create time off request
+            var timeOffRequest = new TimeOffRequest
+            {
+                Date = requestDate,
+                Notes = requestNotes,
+                IsHoliday = isPaidHoliday,
+                IsApproved = ApprovedStatus.Pending, //pending as default
+                ApplicationUserId = userId
+            };
+
+            //add to db and save
+            await _context.TimeOffRequests.AddAsync(timeOffRequest);
+            var result = await _context.SaveChangesAsync();
+
+            if (result <= 0)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Failed to save changes to the database.");
+            }
+
+            //returning to the userdashboard
+            return RedirectToAction("Index");
         }
 
         public async Task<ActionResult> DeleteTimeOffRequest(int id)
@@ -92,7 +155,7 @@ namespace ProRota.Controllers
             }
 
             //if the time off request was a confirmed holiday
-            if (timeOffRequest.IsApproved == true && timeOffRequest.IsHoliday == true)
+            if (timeOffRequest.IsApproved == ApprovedStatus.Approved && timeOffRequest.IsHoliday == true)
             {
                 //incrrment the users remaining holiday
                 user.RemainingHolidays++;
@@ -115,7 +178,7 @@ namespace ProRota.Controllers
             }
 
             //Return to the Index action of ApplicationUser controller
-            return RedirectToAction("Index", "ApplicationUser");
+            return RedirectToAction("Index");
         }
     }
 }

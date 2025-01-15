@@ -123,14 +123,24 @@ function initialisePendingShifts(shiftsJson) {
         highlightTableCellsforPendingShifts(); // highlight cells after table change
     }
 
+    function navigateToCurrentWeek() {
+        const today = new Date();
+        currentWeekStart = new Date(today);
+        currentWeekStart.setDate(today.getDate() - today.getDay() + 1); // Adjust to the Monday of the current week
+
+        populateTable(); // Re-populate the table for the current week
+        highlightTableCellsforPendingShifts(); // Highlight cells if needed
+    }
+
     // Initialize the table
     initializeWeek();
     populateTable();
 
     // Attach the navigateWeek function to buttons
     document.getElementById("prev-week-btn").addEventListener("click", () => navigateWeek(-1));
-    document.getElementById("current-week-btn").addEventListener("click", () => initializeWeek() && populateTable());
     document.getElementById("next-week-btn").addEventListener("click", () => navigateWeek(1));
+    document.getElementById("current-week-btn").addEventListener("click", () => navigateToCurrentWeek());
+
 }
 
 function showDeleteConfirmationPopUp(id, date) {
@@ -140,7 +150,7 @@ function showDeleteConfirmationPopUp(id, date) {
         message = "Error: Time-off Request was not found"
     }
     else {
-        message = `Are you sure you want to delete the time-off request dated: ${date}?, ID: ${id}`;
+        message = `Are you sure you want to delete the time-off request dated: ${date}?`;
 
         //send the req ID to the form through a hidden input value
         const hiddenInput = document.querySelector('#deleteConfirmationPopUp input[name="requestId"]');
@@ -154,6 +164,35 @@ function showDeleteConfirmationPopUp(id, date) {
     const popUp = new bootstrap.Modal(document.getElementById('deleteConfirmationPopUp'));
     popUp.show();
 }
+
+function showCreateTimeOffRequestPopUp() {
+    //show's the time of request popUp
+    const popUp = new bootstrap.Modal(document.getElementById('CreateTimeOffRequestPopUp'));
+    popUp.show();
+}
+
+function validateRequestDate() {
+    const today = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
+    const requestDate = document.getElementById("requestDate").value; // Get the value of the date input
+
+    const submitButton = document.getElementById("submitButton");
+    const errorMessage = document.getElementById("errorMessage");
+
+    // Check if the request date is valid
+    if (requestDate <= today) {
+        // Disable the Submit button and show an error message
+        submitButton.disabled = true;
+        errorMessage.textContent = `Request date must be a date after ${today}.`;
+        errorMessage.style.display = "block";
+    } else {
+        // Enable the Submit button and hide the error message
+        submitButton.disabled = false;
+        errorMessage.textContent = "";
+        errorMessage.style.display = "none";
+    }
+}
+
+
 
 
 

@@ -594,14 +594,23 @@ namespace ProRota.Data
             {
                 if (!dbContext.TimeOffRequests.Any())
                 {
+                    var statusList = new List<ApprovedStatus>
+                    {
+                        ApprovedStatus.Pending,
+                        ApprovedStatus.Approved,
+                        ApprovedStatus.Denied
+
+                    };
+
                     var faker = new Faker<TimeOffRequest>()
                         .RuleFor(t => t.Date, f => f.Date.Between(DateTime.Now.AddDays(-5), DateTime.Now.AddDays(7)))
                         .RuleFor(t => t.Notes, f => f.Lorem.Sentence())
                         .RuleFor(t => t.IsHoliday, f => f.Random.Bool())
-                        .RuleFor(t => t.ApplicationUser, (f) => f.PickRandom(users));
+                        .RuleFor(t => t.ApplicationUser, (f) => f.PickRandom(users))
+                        .RuleFor(t => t.IsApproved, f => f.PickRandom(statusList));
 
                     //generate 20 time off requests
-                    var timeOffRequests = faker.Generate(20);
+                    var timeOffRequests = faker.Generate(50);
 
                     foreach (var request in timeOffRequests)
                     {

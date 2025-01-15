@@ -18,7 +18,7 @@ namespace ProRota.Models
         [Display(Name = "Use a Holiday?")]
         public bool IsHoliday { get; set; }
 
-        public bool IsApproved { get; set; } = false;
+        public ApprovedStatus IsApproved { get; set; } = ApprovedStatus.Pending;
 
         //navigational properties
 
@@ -26,8 +26,12 @@ namespace ProRota.Models
         public string ApplicationUserId { get; set; }
         public ApplicationUser ApplicationUser { get; set; }
 
+    }
 
-
-
+    public enum ApprovedStatus
+    {
+        Approved,
+        Denied,
+        Pending
     }
 }
