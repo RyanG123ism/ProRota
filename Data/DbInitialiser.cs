@@ -594,6 +594,7 @@ namespace ProRota.Data
             {
                 if (!dbContext.TimeOffRequests.Any())
                 {
+                    //creating list of enums to apply to faker
                     var statusList = new List<ApprovedStatus>
                     {
                         ApprovedStatus.Pending,
@@ -610,7 +611,7 @@ namespace ProRota.Data
                         .RuleFor(t => t.IsApproved, f => f.PickRandom(statusList));
 
                     //generate 20 time off requests
-                    var timeOffRequests = faker.Generate(50);
+                    var timeOffRequests = faker.Generate(100);
 
                     foreach (var request in timeOffRequests)
                     {

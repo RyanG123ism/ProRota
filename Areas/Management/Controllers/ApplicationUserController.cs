@@ -35,8 +35,10 @@ namespace ProRota.Areas.Management.Controllers
 
             if (isAdmin)
             {
+                //checks for existing admin siteId session
                 var adminSession = HttpContext.Session.GetInt32("AdminsCurrentSiteId");
 
+                //if session exists then only users from that site will be fetched
                 users = adminSession != null ? ViewAllUsersBySite() : ViewAllUsers();
 
                 return View("ViewAllUsers", users);
@@ -124,7 +126,7 @@ namespace ProRota.Areas.Management.Controllers
                         results.Add(item);
                     }
                 }
-                return View("ViewAllUsersBySite", results); //Return the ViewAllUsers view with filtered results
+                return View("ViewAllUsers", results); //Return the ViewAllUsers view with filtered results
             }
             else//Searching for first names AND last names seperately
             {
@@ -139,7 +141,7 @@ namespace ProRota.Areas.Management.Controllers
                 //Joins the list of first names and last name search results together
                 var results = usersFirstNames.Concat(usersLastNames);
 
-                return View("ViewAllUsersBySite", results); //Return the ViewAllUsers view with filtered results
+                return View("ViewAllUsers", results); //Return the ViewAllUsers view with filtered results
             }
 
         }
@@ -164,7 +166,7 @@ namespace ProRota.Areas.Management.Controllers
                 ViewBag.ErrorMessage = $"There are no users belonging to the role {roleName} ";
             }
 
-            return View("ViewAllUsersBySite", usersInRoleBySite);
+            return View("ViewAllUsers", usersInRoleBySite);
         }
 
         [HttpGet]
@@ -443,6 +445,7 @@ namespace ProRota.Areas.Management.Controllers
 
         public int GetSiteIdFromSessionOrUser()
         {
+            //gets current admin session if it exists
             var siteId = HttpContext.Session.GetInt32("AdminsCurrentSiteId");
 
             if (siteId == null)
@@ -462,6 +465,7 @@ namespace ProRota.Areas.Management.Controllers
                     throw new Exception("Current site not found.");
                 }
 
+                //sets user siteId as the site ID
                 siteId = user.SiteId;
             }
 
