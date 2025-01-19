@@ -143,6 +143,7 @@ function initialisePendingShifts(shiftsJson) {
 
 }
 
+//pop up for user asttempting to delete their own time off requests in the userdashboard
 function showDeleteConfirmationPopUp(id, date) {
     let message;
 
@@ -165,12 +166,14 @@ function showDeleteConfirmationPopUp(id, date) {
     popUp.show();
 }
 
+//displays the form for a user to create a timeoff request
 function showCreateTimeOffRequestPopUp() {
     //show's the time of request popUp
     const popUp = new bootstrap.Modal(document.getElementById('CreateTimeOffRequestPopUp'));
     popUp.show();
 }
 
+//handles invalid dates in the create time off request form in the user dashboard
 function validateRequestDate() {
     const today = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
     const requestDate = document.getElementById("requestDate").value; // Get the value of the date input
@@ -191,6 +194,49 @@ function validateRequestDate() {
         errorMessage.style.display = "none";
     }
 }
+
+////retrieves JSON data from the timeoffrequest controller to pass to the front end
+//async function confirmApproveTimeOffRequest(requestId) {
+//    //gets the JSON Data from the controller
+//    try {
+//        const response = await fetch(`/Management/TimeOffRequest/ApproveTimeOffRequest/${requestId}`, {
+//            headers: {
+//                "Content-Type": "application/json"
+//            }
+//        });
+
+//        if (!response.ok) {
+//            throw new Error("Failed to fetch the approval request.");
+//        }
+
+//        const data = await response.json();
+
+//        if (data.message) {
+//            // Call the reusable function to show the modal
+//            showConfirmationModal(data.message, data.requestId);
+//        }
+//    } catch (error) {
+//        console.error("There was an error:", error);
+//        alert("An error occurred while processing the request. Please try again.");
+//    }      
+//}
+
+////sets the data and displays pop up for the managers time off requests dashboard
+//function showConfirmationModal(message, requestId) {
+//    // Set the message in the modal
+//    const messageElement = document.getElementById('ConfirmApproveMessage');
+//    messageElement.textContent = message;
+
+//    // Set the request ID in the hidden input
+//    const requestIdInput = document.getElementById('ConfirmApproveRequestId');
+//    requestIdInput.value = requestId;
+
+//    // Show the modal
+//    const modalElement = document.getElementById('ConfirmApproveTimeOffRequest');
+//    const modalInstance = new bootstrap.Modal(modalElement);
+//    modalInstance.show();
+//}
+
 
 
 

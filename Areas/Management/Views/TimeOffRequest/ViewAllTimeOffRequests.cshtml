@@ -70,15 +70,66 @@
                         <td>@request.Date.ToString("dd/MM/yyyy")</td>
                         <td>@request.Notes</td>
                         <td>@request.IsApproved</td>
+                        <td>
+                            @if (request.IsApproved == ApprovedStatus.Approved || request.IsApproved == ApprovedStatus.Denied)
+                            {
+                                @Html.ActionLink("Revert", "RevertTimeOffRequest", "TimeOffRequest", new { id = request.Id })
+                            }
+                            else
+                            {
+                                @Html.ActionLink("Approve", "ApproveTimeOffRequest", "TimeOffRequest", new { id = request.Id }) <br />
+                                @Html.ActionLink("Decline", "DeclineTimeOffRequest", "TimeOffRequest", new { id = request.Id })
+                            }
+                        </td>
                     </tr>
                 }
             </tbody>
         </table>
-        
 
+        @* hidden pop up to display conformation messages *@
+        @if (!string.IsNullOrEmpty(ViewBag.ConformationMessage as string))
+        {
+            <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="confirmationModalLabel">Confirmation</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            @ViewBag.ConformationMessage
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }    
         
     </div>
 </div>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Check if the modal element exists
+        const confirmationModalElement = document.getElementById('confirmationModal');
+        if (confirmationModalElement) {
+            const confirmationModal = new bootstrap.Modal(confirmationModalElement);
+            confirmationModal.show();
+        }
+
+        // Add event listener for approve-timeoff buttons
+        document.querySelectorAll('.approve-timeoff').forEach(button => {
+            button.addEventListener('click', function (event) {
+                event.preventDefault();
+                const requestId = this.dataset.requestId; // Retrieve request ID from the data attribute
+                confirmApproveTimeOffRequest(requestId);
+            });
+        });
+    });
+</script>
 
 
 

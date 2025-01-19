@@ -41,6 +41,8 @@ namespace ProRota.Areas.Management.Controllers
             //retrieves all time off requests by site - this is for all roles below admin
             requests = GetAllTimeOffRequestsBySite();
 
+            ViewBag.ConformationMessage = TempData["ConformationMessage"];
+
             return View("ViewAllTimeOffRequests", requests);
         }
 
@@ -95,6 +97,149 @@ namespace ProRota.Areas.Management.Controllers
 
             // If parsing fails, handle it (e.g., return an error or default view)
             return BadRequest("Invalid status value");
+        }
+
+        public async Task<IActionResult> RevertTimeOffRequest(int id)
+        {
+            var request = await ValidateTimeOffRequest(id) ?? throw new ArgumentNullException(nameof(id), "Time-off request is invalid.");
+
+            var user = await ValidateUser(request.ApplicationUserId) ?? throw new ArgumentNullException(nameof(id), "User request is invalid.");
+
+            //reverts the users remaining holiday allowance depending on the status
+            if (request.IsApproved == ApprovedStatus.Approved)
+            {
+                user.RemainingHolidays++;
+            }
+
+            //reverts any changes made to status
+            request.IsApproved = ApprovedStatus.Pending;
+
+            //updates and saves the DB
+            _context.TimeOffRequests.Update(request);
+            var result = await _userManager.UpdateAsync(user);
+
+            if(!result.Succeeded)
+            {
+                throw new Exception("Could not update the User");
+            }
+
+            //saves changes
+            await _context.SaveChangesAsync();
+
+            //passing conf message through temp data to the next action
+            TempData["ConformationMessage"] = $"{user.FirstName}'s Time-Off Request has been Reverted";
+
+            //returns to the time off request index
+            return RedirectToAction("Index");
+
+        }
+
+        public async Task<IActionResult> ApproveTimeOffRequest(int id)
+        {
+            var request = await ValidateTimeOffRequest(id) ?? throw new ArgumentNullException(nameof(id), "Time-off request is invalid.");
+
+            var user = await ValidateUser(request.ApplicationUserId) ?? throw new ArgumentNullException(nameof(id), "User request is invalid.");
+
+            //changes the approval status
+            request.IsApproved = ApprovedStatus.Approved;
+
+            //takes away a holiday from the user allowance
+            if (request.IsHoliday)
+            {
+                user.RemainingHolidays--;
+            }
+
+            //updates and saves the DB
+            _context.TimeOffRequests.Update(request);
+            var result = await _userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+            {
+                throw new Exception("Could not update the User");
+            }
+
+            //saves changes
+            await _context.SaveChangesAsync();
+
+            //CHANGE THIS BACK TO LESS THAN 0
+            if (user.RemainingHolidays >= 0)
+            {
+                TempData["ConformationMessage"] = $"{user.FirstName} {user.LastName} " +
+                    $"has no remaining holidays left in their allowance. If this was a mistake, revert this request.";
+            }
+            else
+            {
+                TempData["ConformationMessage"] = $"{user.FirstName}'s Time-Off Request has been Approved";
+            }
+           
+            //returns to the time off request index
+            return RedirectToAction("Index");
+        }
+
+        public async Task<IActionResult> DeclineTimeOffRequest(int id)
+        {
+            var request = await ValidateTimeOffRequest(id) ?? throw new ArgumentNullException(nameof(id), "Time-off request is invalid.");
+
+            var user = await ValidateUser(request.ApplicationUserId) ?? throw new ArgumentNullException(nameof(id), "User request is invalid.");
+
+            //changes the approval status
+            request.IsApproved = ApprovedStatus.Denied;
+
+            //updates and saves the DB
+            _context.TimeOffRequests.Update(request);
+            var result = await _userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+            {
+                throw new Exception("Could not update the User");
+            }
+
+            //saves changes
+            await _context.SaveChangesAsync();
+
+            TempData["ConformationMessage"] = $"{user.FirstName}'s Time-Off Request has been Denied";
+
+            //returns to the time off request index
+            return RedirectToAction("Index");
+        }
+
+        
+        public async Task<TimeOffRequest?> ValidateTimeOffRequest(int id)
+        {
+            if (id == 0)
+            {
+                return null;
+            }
+
+            //get time off request
+            var request = await _context.TimeOffRequests.FindAsync(id);
+
+            if (request == null)
+            {
+                return null;
+            }
+
+            //returns the time off request
+            return request;
+        }
+
+        public async Task<ApplicationUser?> ValidateUser(string id)
+        {
+            if (id == null)
+            {
+                return null;
+            }
+
+            //get time off request
+            var user = await _context.ApplicationUsers.FindAsync(id);
+
+            if (user == null)
+            {
+                return null;
+            }
+
+            //returns the user
+            return user;
         }
 
         public int GetSiteIdFromSessionOrUser()

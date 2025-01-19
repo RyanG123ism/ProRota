@@ -58,10 +58,10 @@ namespace ProRota.Areas.Management.Controllers
             var users = _context.ApplicationUsers.ToList();
 
             //Refresh the list if any changes are made
-            foreach (var item in users)
-            {
-                _context.Entry(item).Reload();
-            }
+            //foreach (var item in users)
+            //{
+            //    _context.Entry(item).Reload();
+            //}
 
             //Pass all the roles to the view so that you can search users by role
             ViewBag.Roles = _context.Roles.ToList();
@@ -78,10 +78,10 @@ namespace ProRota.Areas.Management.Controllers
             var users = _context.ApplicationUsers.Where(u => u.SiteId == siteId).ToList();
 
             //Refresh the list if any changes are made
-            foreach (var item in users)
-            {
-                _context.Entry(item).Reload();
-            }
+            //foreach (var item in users)
+            //{
+            //    _context.Entry(item).Reload();
+            //}
 
             //Pass all the roles to the view so that you can search users by role
             ViewBag.Roles = _context.Roles.ToList();
