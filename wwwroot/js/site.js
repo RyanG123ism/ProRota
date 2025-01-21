@@ -41,31 +41,35 @@ function highlightTableCellsforPendingShifts() {
     });
 }
 
-
 //Group of functions repsonsible for managing the pending shifts table in the user dashboard
-function initialisePendingShifts(shiftsJson) {
+function initialiseUserRota(shiftsJson, timeOffRequestsJson) {
 
-    console.log("Initializing Pending Shifts...");
-    const shifts = shiftsJson;
+    const shifts = shiftsJson;//json data sent from the view
+    const requests = timeOffRequestsJson;//json data sent from the view
+
+    //maps the approved requests to an array 
+    const filteredRequests = mapTimeOffRequests(requests);
 
     let currentWeekStart; // Tracks the current week's Monday
     const oneWeekMilliseconds = 7 * 24 * 60 * 60 * 1000; // Number of milliseconds in a week
 
     // Function to initialize the current week based on the earliest shift
-    function initializeWeek() {
-        const sortedShifts = shifts.map(shift => ({
-            ...shift,
-            StartDate: shift.StartDateTime ? new Date(shift.StartDateTime).toISOString().split('T')[0] : null
-        })).filter(shift => shift.StartDate !== null)
-            .sort((a, b) => new Date(a.StartDateTime) - new Date(b.StartDateTime));
+    function initialiseWeek() {
 
+        //maps all a users shifts to an array
+        const sortedShifts = mapShifts(shifts);
+
+        //sets the first shift date to the first index position
         const firstShiftDate = sortedShifts.length > 0 ? new Date(sortedShifts[0].StartDateTime) : new Date();
+
+        //sets the current week start date by subtracting the day of the week from the day of the month which will always give you a sunday +1
         currentWeekStart = new Date(firstShiftDate);
         currentWeekStart.setDate(currentWeekStart.getDate() - currentWeekStart.getDay() + 1); // Adjust to Monday
     }
 
     // Function to populate the table for the current week
     function populateTable() {
+        //get the table elements
         const tableHeader = document.getElementById("pendingShifts-table-header");
         const tableBody = document.getElementById("pendingShifts-table-body");
 
@@ -87,6 +91,7 @@ function initialisePendingShifts(shiftsJson) {
         dateHeader.textContent = "Shift Date";
         headerRow.appendChild(dateHeader);
 
+        //aplying the date range to table headers
         dateRange.forEach(date => {
             const th = document.createElement("th");
             th.textContent = date.toLocaleDateString();
@@ -102,6 +107,7 @@ function initialisePendingShifts(shiftsJson) {
 
         dateRange.forEach(date => {
             const shift = shifts.find(s => new Date(s.StartDateTime).toDateString() === date.toDateString());
+            const request = filteredRequests.find(r => new Date(r.Date).toDateString() === date.toDateString());
             const td = document.createElement("td");
             if (shift) {
                 td.textContent =
@@ -109,8 +115,12 @@ function initialisePendingShifts(shiftsJson) {
                     " - " +
                     new Date(shift.EndDateTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
             } else {
-                td.textContent = "OFF";
-            }
+                if (request) {
+                    td.textContent = "HOLIDAY";
+                } else {
+                    td.textContent = "OFF";
+                }
+            } 
             row.appendChild(td);
         });
         tableBody.appendChild(row);
@@ -133,7 +143,7 @@ function initialisePendingShifts(shiftsJson) {
     }
 
     // Initialize the table
-    initializeWeek();
+    initialiseWeek();
     populateTable();
 
     // Attach the navigateWeek function to buttons
@@ -141,6 +151,32 @@ function initialisePendingShifts(shiftsJson) {
     document.getElementById("next-week-btn").addEventListener("click", () => navigateWeek(1));
     document.getElementById("current-week-btn").addEventListener("click", () => navigateToCurrentWeek());
 
+}
+
+function mapShifts(shifts) {
+    //maps the json into individual shift objects, filters out any null values, and orders by ascending
+    const sortedShifts = shifts.map(shift => ({
+        ...shift,
+        StartDate: shift.StartDateTime ? new Date(shift.StartDateTime).toISOString().split('T')[0] : null
+    })).filter(shift => shift.StartDate !== null)
+        .sort((a, b) => new Date(a.StartDateTime) - new Date(b.StartDateTime));
+
+    console.log("Sorted Shifts: ", sortedShifts);
+
+    return sortedShifts;
+
+}
+
+function mapTimeOffRequests(requests) {
+    //filtering the reuqest data to only contain approved requests
+    const filteredRequests = requests.map(req => ({
+        ...req,
+        Status: req.IsApproved === 0 ? "Approved" : req.IsApproved === 1 ? "Denied" : "Pending" // Adds a status label
+    })).filter(req => req.Status === "Approved")
+
+    console.log("Filtered Time-Off Requests: ", filteredRequests);
+
+    return filteredRequests;
 }
 
 //pop up for user asttempting to delete their own time off requests in the userdashboard
@@ -194,49 +230,6 @@ function validateRequestDate() {
         errorMessage.style.display = "none";
     }
 }
-
-////retrieves JSON data from the timeoffrequest controller to pass to the front end
-//async function confirmApproveTimeOffRequest(requestId) {
-//    //gets the JSON Data from the controller
-//    try {
-//        const response = await fetch(`/Management/TimeOffRequest/ApproveTimeOffRequest/${requestId}`, {
-//            headers: {
-//                "Content-Type": "application/json"
-//            }
-//        });
-
-//        if (!response.ok) {
-//            throw new Error("Failed to fetch the approval request.");
-//        }
-
-//        const data = await response.json();
-
-//        if (data.message) {
-//            // Call the reusable function to show the modal
-//            showConfirmationModal(data.message, data.requestId);
-//        }
-//    } catch (error) {
-//        console.error("There was an error:", error);
-//        alert("An error occurred while processing the request. Please try again.");
-//    }      
-//}
-
-////sets the data and displays pop up for the managers time off requests dashboard
-//function showConfirmationModal(message, requestId) {
-//    // Set the message in the modal
-//    const messageElement = document.getElementById('ConfirmApproveMessage');
-//    messageElement.textContent = message;
-
-//    // Set the request ID in the hidden input
-//    const requestIdInput = document.getElementById('ConfirmApproveRequestId');
-//    requestIdInput.value = requestId;
-
-//    // Show the modal
-//    const modalElement = document.getElementById('ConfirmApproveTimeOffRequest');
-//    const modalInstance = new bootstrap.Modal(modalElement);
-//    modalInstance.show();
-//}
-
 
 
 

@@ -71,14 +71,21 @@
                         <td>@request.Notes</td>
                         <td>@request.IsApproved</td>
                         <td>
-                            @if (request.IsApproved == ApprovedStatus.Approved || request.IsApproved == ApprovedStatus.Denied)
+                            @if(request.Date > ViewBag.Tomorrow)
                             {
-                                @Html.ActionLink("Revert", "RevertTimeOffRequest", "TimeOffRequest", new { id = request.Id })
+                                if (request.IsApproved == ApprovedStatus.Approved || request.IsApproved == ApprovedStatus.Denied)
+                                {
+                                    @Html.ActionLink("Revert", "RevertTimeOffRequest", "TimeOffRequest", new { id = request.Id })
+                                }
+                                else
+                                {
+                                    @Html.ActionLink("Approve", "ApproveTimeOffRequest", "TimeOffRequest", new { id = request.Id }) <br />
+                                    @Html.ActionLink("Decline", "DeclineTimeOffRequest", "TimeOffRequest", new { id = request.Id })
+                                }
                             }
                             else
                             {
-                                @Html.ActionLink("Approve", "ApproveTimeOffRequest", "TimeOffRequest", new { id = request.Id }) <br />
-                                @Html.ActionLink("Decline", "DeclineTimeOffRequest", "TimeOffRequest", new { id = request.Id })
+                                <span>Expired</span>
                             }
                         </td>
                     </tr>

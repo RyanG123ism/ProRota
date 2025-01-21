@@ -97,6 +97,12 @@
                                                     Delete Request
                                                 </a>
                                             }
+                                            else
+                                            {
+                                                <span class="text-center" style="color: black; font-weight: bold;">
+                                                    Request Expired
+                                                </span>
+                                            }
 
                                         </td>
                                     </tr>
@@ -192,8 +198,12 @@
     // Scripts that will be loaded when DOM is initiated
     document.addEventListener("DOMContentLoaded", function () {
         const shiftsJson = '@Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Shifts))';
-        console.log("Shifts JSON:", shiftsJson); // Debugging: Check JSON structure
-        initialisePendingShifts(JSON.parse(shiftsJson));
+        console.log("Shifts JSON:", shiftsJson);
+        const timeOffRequestsJson = '@Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.TimeOffRequests))';
+        console.log("timeOffRequests JSON:", timeOffRequestsJson);
+
+                     
+        initialiseUserRota(JSON.parse(shiftsJson), JSON.parse(timeOffRequestsJson));
         highlightTableCellsforPendingShifts();
 
 

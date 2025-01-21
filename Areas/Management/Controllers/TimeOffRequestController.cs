@@ -41,6 +41,10 @@ namespace ProRota.Areas.Management.Controllers
             //retrieves all time off requests by site - this is for all roles below admin
             requests = GetAllTimeOffRequestsBySite();
 
+            //sends tomorrows date to view
+            ViewBag.Tomorrow = DateTime.Now.AddDays(1).Date;
+
+            //send temp data from other actions back into the view
             ViewBag.ConformationMessage = TempData["ConformationMessage"];
 
             return View("ViewAllTimeOffRequests", requests);
@@ -90,7 +94,7 @@ namespace ProRota.Areas.Management.Controllers
             {
                 //retrieve all requests that match that approval status
                 var requests = _context.TimeOffRequests.Where(t => t.IsApproved == approvalStatus)
-                    .Include(t => t.ApplicationUser).Where(t => t.ApplicationUser.SiteId == siteId).ToList();
+                    .Include(t => t.ApplicationUser).Where(t => t.ApplicationUser.SiteId == siteId).OrderByDescending(t => t.Date).ToList();
 
                 return View("ViewAllTimeOffRequests", requests);
             }

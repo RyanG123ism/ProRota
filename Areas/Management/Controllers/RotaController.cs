@@ -31,22 +31,23 @@ namespace ProRota.Areas.Management.Controllers
         }
 
         public async Task<ActionResult> ViewWeeklyRota(string weekEnding)
-        {
-            //get user
-            var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var user = await _context.ApplicationUsers.FindAsync(id);
+        {        
+            //checks wether siteID is of user or the admins session (if admin is logged in)
+            var siteId = GetSiteIdFromSessionOrUser();
 
             var weekEndingDate = DateTime.Parse(weekEnding);
             var weekStartingDate = weekEndingDate.AddDays(-7); // Week start date from the end date 
 
-            // Get all users and include the shifts within the given date parameters
-            var usersAndShifts = await _context.ApplicationUsers
-                .Include(u => u.Shifts.Where(s => s.SiteId == user.SiteId).Where(s => s.StartDateTime >= weekStartingDate && s.StartDateTime <= weekEndingDate))
+            // Get all users and include the shifts and time off requests within the given date parameters
+            var rota = await _context.ApplicationUsers
+                .Include(u => u.Shifts.Where(s => s.SiteId == siteId).Where(s => s.StartDateTime >= weekStartingDate && s.StartDateTime <= weekEndingDate))
+                .Include(u => u.TimeOffRequests.Where(t => t.Date >= weekStartingDate && t.Date <= weekEndingDate).Where(t => t.IsApproved == ApprovedStatus.Approved))
+                .Where(u => u.SiteId == siteId)
                 .ToListAsync();
 
             ViewBag.WeekStartingDate = weekStartingDate;//passing starting date to view to help format dates
 
-            return View(usersAndShifts);
+            return View(rota);
         }
 
         private async Task<Dictionary<string, List<Shift>>> GeterateWeeklyRotaListForSiteAsync()

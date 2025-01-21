@@ -36,8 +36,9 @@ namespace ProRota.Controllers
             //gets current users ID and then gets the user object
             var userId = _userManager.GetUserId(User);
             var user = _context.ApplicationUsers
-                .Where(u => u.Id == userId)
+                .Where(u => u.Id == userId)                                     //MAKE SURE TO INCLUDE THIS 
                 .Include(u => u.Shifts.OrderByDescending(s => s.StartDateTime)/*.Where(s => s.StartDateTime >= DateTime.Now.Date)*/)
+                .Include(u => u.TimeOffRequests.OrderByDescending(t => t.Date))
                 .Include(u => u.TimeOffRequests)
                 .FirstOrDefault();
 
@@ -46,9 +47,11 @@ namespace ProRota.Controllers
             {
                 _context.Entry(user).Collection(u => u.TimeOffRequests).Load();
                 _context.Entry(user).Collection(u => u.Shifts).Load();
+
+                return user;
             }
 
-            return user;
+            throw new Exception("User object not found");
         }
 
         [HttpPost]
