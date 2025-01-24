@@ -1,0 +1,285 @@
+﻿@using System.Web
+@model ProRota.Models.Site
+
+<div class="card shadow-sm p-3 mb-5" style="background-color: #f8f9fa; border: none;">
+    <div class="card-header text-center">
+        <h1 class="display-4">Site Management</h1>
+        <h3>Configure Your Site</h3>
+    </div>
+    <div class="card-body text-center">
+        
+        <div>
+            <h4>@Model.Company.CompanyName @Model.SiteName Details</h4>
+            <hr />
+            <dl class="row">
+                <dt class="col-sm-2">
+                    @Html.DisplayNameFor(model => model.SiteName)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.SiteName)
+                </dd>
+                <dt class="col-sm-2">
+                    @Html.DisplayNameFor(model => model.Company)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.Company.CompanyName)
+                </dd>
+                <dt class="col-sm-2">
+                    @Html.DisplayNameFor(model => model.CoversCapacity)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.CoversCapacity)
+                </dd>
+                <dt class="col-sm-2">
+                    @Html.DisplayNameFor(model => model.NumberOfSections)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.NumberOfSections)
+                </dd>
+                <dt class="col-sm-2">
+                    @Html.DisplayNameFor(model => model.MaxFrontOfHouse)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.MaxFrontOfHouse)
+                </dd>
+                <dt class="col-sm-2">
+                    @Html.DisplayNameFor(model => model.MaxBarTenders)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.MaxBarTenders)
+                </dd>
+                <dt class="col-sm-2">
+                    @Html.DisplayNameFor(model => model.MaxManagement)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.MaxManagement)
+                </dd>
+                <dt class="col-sm-2">
+                    @Html.DisplayNameFor(model => model.MinManagement)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.MinManagement)
+                </dd>
+                <dt class="col-sm-2">
+                    @Html.DisplayNameFor(model => model.ConfigurationComplete)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.ConfigurationComplete)
+                </dd>               
+            </dl>
+        </div>
+        <div>
+            <a href="javascript:void(0);" onclick="showEditSiteConfigurationPopUp('@Model.Id', '@Model.SiteName')">
+                Edit Configuration
+            </a>
+            <br />
+        </div>
+
+
+
+        @* NESTED CARDS *@
+        <div class="card shadow-sm mb-4" style="background-color: #e9ecef; border: none;">
+            <div class="card-body">
+                <h5 class="card-title">Trading Schedule</h5>
+                <p class="card-text">View @Model.Company.CompanyName @Model.SiteName's opening and closing times </p>
+                <p class="card-text">Click Here to Edit</p>
+
+                <table class="table table-bordered table-striped table-hover" style="border-color: lightgray;">
+                    <thead>
+                        <tr>
+                            <th>Day of the Week</th>
+                            <th>Open Time</th>
+                            <th>Close Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Monday</td>
+                            @if (Model.MondayOpenTime == null)
+                            {
+                                <td style="background-color: lightcoral;">Closed</td>
+                                <td style="background-color: lightcoral;">Closed</td>
+                            }
+                            else
+                            {
+                                <td>@Html.DisplayFor(model => model.MondayOpenTime)</td>
+                                <td>@Html.DisplayFor(model => model.MondayCloseTime)</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>Tuesday</td>
+                            @if (Model.TuesdayOpenTime == null)
+                            {
+                                <td style="background-color: lightcoral;">Closed</td>
+                                <td style="background-color: lightcoral;">Closed</td>
+                            }
+                            else
+                            {
+                                <td>@Html.DisplayFor(model => model.TuesdayOpenTime)</td>
+                                <td>@Html.DisplayFor(model => model.TuesdayCloseTime)</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>Wednesday</td>
+                            @if (Model.WednesdayOpenTime == null)
+                            {
+                                <td style="background-color: lightcoral;">Closed</td>
+                                <td style="background-color: lightcoral;">Closed</td>
+                            }
+                            else
+                            {
+                                <td>@Html.DisplayFor(model => model.WednesdayOpenTime)</td>
+                                <td>@Html.DisplayFor(model => model.WednesdayCloseTime)</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>Thursday</td>
+                            @if (Model.ThursdayOpenTime == null)
+                            {
+                                <td style="background-color: lightcoral;">Closed</td>
+                                <td style="background-color: lightcoral;">Closed</td>
+                            }
+                            else
+                            {
+                                <td>@Html.DisplayFor(model => model.ThursdayOpenTime)</td>
+                                <td>@Html.DisplayFor(model => model.ThursdayCloseTime)</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>Friday</td>
+                            @if (Model.FridayOpenTime == null)
+                            {
+                                <td style="background-color: lightcoral;">Closed</td>
+                                <td style="background-color: lightcoral;">Closed</td>
+                            }
+                            else
+                            {
+                                <td>@Html.DisplayFor(model => model.FridayOpenTime)</td>
+                                <td>@Html.DisplayFor(model => model.FridayCloseTime)</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>Saturday</td>
+                            @if (Model.SaturdayOpenTime == null)
+                            {
+                                <td style="background-color: lightcoral;">Closed</td>
+                                <td style="background-color: lightcoral;">Closed</td>
+                            }
+                            else
+                            {
+                                <td>@Html.DisplayFor(model => model.SaturdayOpenTime)</td>
+                                <td>@Html.DisplayFor(model => model.SaturdayCloseTime)</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>Sunday</td>
+                            @if (Model.SundayOpenTime == null)
+                            {
+                                <td style="background-color: lightcoral;">Closed</td>
+                                <td style="background-color: lightcoral;">Closed</td>
+                            }
+                            else
+                            {
+                                <td>@Html.DisplayFor(model => model.SundayOpenTime)</td>
+                                <td>@Html.DisplayFor(model => model.SundayCloseTime)</td>
+                            }
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- hidden pop up for editing the site configuration -->
+<div class="modal fade" id="EditSiteConfigurationPopUp" tabindex="-1" aria-labelledby="EditSiteConfigurationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="EditSiteConfigurationModalLabel"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="EditConfiguration" asp-area="Management" asp-controller="Site" asp-action="EditConfiguration" method="post">
+                    <!-- Covers Capacity -->
+                    <div class="mb-3">
+                        <label for="coversCapacity" class="form-label">Restaurant Daily Capacity</label>
+                        <input type="number" class="form-control" id="coversCapacity" name="coversCapacity" min="1" max="1000" required />
+                        <div class="form-text">Enter the total number of covers (seats) your restaurant can accommodate in a single day (1-1000).</div>
+                        <div class="invalid-feedback">Please enter a value between 1 and 1000.</div>
+                    </div>
+
+                    <!-- Number of Sections -->
+                    <div class="mb-3">
+                        <label for="numberOfSections" class="form-label">Number of Sections</label>
+                        <input type="number" class="form-control" id="numberOfSections" name="numberOfSections" min="1" required />
+                        <div class="form-text">How many sections is the restaurant floor split up into?</div>
+                        <div class="invalid-feedback">Please enter 1 or more sections.</div>
+                    </div>
+
+                    <!-- Max Front of House -->
+                    <div class="mb-3">
+                        <label for="maxFrontOfHouse" class="form-label">Maximum Front of House Staff</label>
+                        <input type="number" class="form-control" id="maxFrontOfHouse" name="maxFrontOfHouse" min="1" required />
+                        <div class="form-text">Enter the maximum number of front-of-house staff members (management included) that can work at one time.</div>
+                        <div class="invalid-feedback">Please enter 1 or more staff members.</div>
+                    </div>
+
+                    <!-- Max Bartenders -->
+                    <div class="mb-3">
+                        <label for="maxBartenders" class="form-label">Maximum Bartenders</label>
+                        <input type="number" class="form-control" id="maxBartenders" name="maxBartenders" min="1" required />
+                        <div class="form-text">Enter the maximum number of bartenders that can work during a shift.</div>
+                        <div class="invalid-feedback">Please enter 1 or more bartenders.</div>
+                    </div>
+
+                    <!-- Max Management -->
+                    <div class="mb-3">
+                        <label for="maxManagement" class="form-label">Maximum Management</label>
+                        <input type="number" class="form-control" id="maxManagement" name="maxManagement" min="1" required />
+                        <div class="form-text">Specify the maximum number of managers or supervisors allowed on shift simultaneously.</div>
+                        <div class="invalid-feedback">Please enter 1 or more managers.</div>
+                    </div>
+
+                    <!-- Min Management -->
+                    <div class="mb-3">
+                        <label for="minManagement" class="form-label">Minimum Management</label>
+                        <input type="number" class="form-control" id="minManagement" name="minManagement" min="1" required />
+                        <div class="form-text">Specify the minimum number of managers or supervisors required on shift at all times.</div>
+                        <div class="invalid-feedback">Please enter 1 or more managers.</div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <!-- Cancel Button -->
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn btn-primary" id="submitButton">Submit</button>
+                        <!-- Error Messaage -->
+                        <div class="text-center">
+                            <span id="errorMessage" style="color: red; display: none;"></span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var message = '@HttpUtility.JavaScriptStringEncode(ViewBag.PopUpMessage)';
+        if (message && message.trim() !== '') {
+            console.log('PopUp Message:', message);
+            popUpMessage(message);
+        }
+
+        //listener for any changes in form
+        document.getElementById("EditConfiguration").addEventListener("change", function (event) {
+            validateSiteConfigurationForm();
+        });
+
+    });
+</script>

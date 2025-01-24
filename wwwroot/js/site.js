@@ -231,6 +231,96 @@ function validateRequestDate() {
     }
 }
 
+function showEditSiteConfigurationPopUp(id, siteName) {
+    let message;
+    let pageTitle;
+
+    if (id == 0) {
+        pageTitle = `ERROR`;
+        message = `Error: Could not find ${siteName}`;
+        errorPopUp(message);//displays error popUp
+    }
+    else {
+        pageTitle = `Edit ${siteName}'s Configuration`;
+
+        //send the siteId to the form through a hidden input value
+        //const hiddenInput = document.querySelector('#EditSiteConfigurationPopUp input[name="siteId"]');
+        //hiddenInput.value = id;
+    }
+
+    //sets the message
+    document.getElementById('EditSiteConfigurationModalLabel').textContent = pageTitle;
+
+    //show the popUp
+    const popUp = new bootstrap.Modal(document.getElementById('EditSiteConfigurationPopUp'));
+    popUp.show();
+
+}
+
+function validateSiteConfigurationForm() {
+    const errorMessage = document.getElementById("errorMessage");
+    const submitButton = document.getElementById("submitButton");
+
+    const minManagement = parseInt(document.getElementById("minManagement").value, 10);
+    const maxManagement = parseInt(document.getElementById("maxManagement").value, 10);
+
+    if (minManagement > maxManagement) {
+        submitButton.disabled = true
+        errorMessage.textContent = "Minimum management cannot exceed maximum management.";
+        errorMessage.style.display = "block";
+        return;
+    }
+    else {
+        submitButton.disabled = false;
+        errorMessage.textContent = "";
+        errorMessage.style.display = "none";
+        return;
+    }
+}
+
+
+
+function popUpMessage(message) {
+    // Check if the error modal already exists
+    let errorModal = document.getElementById('errorModal');
+
+    if (!errorModal) {
+        // Create the modal element dynamically
+        const modalHtml = `
+        <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title" id="errorModalLabel">Error</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p id="errorModalMessage"></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        `;
+
+        // Append the modal to the body
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+        // Get the newly created modal
+        errorModal = document.getElementById('errorModal');
+    }
+
+    // Set the error message in the modal
+    const errorModalMessage = errorModal.querySelector('#errorModalMessage');
+    errorModalMessage.textContent = message;
+
+    // Show the modal using Bootstrap
+    const bootstrapModal = new bootstrap.Modal(errorModal);
+    bootstrapModal.show();
+}
+
 
 
 
