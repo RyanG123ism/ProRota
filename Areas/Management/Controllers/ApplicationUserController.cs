@@ -201,7 +201,9 @@ namespace ProRota.Areas.Management.Controllers
         public async Task<ActionResult> CreateApplicationUser(
             [Bind(include: "Email,Password,FirstName,LastName, Salary, ContractualHours, Notes, Role")] CreateApplicationUserViewModel model)
         {
-
+            //getting the siteId from the current user - to bind to user created
+            var siteId = GetSiteIdFromSessionOrUser();
+            
             if (ModelState.IsValid)
             {
                 // Validate email uniqueness before creating the user
@@ -222,7 +224,8 @@ namespace ProRota.Areas.Management.Controllers
                     Salary = model.Salary,
                     ContractualHours = model.ContractualHours,
                     Notes = model.Notes,
-                    EmailConfirmed = true // this is so the user can login - IF I have till will change to 2fa
+                    EmailConfirmed = true, // this is so the user can login - IF I have time will change to 2fa
+                    SiteId= siteId
                 };
 
                 //Creates the user in the DB and adds the password

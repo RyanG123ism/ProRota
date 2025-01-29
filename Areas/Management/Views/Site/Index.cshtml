@@ -1,7 +1,7 @@
 ﻿@using System.Web
 @model ProRota.Models.Site
 
-<div class="card shadow-sm p-3 mb-5" style="background-color: #f8f9fa; border: none;">
+<div class="card shadow-sm p-3 mb-5">
     <div class="card-header text-center">
         <h1 class="display-4">Site Management</h1>
         <h3>Configure Your Site</h3>
@@ -78,13 +78,13 @@
 
 
         @* NESTED CARDS *@
-        <div class="card shadow-sm mb-4" style="background-color: #e9ecef; border: none;">
+        <div class="card shadow-sm mb-4" >
             <div class="card-body">
                 <h5 class="card-title">Trading Schedule</h5>
                 <p class="card-text">View @Model.Company.CompanyName @Model.SiteName's opening and closing times </p>
                 <p class="card-text">Click Here to Edit</p>
 
-                <table class="table table-bordered table-striped table-hover" style="border-color: lightgray;">
+                <table class="table table-hover">
                     <thead>
                         <tr>
                             <th>Day of the Week</th>
@@ -94,7 +94,7 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td>Monday</td>
+                            <td onclick="showEditTradingTimesPopUp(@((int)DayOfWeek.Monday))">Monday</td>
                             @if (Model.MondayOpenTime == null)
                             {
                                 <td style="background-color: lightcoral;">Closed</td>
@@ -107,7 +107,7 @@
                             }
                         </tr>
                         <tr>
-                            <td>Tuesday</td>
+                            <td onclick="showEditTradingTimesPopUp(@((int)DayOfWeek.Tuesday))">Tuesday</td>
                             @if (Model.TuesdayOpenTime == null)
                             {
                                 <td style="background-color: lightcoral;">Closed</td>
@@ -120,7 +120,7 @@
                             }
                         </tr>
                         <tr>
-                            <td>Wednesday</td>
+                            <td onclick="showEditTradingTimesPopUp(@((int)DayOfWeek.Wednesday))">Wednesday</td>
                             @if (Model.WednesdayOpenTime == null)
                             {
                                 <td style="background-color: lightcoral;">Closed</td>
@@ -133,7 +133,7 @@
                             }
                         </tr>
                         <tr>
-                            <td>Thursday</td>
+                            <td onclick="showEditTradingTimesPopUp(@((int)DayOfWeek.Thursday))">Thursday</td>
                             @if (Model.ThursdayOpenTime == null)
                             {
                                 <td style="background-color: lightcoral;">Closed</td>
@@ -146,7 +146,7 @@
                             }
                         </tr>
                         <tr>
-                            <td>Friday</td>
+                            <td onclick="showEditTradingTimesPopUp(@((int)DayOfWeek.Friday))">Friday</td>
                             @if (Model.FridayOpenTime == null)
                             {
                                 <td style="background-color: lightcoral;">Closed</td>
@@ -159,7 +159,7 @@
                             }
                         </tr>
                         <tr>
-                            <td>Saturday</td>
+                            <td onclick="showEditTradingTimesPopUp(@((int)DayOfWeek.Saturday))">Saturday</td>
                             @if (Model.SaturdayOpenTime == null)
                             {
                                 <td style="background-color: lightcoral;">Closed</td>
@@ -172,7 +172,7 @@
                             }
                         </tr>
                         <tr>
-                            <td>Sunday</td>
+                            <td onclick="showEditTradingTimesPopUp(@((int)DayOfWeek.Sunday))">Sunday</td>
                             @if (Model.SundayOpenTime == null)
                             {
                                 <td style="background-color: lightcoral;">Closed</td>
@@ -267,6 +267,57 @@
     </div>
 </div>
 
+<!-- Hidden pop-up for editing trading times -->
+<div class="modal fade" id="EditTradingTimesPopUp" tabindex="-1" aria-labelledby="EditTradingTimesModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="EditTradingTimesModalLabel"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="EditTradingTimes" method="post" asp-area="Management" asp-controller="Site" asp-action="EditTradingTimes">
+                    <div class="row mb-3">
+                        <!-- Opening Time -->
+                        <div class="col-md-6">
+                            <label for="openingTime" class="form-label">Opening Time</label>
+                            <input type="time" class="form-control" id="openingTime" name="openingTime" required />
+                            <div class="form-text">Select the opening time.</div>
+                            <div class="invalid-feedback">Please select a valid opening time.</div>
+                        </div>
+                        <!-- Closing Time -->
+                        <div class="col-md-6">
+                            <label for="closingTime" class="form-label">Closing Time</label>
+                            <input type="time" class="form-control" id="closingTime" name="closingTime" required />
+                            <div class="form-text">Select the closing time.</div>
+                            <div class="invalid-feedback">Please select a valid closing time.</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <!-- Hidden input for day enum -->
+                        <input id="dayOfWeekEnumEdit" type="hidden" name="dayOfWeekEnum" value="" />                                     
+                        <!-- Cancel Button -->
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <!-- Save Button -->
+                        <button type="submit" class="btn btn-primary" id="saveButton">Save</button>
+                        <!-- Error Messaage -->
+                        <div class="text-center">
+                            <span id="errorMessageTradingHours" style="color: red; display: none;"></span>
+                        </div>
+                    </div>
+                </form>
+                <div class="modal-footer">
+                    <form id="RemoveTradingHours" method="post" asp-area="Management" asp-controller="Site" asp-action="RemoveTradingTimes" class="w-100">
+                        <input id="dayOfWeekEnumRemove" type="hidden" name="dayOfWeekEnum2" value="" />
+                        <button type="submit" class="btn btn-danger w-100">Close Restaurant</button>
+                    </form>
+                </div>           
+            </div>
+        </div>
+    </div>
+</div>
+
+
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
@@ -276,10 +327,12 @@
             popUpMessage(message);
         }
 
-        //listener for any changes in form
+        //listener for any changes in forms
         document.getElementById("EditConfiguration").addEventListener("change", function (event) {
             validateSiteConfigurationForm();
         });
-
+        document.getElementById("EditTradingTimes").addEventListener("change", function (event) {
+            validateTradingHours();
+        });
     });
 </script>

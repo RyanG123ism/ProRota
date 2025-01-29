@@ -96,6 +96,9 @@ namespace ProRota.Areas.Management.Controllers
                 var requests = _context.TimeOffRequests.Where(t => t.IsApproved == approvalStatus)
                     .Include(t => t.ApplicationUser).Where(t => t.ApplicationUser.SiteId == siteId).OrderByDescending(t => t.Date).ToList();
 
+                //sends tomorrows date to view
+                ViewBag.Tomorrow = DateTime.Now.AddDays(1).Date;
+
                 return View("ViewAllTimeOffRequests", requests);
             }
 
@@ -165,8 +168,7 @@ namespace ProRota.Areas.Management.Controllers
             //saves changes
             await _context.SaveChangesAsync();
 
-            //CHANGE THIS BACK TO LESS THAN 0
-            if (user.RemainingHolidays >= 0)
+            if (user.RemainingHolidays <= 0)
             {
                 TempData["ConformationMessage"] = $"{user.FirstName} {user.LastName} " +
                     $"has no remaining holidays left in their allowance. If this was a mistake, revert this request.";

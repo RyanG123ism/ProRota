@@ -18,6 +18,173 @@ html {
 }
 
 body {
-  margin-bottom: 60px;
+    margin-bottom: 60px;
+    /* BACKGROUND IMAGE FORMATTING */
+    background-image: url('/images/Background.png');
+    background-size: cover; /* Ensures the image covers the entire screen */
+    background-position: top; /* displays the image top down */
+    background-repeat: no-repeat; /* Prevents tiling */
+    background-attachment: scroll; /* Makes the background scroll with the content */
+    margin: 0; /* Removes default margins */
+    padding: 0; /* Removes default padding */
+    font-family: 'Poppins', sans-serif; /* Optional: set default font */
 }
 
+/* Transparent Navbar Styling */
+.navbar {
+    background-color: transparent !important;
+    color: white !important;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+    .navbar .navbar-brand,
+    .navbar .nav-link {
+        color: white !important; /* Default text color is white */
+        transition: color 0.3s ease;
+    }
+
+        .navbar .nav-link:hover {
+            color: #f8f9fa; /* Lighter white on hover */
+        }
+
+
+.card {
+    background-color: rgba(255, 255, 255, 0.1); /* Transparent background */
+    border: 1px solid white; /* Thin white frame */
+    color: white; /* White text color */
+    border-radius: 0.5rem; /* Slightly rounded corners */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: subtle shadow for better visibility */
+    transition: transform 0.2s ease, box-shadow 0.2s ease; /* Optional: smooth hover effect */
+}
+
+/* Transparent Card Header */
+.card-header {
+    background-color: rgba(255, 255, 255, 0.0); /* Transparent background */
+    color: white; /* White text for card headers */
+    font-weight: bold; /* Bold text for emphasis */
+    border-bottom: none; /* Subtle bottom border */
+}
+
+
+
+/* Table Styling */
+.table {
+    background-color: rgba(255, 255, 255, 0.1); /* Transparent background */
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid white; /* White border around table */
+    color: white; /* White text for table content */
+    margin-bottom: 1rem;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.2); /* Lighter transparent hover effect */
+    color: white; /* Ensure text stays white on hover */
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(255, 255, 255, 0.05); /* Light stripe on odd rows */
+}
+
+.table th, .table td {
+    border: 1px solid white; /* White border around cells */
+    padding: 0.75rem;
+    text-align: center; /* Center-align text */
+    vertical-align: middle; /* Vertically center text */
+}
+
+.table thead {
+    background-color: rgba(255, 255, 255, 0.1); /* Transparent header */
+    color: white; /* White text */
+    font-weight: bold; /* Bold text */
+    border-bottom: 1px solid white; /*white border*/
+}
+
+/* Responsive Table */
+.table-responsive {
+    overflow-x: auto;
+}
+
+
+/* Primary Buttons */
+.btn-primary {
+    background-color: #807C96 !important; /* Primary button background color */
+    border-color: #807C96 !important; /* Primary button border color */
+    color: white !important; /* Primary button text color */
+    transition: background-color 0.3s ease, color 0.3s ease; /* Smooth hover effect */
+}
+
+    .btn-primary:hover, .btn-primary:focus {
+        background-color: #6F6A85 !important; /* Slightly darker shade on hover */
+        color: white !important; /* Text remains white */
+        border-color: #6F6A85 !important; /* Match border with hover color */
+    }
+
+/* Secondary Buttons */
+.btn-secondary {
+    background-color: #9FBA60 !important; /* Secondary button background color */
+    border-color: #9FBA60 !important; /* Secondary button border color */
+    color: white !important; /* Secondary button text color */
+    transition: background-color 0.3s ease, color 0.3s ease; /* Smooth hover effect */
+}
+
+    .btn-secondary:hover, .btn-secondary:focus {
+        background-color: #8BA54D !important; /* Slightly darker shade on hover */
+        color: white !important; /* Text remains white */
+        border-color: #8BA54D !important; /* Match border with hover color */
+    }
+
+/* Links/Action Links */
+a {
+    color: #9FBA60; /* Default link color matches secondary buttons */
+    text-decoration: none; /* Remove underline */
+    transition: color 0.3s ease; /* Smooth color change */
+}
+
+    a:hover, a:focus {
+        color: #8BA54D; /* Slightly darker shade on hover */
+        text-decoration: underline; /* Add underline on hover for clarity */
+    }
+
+/* Ensure Bootstrap Modal Doesn't Flicker */
+.modal {
+    animation: none !important;
+    transition: none !important;
+}
+
+    /* Fix flickering due to repeated animation */
+    .modal.fade.show {
+        display: block !important; /* Ensure modal stays visible */
+    }
+
+/* Fix issue where modal backdrop isn't displaying correctly */
+.modal-backdrop {
+    background-color: rgba(0, 0, 0, 0.5) !important;
+    z-index: 1040 !important; /* Ensure it sits correctly */
+}
+
+/* Ensure modal content doesn't get affected by table settings */
+.modal-dialog {
+    max-width: 500px;
+    margin: 1.75rem auto;
+}
+
+/* Ensure modal body and footer align correctly */
+.modal-content {
+    background-color: rgba(0, 0, 0, 0.8); /* Darker modal background for contrast */
+    border: 1px solid white; /* White border to match design */
+    color: white !important; /* Text should be visible */
+    border-radius: 0.5rem;
+}
+
+/* Ensure modal text is readable */
+.modal-title,
+.modal-body,
+.modal-footer {
+    color: white !important;
+}
+
+/* Prevent background scrolling when modal is open */
+body.modal-open {
+    overflow: hidden !important;
+}

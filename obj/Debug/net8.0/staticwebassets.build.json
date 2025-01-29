@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "53Ev93p/FPGOPl1CBOIPJgctjIOUC342FEJ17p+7tlc=",
+  "Hash": "8oPvLqH/Vd7EApl8y/VpxYh21f+eQXdPRYxmDfxZ2Uo=",
   "Source": "ProRota",
   "BasePath": "_content/ProRota",
   "Mode": "Default",
@@ -1231,6 +1231,25 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\favicon.ico"
+    },
+    {
+      "Identity": "C:\\Users\\grant\\OneDrive\\Desktop\\UNI\\Year 4\\Honours Project\\ProRota\\wwwroot\\images\\Background.png",
+      "SourceId": "ProRota",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\grant\\OneDrive\\Desktop\\UNI\\Year 4\\Honours Project\\ProRota\\wwwroot\\",
+      "BasePath": "_content/ProRota",
+      "RelativePath": "images/Background.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\images\\Background.png"
     },
     {
       "Identity": "C:\\Users\\grant\\OneDrive\\Desktop\\UNI\\Year 4\\Honours Project\\ProRota\\wwwroot\\js\\site.js",

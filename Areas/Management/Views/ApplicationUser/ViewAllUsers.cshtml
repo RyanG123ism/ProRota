@@ -9,7 +9,7 @@
 @{
     ViewData["Title"] = "ViewAllUsers";
 }
-<div class="card shadow-sm p-3 mb-5" style="background-color: #f8f9fa; border: none;">
+<div class="card shadow-sm p-3 mb-5" @* style="background-color: #f8f9fa; border: none;" *@>
     <div class="card-header text-center">
         <h1 class="display-4">Management Dashboard</h1>
         <h3>User Management</h3>
@@ -51,7 +51,7 @@
         </div>
 
         <!-- Count of the users -->
-        <h3 class="font-weight-bold text-center text-black" style="padding-top: 10px;">@Model.Count() USERS</h3>
+        <h3 class="font-weight-bold text-center" style="padding-top: 10px;">@Model.Count() USERS</h3>
 
         @if (Model == null || !Model.Any())
         {
@@ -60,7 +60,7 @@
         else
         {
             <div class="table-responsive">
-                <table class="table table-bordered table-striped table-hover" style="border-color:black;">
+                <table class="table table-hover">
                     <tr class="text-black">
                         <th>@Html.DisplayNameFor(model => model.Email)</th>
                         <th>@Html.DisplayNameFor(model => model.FirstName)</th>
@@ -71,7 +71,7 @@
 
                     @foreach (var user in Model)
                     {
-                        <tr class="text-black">
+                        <tr>
                             <td>
                                 @Html.DisplayFor(modelItem => user.Email)
                             </td>
@@ -93,7 +93,7 @@
                                 }
                             </td>
 
-                            <td class="text-black">
+                            <td>
 
                                 @if (User.FindFirstValue(ClaimTypes.NameIdentifier.ToString()) == user.Id)
                                 {

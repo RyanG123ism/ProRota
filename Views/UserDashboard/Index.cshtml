@@ -1,14 +1,14 @@
 ﻿@model ApplicationUser
 @using ProRota.Models
 
-<div class="card shadow-sm p-3 mb-5" style="background-color: #f8f9fa; border: none;">
+<div class="card shadow-sm p-3 mb-5" @* style="background-color: #f8f9fa; border: none;" *@>
     <div class="card-header text-center">
         <h1 class="display-4">Your Dashboard</h1>
         <h3>Welcome to your Dashboard, @Model.FirstName</h3>
     </div>
     <div class="card-body text-center">
         @* Table to display users shifts *@
-        <div class="card shadow-sm mb-4" style="background-color: #e9ecef; border: none;">
+        <div class="card shadow-sm mb-4" @* style="background-color: #e9ecef; border: none;" *@>
             <div class="card-body">
                 <h2 class="text-center mb-3" style="font-weight: bold;">Your Upcoming Shifts</h2>
 
@@ -23,8 +23,8 @@
                     </div>
 
                     <!-- Shifts Table -->
-                    <table id="pendingShiftsTable" class="table table-bordered table-striped table-hover" style="border-color: lightgray;">
-                        <thead id="pendingShifts-table-header" class="table-dark">
+                    <table id="pendingShiftsTable" class="table table-hover" style="border-color: white;">
+                        <thead id="pendingShifts-table-header">
                             <!-- Header will be populated by JavaScript -->
                         </thead>
                         <tbody id="pendingShifts-table-body">
@@ -36,11 +36,11 @@
         </div>
 
         @* Time off requests Card *@
-        <div class="card shadow-sm p-3 mb-4" style="background-color: #e9ecef; border: none;">
+        <div class="card shadow-sm p-3 mb-4" @* style="background-color: #e9ecef; border: none;" *@>
             <div class="card-body">
                 <!-- Time-Off Requests Section -->
-                <h2 class="card-title text-center mb-4" style="font-weight: bold; color: #343a40;">Your Time-Off Requests</h2>
-                <h3 class="text-center" style="font-weight: 500; color: #495057;">
+                <h2 class="card-title text-center mb-4" style="font-weight: bold;">Your Time-Off Requests</h2>
+                <h3 class="text-center" style="font-weight: 500;">
                     You've taken <span style="font-weight: bold;">@ViewBag.HolidaysTaken</span> out of <span style="font-weight: bold;">@Model.HolidaysPerYear</span> paid days off.
                 </h3>
                 <h5 class="text-center" style="font-weight: 500;">
@@ -52,8 +52,8 @@
                 <div id="table-container" class="table-responsive">
 
                     <!-- Time of Request Shifts Table -->
-                    <table id="timeOffRequestsTable" class="table table-bordered table-striped table-hover" style="border-color: lightgray;">
-                        <thead id="table-header" class="table-dark">
+                    <table id="timeOffRequestsTable" class="table table-hover">
+                        <thead id="table-header">
                         <th>Request Date</th>
                         <th>Paid?</th>
                         <th>Notes</th>
@@ -73,19 +73,19 @@
                                         <td>@req.Notes</td>
                                         @if (req.IsApproved == ApprovedStatus.Approved)
                                         {
-                                            <td class="text-center" style="background-color: lightgreen; color: black; font-weight: bold;">
+                                            <td class="text-center" style="background-color: lightgreen; font-weight: bold;">
                                                 Approved
                                             </td>
                                         }
                                         else if (req.IsApproved == ApprovedStatus.Denied)
                                         {
-                                            <td class="text-center" style="background-color: lightcoral; color: black; font-weight: bold;">
+                                            <td class="text-center" style="background-color: salmon; font-weight: bold;">
                                                 Denied
                                             </td>
                                         }
                                         else
                                         {
-                                            <td class="text-center" style="color: black; font-weight: bold;">
+                                            <td class="text-center">
                                                 Pending
                                             </td>
                                         }
@@ -99,7 +99,7 @@
                                             }
                                             else
                                             {
-                                                <span class="text-center" style="color: black; font-weight: bold;">
+                                                <span class="text-center" >
                                                     Request Expired
                                                 </span>
                                             }
