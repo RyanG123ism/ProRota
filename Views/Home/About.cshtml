@@ -1,0 +1,42 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+
+@{
+    if (!SignInManager.IsSignedIn(User))
+    {
+        Layout = "_LayoutNavBarRemoved";
+    }
+}
+
+<div class="container mt-5" style="color:white">
+    <div class="text-center">
+        <h1 class="display-4">About ProRota</h1>
+        <p class="lead">Simplifying workforce scheduling for businesses of all sizes.</p>
+    </div>
+
+    <div class="row mt-5">
+        <!-- Left Column: Image -->
+        <div class="col-md-6 text-center">
+            <img src="/images/example_rota.png" alt="About Us" class="img-fluid rounded">
+        </div>
+
+        <!-- Right Column: Description -->
+        <div class="col-md-6">
+            <h2>Who We Are</h2>
+            <p>
+                ProRota is an innovative scheduling platform designed to help businesses manage their workforce effortlessly.
+                Our goal is to reduce scheduling complexities, improve efficiency, and ensure seamless shift management.
+            </p>
+            <h2>Our Mission</h2>
+            <p>
+                We aim to provide a powerful yet easy-to-use solution that empowers businesses and employees alike.
+                With automated scheduling, real-time updates, and user-friendly interfaces, we make workforce management stress-free.
+            </p>
+        </div>
+    </div>
+
+    <!-- Call to Action -->
+    <div class="text-center mt-5">
+        <a href="/register" class="btn btn-primary btn-lg">Join Us Today</a>
+    </div>
+</div>

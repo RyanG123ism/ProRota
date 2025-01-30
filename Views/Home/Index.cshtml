@@ -1,73 +1,140 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@page
+@{
+    Layout = null;
 }
 
-<div class="container-fluid p-0">
-    <!-- Hero Section -->
-    <header class="hero">
-        <div class="container text-center" style="color:white">
-            <h1 class="display-4 fw-bold">Welcome to ProRota</h1>
-            <p class="lead">Your ultimate solution for rota and scheduling management.</p>
-            <a href="#" class="btn btn-primary btn-lg mt-3">Get Started</a>
-            <a href="#" class="btn btn-outline-light btn-lg mt-3">Learn More</a>
-        </div>
-    </header>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProRota - Welcome</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+            background-image: url('/images/Background.png');
+            background-size: cover;
+            background-position: top;
+            background-repeat: no-repeat;
+            background-attachment: scroll;
+            padding: 0;
+        }
 
-    <!-- Features Section -->
-    <section class="features py-5" style="color: white">
-        <div class="container text-center">
-            <h2 class="fw-bold mb-4">Why Choose ProRota?</h2>
-            <div class="row">
-                <div class="col-md-4 mb-4">
-                    <div class="feature-box">
-                        <i class="fas fa-calendar-alt fa-3x text-primary mb-3"></i>
-                        <h4>Efficient Scheduling</h4>
-                        <p>Create and manage schedules effortlessly with ProRota's user-friendly tools.</p>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-4">
-                    <div class="feature-box">
-                        <i class="fas fa-users fa-3x text-success mb-3"></i>
-                        <h4>Team Collaboration</h4>
-                        <p>Enhance team communication and keep everyone on the same page.</p>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-4">
-                    <div class="feature-box">
-                        <i class="fas fa-chart-line fa-3x text-warning mb-3"></i>
-                        <h4>Analytics & Insights</h4>
-                        <p>Track performance and gain insights to make better decisions.</p>
-                    </div>
-                </div>
+        .container {
+            display: flex;
+            align-items: center;
+            max-width: 800px;
+        }
+
+        .logo {
+            width: 275px;
+            margin-right: 40px;
+        }
+
+        .text-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center elements */
+            text-align: center;
+            transform: translateY(-23px); /* Moves text and buttons up by 10px */
+        }
+
+            .text-content h1 {
+                font-size: 7rem; /* Large title */
+                font-weight: 700;
+                margin-bottom: 0px; /* Reduced space below title */
+                color: white;
+                line-height: 1;
+            }
+
+            .text-content h3 {
+                font-size: 1.2rem; /* Smaller subtitle */
+                font-weight: 400;
+                color: white;
+                margin-top: 0; /* Removes extra space above subtitle */
+                margin-bottom: 15px; /* Slight spacing before buttons */
+                line-height: 1;
+            }
+
+        .btn-container {
+            display: flex;
+            gap: 12px;
+            width: 50%;
+            align-items: center; /* Center buttons */
+            margin-bottom: 10px
+        }
+
+            .btn-container-single {
+                display: flex;
+                justify-content: center; /* Ensures centering */
+                width: 25%; /* Full width */
+                margin-top: 5px; /* Space from buttons above */
+            }
+
+        .btn {
+            font-size: 1rem;
+            padding: 12px 24px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: 0.3s;
+            width: 200px;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background-color: #807C96;
+            color: white;
+            border: none;
+        }
+
+            .btn-primary:hover {
+                background-color: #6F6A85;
+            }
+
+        .btn-secondary {
+            background-color: #9FBA60;
+            color: white;
+            border: none;
+        }
+
+            .btn-secondary:hover {
+                background-color: #8BA54D;
+            }
+
+        .btn-outline {
+            background: transparent;
+            color: #807C96;
+            border: 2px solid #807C96;
+        }
+
+            .btn-outline:hover {
+                background: #807C96;
+                color: white;
+            }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="/images/Logo_Transparent.png" alt="ProRota Logo" class="logo">
+        <div class="text-content">
+            <h1>ProRota</h1>
+            <h3>Scheduling made simple.</h3>
+            <div class="btn-container">
+                <a class="btn btn-primary" asp-area="Identity" asp-page="/Account/Login">Log In</a>
+                <a class="btn btn-secondary" asp-area="Identity" asp-page="/Account/Register">Join Now</a>
+            </div>
+            <div class="btn-container-single">
+                <a class="btn btn-outline" asp-controller="Home" asp-action="About">About Us</a>
             </div>
         </div>
-    </section>
-
-    <!-- About Section -->
-    <section class="about py-5 bg-light">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <h2 class="fw-bold">About ProRota</h2>
-                    <p>
-                        ProRota is designed to make rota management seamless and hassle-free. Whether you're managing a small team or a large workforce, ProRota has the tools to keep your operations running smoothly.
-                    </p>
-                    <a href="#" class="btn btn-outline-primary">Learn More</a>
-                </div>
-                <div class="col-md-6 text-center">
-                    <img src="https://via.placeholder.com/500x300" alt="About ProRota" class="img-fluid rounded">
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer Section -->
-    <footer class="footer text-center" style="color:white">
-        <div class="container">
-            <p class="mb-0">&copy; @DateTime.Now.Year ProRota. All Rights Reserved.</p>
-            <p class="small">
-                <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a>
-            </p>
-        </div>
-    </footer>
-</div>
+    </div>
+</body>
+</html>

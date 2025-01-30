@@ -1,12 +1,17 @@
 ﻿@page
 @model RegisterModel
+@inject SignInManager<ApplicationUser> SignInManager
 @{
     ViewData["Title"] = "Register";
+    if (!SignInManager.IsSignedIn(User))
+    {
+        Layout = "_LayoutNavBarRemoved";
+    }
 }
 
-<h1>@ViewData["Title"]</h1>
+<h1 class="text-content">@ViewData["Title"]</h1>
 
-<div class="row">
+<div class="row text-content">
     <div class="col-md-4">
         <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
             <h2>Create a new account.</h2>
@@ -43,7 +48,7 @@
             <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
         </form>
     </div>
-    <div class="col-md-6 col-md-offset-2">
+    <div class="col-md-6 col-md-offset-2 text-content">
         <section>
             <h3>Use another service to register.</h3>
             <hr />

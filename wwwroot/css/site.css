@@ -17,6 +17,11 @@ html {
   min-height: 100%;
 }
 
+.text-content {
+    display: flex;
+    color: white;
+}
+
 body {
     margin-bottom: 60px;
     /* BACKGROUND IMAGE FORMATTING */
@@ -47,6 +52,17 @@ body {
             color: #f8f9fa; /* Lighter white on hover */
         }
 
+.user-profile-img {
+    width: 40px; /* Reduce size (previously 40px, now 20px) */
+    height: 40px;
+    border-radius: 50%; /* Keeps it circular */
+    object-fit: cover; /* Ensures proper scaling */
+    transition: opacity 0.3s ease;
+}
+
+    .user-profile-img:hover {
+        opacity: 0.8; /* Hover effect */
+    }
 
 .card {
     background-color: rgba(255, 255, 255, 0.1); /* Transparent background */
@@ -188,3 +204,44 @@ a {
 body.modal-open {
     overflow: hidden !important;
 }
+
+/* User Profile Dropdown Styling */
+.user-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.user-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white */
+    border-radius: 8px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    min-width: 150px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px); /* Moves it slightly up before appearing */
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+}
+
+.user-dropdown:hover .user-dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0); /* Moves to normal position smoothly */
+}
+
+/* Style for dropdown links */
+.user-dropdown-menu a {
+    display: block;
+    padding: 10px;
+    text-decoration: none;
+    color: #333;
+    font-size: 14px;
+    transition: background-color 0.2s ease;
+}
+
+    .user-dropdown-menu a:hover {
+        background-color: rgba(0, 0, 0, 0.1);
+        border-radius: 5px;
+    }

@@ -6,14 +6,37 @@
 <ul class="navbar-nav">
 @if (SignInManager.IsSignedIn(User))
 {
-    <li class="nav-item">
-        <a  class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @User.Identity?.Name!</a>
-    </li>
-    <li class="nav-item">
-        <form  class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-            <button  type="submit" class="nav-link btn btn-link text-dark">Logout</button>
-        </form>
-    </li>
+        <div class="user-dropdown">
+            <img src="/images/AccountLogo.png" alt="User Profile" class="user-profile-img">
+            <div class="user-dropdown-menu">
+                <a asp-area="Identity" asp-page="/Account/Manage/Index">My Profile</a>
+                 @if(User.Identity.IsAuthenticated)
+                        {
+                            @if(User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" style="color:black" asp-area="Admin" asp-controller="Home" asp-action="Index">Admin Dashboard</a>
+                                </li>
+
+                            }
+                            else if (User.IsInRole("General Manager") || User.IsInRole("Assistant Manager") || User.IsInRole("Operations Manager") || User.IsInRole("Head Chef") || User.IsInRole("Executive Chef"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" style="color:black" asp-area="Management" asp-controller="Home" asp-action="Index">Management Dashboard</a>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" style="color:black" asp-area="" asp-controller="UserDashboard" asp-action="Index">Your User Dashboard</a>
+                                </li>
+                            }
+                        }
+                <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post">
+                    <button type="submit" class="dropdown-item">Logout</button>
+                </form>
+            </div>
+        </div>
 }
 else
 {
