@@ -16,7 +16,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ProRota")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+549aaccccbcc9202439b7f8d46806a50a170e119")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9b1253d054cf3efcd270b1927126ac2a78221c76")]
 [assembly: System.Reflection.AssemblyProductAttribute("ProRota")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ProRota")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

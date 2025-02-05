@@ -50,16 +50,25 @@ namespace ProRota.Areas.Management.Controllers
             return View(rota);
         }
 
-        private async Task<Dictionary<string, List<Shift>>> GeterateWeeklyRotaListForSiteAsync()
+        private async Task<Dictionary<string, Dictionary<string, List<Shift>>>> GeterateWeeklyRotaListForSiteAsync()
         {
             var siteId = GetSiteIdFromSessionOrUser();
 
             //get shifts for the managers corresponding site for the last 12 weeks (84 days)
             var shifts = _context.Shifts.ToList().Where(s => s.SiteId == siteId).Where(s => s.StartDateTime > DateTime.Now.AddDays(-84));
 
+            //dictionary for all weekly rotas
             var weeklyRotas = new Dictionary<string, List<Shift>>();
 
-            foreach(var  shift in shifts)
+            //dictionary to hold multiple dicitonaries of catagorised weekly rotas 
+            var categorisedWeeklyRotas = new Dictionary<string, Dictionary<string, List<Shift>>>
+            {
+                { "Unpublished", new Dictionary<string, List<Shift>>() },
+                { "ActiveWeek", new Dictionary<string, List<Shift>>() },
+                { "Published", new Dictionary<string, List<Shift>>() }
+            };
+
+            foreach (var shift in shifts)
             {
                 //gets the next sunday date
                 var weekEnding = CalculateNextSundayDateToString(shift);
@@ -77,22 +86,55 @@ namespace ProRota.Areas.Management.Controllers
             }
 
             //orders the dictionary by decending date key values
-            var sortedWeeklyRotas = weeklyRotas.OrderByDescending(r => DateTime.Parse(r.Key)).ToDictionary(r => r.Key, r => r.Value);
+            weeklyRotas.OrderByDescending(r => DateTime.Parse(r.Key)).ToDictionary(r => r.Key, r => r.Value);
 
-            return sortedWeeklyRotas;
+            // Determine the active week (this week ending Sunday)
+            var activeWeekKey = CalculateNextSundayDateToString(DateTime.Now);
+
+            // Loop through each weekly rota and categorise it
+            foreach (var entry in weeklyRotas)
+            {
+                string weekEnding = entry.Key;
+                List<Shift> shiftsInWeek = entry.Value;
+
+                // Check if any shift in this week is unpublished
+                bool hasUnpublishedShifts = shiftsInWeek.Any(s => !s.IsPublished);
+
+                if (weekEnding == activeWeekKey)
+                {
+                    // Set as active week
+                    categorisedWeeklyRotas["ActiveWeek"][weekEnding] = shiftsInWeek;
+                }
+                else if (hasUnpublishedShifts)
+                {
+                    // Add to Unpublished if at least one shift is not published
+                    categorisedWeeklyRotas["Unpublished"][weekEnding] = shiftsInWeek;
+                }
+                else
+                {
+                    // Otherwise, add to Published
+                    categorisedWeeklyRotas["Published"][weekEnding] = shiftsInWeek;
+                }
+            }
+
+            //sending todays date to view for comparrison later
+            ViewBag.Today = DateTime.Today;
+
+            return categorisedWeeklyRotas;
         }
 
+        
         private string CalculateNextSundayDateToString(Shift shift)
         {
-            var shiftDate = shift.StartDateTime.Value;
+            return CalculateNextSundayDateToString(shift.StartDateTime.Value);
+        }
 
-            // adds seven to dayofWeek enum then calculates the remainder
-            // using % 7 operator so that if shift is on a sunday (7) then it divides by 7 and gives us 0
-            var daysUntilSunday = ((int)DayOfWeek.Sunday - (int)shiftDate.DayOfWeek + 7) % 7;
-            var endOfWeekDate = shiftDate.AddDays(daysUntilSunday);
+        private string CalculateNextSundayDateToString(DateTime date)
+        {
+            var daysUntilSunday = ((int)DayOfWeek.Sunday - (int)date.DayOfWeek + 7) % 7;
+            var endOfWeekDate = date.AddDays(daysUntilSunday);
 
             return endOfWeekDate.ToString("yyyy-MM-dd");
-
         }
 
         public int GetSiteIdFromSessionOrUser()

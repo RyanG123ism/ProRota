@@ -20,6 +20,8 @@ namespace ProRota.Models
         [DataType(DataType.Text)]
         public string? ShiftNotes { get; set; } = string.Empty; //eg. bar today / break cover
 
+        public bool IsPublished { get; set; } = false;
+
         //navigational properties
 
         [ForeignKey("ApplicationUserId")]

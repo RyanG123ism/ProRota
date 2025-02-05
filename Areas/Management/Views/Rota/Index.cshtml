@@ -1,6 +1,10 @@
-﻿@model Dictionary<string, List<Shift>>
+﻿@model Dictionary<string, Dictionary<string, List<Shift>>>
 @using ProRota.Models
 
+@{
+    //categories that represent all the key values within the parent dictionary
+    var categories = new List<string> { "Unpublished", "ActiveWeek", "Published" };
+}
 
 <div class="card shadow-sm p-3 mb-5">
     <div class="card-header text-center">
@@ -8,69 +12,77 @@
         <h3>Weekly Rotas</h3>
     </div>
     <div class="card-body text-center">
+
+        <div class="text-center">
+            <a asp-area="Management" asp-controller="Rota" asp-action="CreateNewRota" class="btn btn-primary btn-sm">Create New Rota</a>
+        </div>
         <div class="container">
-            <h2 class="text-center text-black font-weight-bold" style="padding-top: 10px;">Weekly Rotas</h2>
-
-            @if (Model == null || !Model.Any())
+            
+            @foreach (var category in categories)
             {
-                <p class="text-center">@ViewBag.ErrorMessage</p>
+                if (Model.ContainsKey(category) && Model[category].Any())
+                {
+                    <div class="card mb-4">
+                        <div class="card-header text-center">
+                            <h2>@category Rotas</h2>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-bordered table-striped table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Week Ending</th>
+                                        <th>Total Shifts</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var entry in Model[category])
+                                    {
+                                        <tr>
+                                            <td>@entry.Key</td> <!-- Week Ending Date -->
+                                            <td>@entry.Value.Count</td> <!-- Count of shifts -->
+                                            <td>
+                                                @{
+                                                    if (category == "Unpublished")
+                                                    {
+                                                        <div>
+                                                            @Html.ActionLink("Delete Draft", "ViewWeeklyRota", new { weekEnding = entry.Key }) |
+                                                            @Html.ActionLink("Publish Rota", "ViewWeeklyRota", new { weekEnding = entry.Key }) |
+                                                            @Html.ActionLink("Edit", "EditWeeklyRota", new { weekEnding = entry.Key })
+                                                        </div>
+                                                        
+                                                    }
+                                                    if (category == "ActiveWeek")
+                                                    {
+                                                        <div>
+                                                            @Html.ActionLink("Edit", "EditWeeklyRota", new { weekEnding = entry.Key }) |
+                                                            @Html.ActionLink("View", "ViewWeeklyRota", new { weekEnding = entry.Key }) |
+                                                       </div>     
+                                                    }
+                                                    if (category == "Published")
+                                                    {
+                                                        if(DateTime.Parse(entry.Key) > ViewBag.Today)
+                                                        {
+                                                            <div>
+                                                                @Html.ActionLink("Edit", "EditWeeklyRota", new { weekEnding = entry.Key }) |
+                                                            </div>  
+                                                        }
+
+                                                        @Html.ActionLink("View", "ViewWeeklyRota", new { weekEnding = entry.Key })
+                                                    }
+                                                                
+                                                                
+                                                }                                              
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                }
             }
-            else
-            {
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Week Ending</th>
-                                <th>Total Shifts</th>
-                                <th>Is Published? (IMPLEMENT THIS)</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var entry in Model)
-                            {
-                                var weekEnding = entry.Key;
-                                var shifts = entry.Value;
-                                //var isPublished = shifts.Any(shift => shift.IsPublished); // Assuming `IsPublished` is a property in Shift
-
-                                <tr class="text-black">
-                                    <!-- Week Ending Key -->
-                                    <td>
-                                        Week Ending: @weekEnding
-                                    </td>
-
-                                    <!-- Total Shifts -->
-                                    <td>
-                                        @shifts.Count
-                                    </td>
-
-                                    <!-- Is Published? -->
-                                    <td>
-                                        @* @if (isPublished)
-                                {
-                                <span class="text-success font-weight-bold">Yes</span>
-                                }
-                                else
-                                {
-                                <span class="text-danger font-weight-bold">No</span>
-                                } *@
-
-                                        No
-                                    </td>
-
-                                    <!-- Actions -->
-                                    <td>
-                                        @Html.ActionLink("View", "ViewWeeklyRota", new { weekEnding = weekEnding }) |
-                                        @Html.ActionLink("Edit", "EditWeeklyRota", new { weekEnding = weekEnding }) |
-                                        @Html.ActionLink("Publish", "PublishWeeklyRota", new { weekEnding = weekEnding })
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            }
+            
         </div>
     </div>
 </div>

@@ -491,6 +491,7 @@ namespace ProRota.Data
                         //End Date between startDate time and 10+ hours after
                         .RuleFor(s => s.EndDateTime, (f, s) => f.Date.Between(s.StartDateTime.Value, s.StartDateTime.Value.AddHours(10)))
                         .RuleFor(s => s.ShiftNotes, f => f.Lorem.Word())
+                        .RuleFor(s => s.IsPublished, true)//by default all seeded shifts are published already 
                         .RuleFor(s => s.ApplicationUser, (f) => f.PickRandom(users))
                         .RuleFor(s => s.Site, (f, s) => s.ApplicationUser.Site);//chooses the site from the randomly assigned user
 
