@@ -12,45 +12,59 @@ namespace ProRota.Models
         public string SiteName { get; set; } = string.Empty;
 
         [Display(Name = "Monday Open Time")]
+        [DisplayFormat(DataFormatString = "{0:HH:mm}", ApplyFormatInEditMode = true)]
         public DateTime? MondayOpenTime { get; set; } = null;
 
         [Display(Name = "Monday Close Time")]
+        [DisplayFormat(DataFormatString = "{0:HH:mm}", ApplyFormatInEditMode = true)]
         public DateTime? MondayCloseTime { get; set; } = null;
 
         [Display(Name = "Tuesday Open Time")]
+        [DisplayFormat(DataFormatString = "{0:HH:mm}", ApplyFormatInEditMode = true)]
         public DateTime? TuesdayOpenTime { get; set; } = null;
 
         [Display(Name = "Tuesday Close Time")]
+        [DisplayFormat(DataFormatString = "{0:HH:mm}", ApplyFormatInEditMode = true)]
         public DateTime? TuesdayCloseTime { get; set; } = null;
 
         [Display(Name = "Wednesday Open Time")]
+        [DisplayFormat(DataFormatString = "{0:HH:mm}", ApplyFormatInEditMode = true)]
         public DateTime? WednesdayOpenTime { get; set; } = null;
 
         [Display(Name = "Wednesday Close Time")]
+        [DisplayFormat(DataFormatString = "{0:HH:mm}", ApplyFormatInEditMode = true)]
         public DateTime? WednesdayCloseTime { get; set; } = null;
 
         [Display(Name = "Thursday Open Time")]
+        [DisplayFormat(DataFormatString = "{0:HH:mm}", ApplyFormatInEditMode = true)]
         public DateTime? ThursdayOpenTime { get; set; } = null;
 
         [Display(Name = "Thursday Close Time")]
+        [DisplayFormat(DataFormatString = "{0:HH:mm}", ApplyFormatInEditMode = true)]
         public DateTime? ThursdayCloseTime { get; set; } = null;
 
         [Display(Name = "Friday Open Time")]
+        [DisplayFormat(DataFormatString = "{0:HH:mm}", ApplyFormatInEditMode = true)]
         public DateTime? FridayOpenTime { get; set; } = null;
 
         [Display(Name = "Friday Close Time")]
+        [DisplayFormat(DataFormatString = "{0:HH:mm}", ApplyFormatInEditMode = true)]
         public DateTime? FridayCloseTime { get; set; } = null;
 
         [Display(Name = "Saturday Open Time")]
+        [DisplayFormat(DataFormatString = "{0:HH:mm}", ApplyFormatInEditMode = true)]
         public DateTime? SaturdayOpenTime { get; set; } = null;
 
         [Display(Name = "Saturday Close Time")]
+        [DisplayFormat(DataFormatString = "{0:HH:mm}", ApplyFormatInEditMode = true)]
         public DateTime? SaturdayCloseTime { get; set; } = null;
 
         [Display(Name = "Sunday Open Time")]
+        [DisplayFormat(DataFormatString = "{0:HH:mm}", ApplyFormatInEditMode = true)]
         public DateTime? SundayOpenTime { get; set; } = null;
 
         [Display(Name = "Sunday Close Time")]
+        [DisplayFormat(DataFormatString = "{0:HH:mm}", ApplyFormatInEditMode = true)]
         public DateTime? SundayCloseTime { get; set; } = null;
 
         [Display(Name = "Covers Capacity")]

@@ -1,0 +1,113 @@
+﻿@model Site
+@using ProRota.Models
+
+<div class="card shadow-sm p-3 mb-5">
+    <div class="card-header text-center">
+        <h1 class="display-4">Rota Management</h1>
+        <h3>Create a new rota</h3>
+    </div>
+    <div class="card-body text-center">
+        <!-- Placeholder for Weekly Rota Table -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h2 class="text-center mb-3" style="font-weight: bold;">Configure Your Week</h2>
+
+                <!-- Informational Text -->
+                <p class="text-center">
+                    Each day of <strong>@Model.SiteName</strong>'s trading hours has been split into four quarters.
+                    To configure your rota properly, enter how many customers you have booked in within each of these time frames,
+                    and ProRota will generate a rota that best suits your site!
+                </p>
+                <p class="text-center">
+                    If you cant see your sites trading hours, make sure you have configured your site first in your dashboard!
+                </p>
+
+                <div id="table-container" class="table-responsive">
+                    <table id="weeklyRotaTable" class="table table-bordered text-center">
+                        <thead>
+                            <tr>
+                                @foreach (var day in ViewBag.Week)
+                                {
+                                    <th colspan="4">@day</th>
+                                }
+                            </tr>
+                            <tr>
+                                @{
+
+                                    foreach (var day in ViewBag.Week)
+                                    {
+                                        if(!ViewBag.OpenDays[day])
+                                        {
+                                            <th colspan="4" class="text-center" style="background-color: lightcoral; color: white; font-weight: bold;">Closed</th>
+                                        }
+                                        else
+                                        {
+                                        //get open and close time of current day
+                                            var openTime = (typeof(Site).GetProperty($"{day}OpenTime")?.GetValue(Model) as DateTime?)?.ToString("HH:mm") ?? "";
+                                            var closeTime = (typeof(Site).GetProperty($"{day}CloseTime")?.GetValue(Model) as DateTime?)?.ToString("HH:mm") ?? "";
+
+
+                                            <th class="times-input" data-day="@day" data-open-time="@openTime" data-close-time="@closeTime">0</th>
+                                            <th class="times-input" data-day="@day" data-open-time="@openTime" data-close-time="@closeTime">0</th>
+                                            <th class="times-input" data-day="@day" data-open-time="@openTime" data-close-time="@closeTime">0</th>
+                                            <th class="times-input" data-day="@day" data-open-time="@openTime" data-close-time="@closeTime">0</th>
+                                        }
+                                    }      
+                                }
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Input row for rota values -->
+                            <tr>
+                                @{
+                                    foreach(var day in ViewBag.Week)
+                                    {
+                                        if (!ViewBag.OpenDays[day])
+                                        {
+                                            <td colspan="4" class="text-center" style="background-color: lightcoral; color: white; font-weight: bold;">Closed</td>
+                                        }
+                                        else
+                                        {
+                                            <td><input type="number" class="covers-input" min="0" data-day="@day" oninput="calculateTotals()" /></td>
+                                            <td><input type="number" class="covers-input" min="0" data-day="@day" oninput="calculateTotals()" /></td>
+                                            <td><input type="number" class="covers-input" min="0" data-day="@day" oninput="calculateTotals()" /></td>
+                                            <td><input type="number" class="covers-input" min="0" data-day="@day" oninput="calculateTotals()" /></td>
+                                        }
+                                    }
+                                }
+                            </tr>
+                            <!-- Total row -->
+                            <tr class="table-secondary">
+                                @{
+                                    foreach (var day in ViewBag.Week)
+                                    {
+                                        if (!ViewBag.OpenDays[day])
+                                        {
+                                            <td colspan="4" class="text-center" style="background-color: lightcoral; color: white; font-weight: bold;">Closed</td>
+                                        }
+                                        else
+                                        {
+                                            <td colspan="4" id="total-@day">0</td>
+                                        }
+                                    }
+                                }
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Generate Rota Button -->
+        <div class="text-center">
+            <button id="generateRotaButton" class="btn btn-primary btn-lg">Generate Rota</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        calculateQuaterlyTimes();
+    });
+</script>
+

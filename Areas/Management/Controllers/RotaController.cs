@@ -36,11 +36,17 @@ namespace ProRota.Areas.Management.Controllers
             var siteId = GetSiteIdFromSessionOrUser();
 
             var weekEndingDate = DateTime.Parse(weekEnding);
-            var weekStartingDate = weekEndingDate.AddDays(-7); // Week start date from the end date 
+            var weekStartingDate = weekEndingDate.AddDays(-7); // Week start date from the end date
+            
+            //passing true to view only if the rota is of this week or in the future
+            if(weekEndingDate >= DateTime.Now)
+            {
+                ViewBag.Editable = true;
+            }
 
             // Get all users and include the shifts and time off requests within the given date parameters
             var rota = await _context.ApplicationUsers
-                .Include(u => u.Shifts.Where(s => s.SiteId == siteId).Where(s => s.StartDateTime >= weekStartingDate && s.StartDateTime <= weekEndingDate))
+                .Include(u => u.Shifts.Where(s => s.SiteId == siteId).Where(s => s.StartDateTime >= weekStartingDate && s.StartDateTime <= weekEndingDate).Where(s => s.IsPublished == true))
                 .Include(u => u.TimeOffRequests.Where(t => t.Date >= weekStartingDate && t.Date <= weekEndingDate).Where(t => t.IsApproved == ApprovedStatus.Approved))
                 .Where(u => u.SiteId == siteId)
                 .ToListAsync();
@@ -88,31 +94,31 @@ namespace ProRota.Areas.Management.Controllers
             //orders the dictionary by decending date key values
             weeklyRotas.OrderByDescending(r => DateTime.Parse(r.Key)).ToDictionary(r => r.Key, r => r.Value);
 
-            // Determine the active week (this week ending Sunday)
+            //determine the active week (this week ending Sunday)
             var activeWeekKey = CalculateNextSundayDateToString(DateTime.Now);
 
-            // Loop through each weekly rota and categorise it
+            //loop through each weekly rota and categorise it
             foreach (var entry in weeklyRotas)
             {
                 string weekEnding = entry.Key;
                 List<Shift> shiftsInWeek = entry.Value;
 
-                // Check if any shift in this week is unpublished
+                //check if any shift in this week is unpublished
                 bool hasUnpublishedShifts = shiftsInWeek.Any(s => !s.IsPublished);
 
                 if (weekEnding == activeWeekKey)
                 {
-                    // Set as active week
+                    //set as active week
                     categorisedWeeklyRotas["ActiveWeek"][weekEnding] = shiftsInWeek;
                 }
                 else if (hasUnpublishedShifts)
                 {
-                    // Add to Unpublished if at least one shift is not published
+                    //add to Unpublished if at least one shift is not published
                     categorisedWeeklyRotas["Unpublished"][weekEnding] = shiftsInWeek;
                 }
                 else
                 {
-                    // Otherwise, add to Published
+                    //otherwise, add to Published
                     categorisedWeeklyRotas["Published"][weekEnding] = shiftsInWeek;
                 }
             }
@@ -123,7 +129,39 @@ namespace ProRota.Areas.Management.Controllers
             return categorisedWeeklyRotas;
         }
 
-        
+        public async Task<IActionResult> CreateNewRota()
+        {
+            var siteId = GetSiteIdFromSessionOrUser();
+            var site = await _context.Sites.FindAsync(siteId);
+
+            if(site == null)
+            {
+                throw new Exception("Site Not Found");
+            }
+
+            //tracking the day of week
+            var week = new[] { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" };
+
+            //dictionary to store open days
+            var openDays = new Dictionary<string, bool>();
+
+            //loops through day of week and tried to find open and closing times for the site
+            foreach (var day in week)
+            {
+                var openTime = typeof(Site).GetProperty($"{day}OpenTime")?.GetValue(site) as DateTime?;
+                var closeTime = typeof(Site).GetProperty($"{day}CloseTime")?.GetValue(site) as DateTime?;
+                openDays[day] = openTime != null && closeTime != null; //returns true if both times exist
+            }
+
+            //send data to the view
+            ViewBag.Week = week;
+            ViewBag.OpenDays = openDays;
+
+            return View(site);
+        }
+
+
+
         private string CalculateNextSundayDateToString(Shift shift)
         {
             return CalculateNextSundayDateToString(shift.StartDateTime.Value);

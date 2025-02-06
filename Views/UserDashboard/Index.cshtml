@@ -1,14 +1,14 @@
 ﻿@model ApplicationUser
 @using ProRota.Models
 
-<div class="card shadow-sm p-3 mb-5" @* style="background-color: #f8f9fa; border: none;" *@>
+<div class="card shadow-sm p-3 mb-5">
     <div class="card-header text-center">
         <h1 class="display-4">Your Dashboard</h1>
         <h3>Welcome to your Dashboard, @Model.FirstName</h3>
     </div>
     <div class="card-body text-center">
         @* Table to display users shifts *@
-        <div class="card shadow-sm mb-4" @* style="background-color: #e9ecef; border: none;" *@>
+        <div class="card shadow-sm mb-4">
             <div class="card-body">
                 <h2 class="text-center mb-3" style="font-weight: bold;">Your Upcoming Shifts</h2>
 
@@ -36,7 +36,7 @@
         </div>
 
         @* Time off requests Card *@
-        <div class="card shadow-sm p-3 mb-4" @* style="background-color: #e9ecef; border: none;" *@>
+        <div class="card shadow-sm p-3 mb-4">
             <div class="card-body">
                 <!-- Time-Off Requests Section -->
                 <h2 class="card-title text-center mb-4" style="font-weight: bold;">Your Time-Off Requests</h2>

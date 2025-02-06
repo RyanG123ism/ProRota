@@ -102,6 +102,9 @@ namespace ProRota.Areas.Management.Controllers
                 throw new Exception("Opening time is greater than closing time");
             }
 
+            TimeSpan oTime = openingTime.TimeOfDay;
+            TimeSpan cTime = closingTime.TimeOfDay;
+
             //assigns the opening and closing times to the site based on the dayofweek enum value
             switch(dayOfWeekEnum)
             {

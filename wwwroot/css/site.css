@@ -245,3 +245,35 @@ body.modal-open {
         background-color: rgba(0, 0, 0, 0.1);
         border-radius: 5px;
     }
+
+/*[AREA = MANAGEMENT] ----------------------------------------CREATE NEW ROTA---------------------------------------------*/
+
+/*adding covers to table on*/
+.covers-input {
+    width: 35px; /* Super compact width */
+    padding: 2px;
+    font-size: 14px;
+    text-align: center;
+}
+
+/*display times for each day in table*/
+.times-input {
+    width: 35px; /* Super compact width */
+    padding: 2px;
+    font-size: 14px;
+    text-align: center;
+}
+
+/* Adjust table size */
+#weeklyRotaTable {
+    width: 100%; /* Uses more screen space */
+    font-size: 14px;
+    margin: auto;
+}
+
+    #weeklyRotaTable th, #weeklyRotaTable td {
+        padding: 4px;
+        text-align: center;
+    }
+
+/*----------------------------------------------------------------------------------------------------------------------*/

@@ -12,6 +12,12 @@
         <h3>Week Commencing - <b>@weekStartingDate</b></h3>
     </div>
     <div class="card-body text-center">
+
+
+        <div class="text-center">
+            <a asp-area="Management" asp-controller="Rota" asp-action="Index" class="btn btn-secondary btn-sm">Back to List</a>
+        </div>
+
         <div class="table-responsive">
 
             <table id="weeklyRotaTable" class="table table-hover" ">
@@ -213,13 +219,22 @@
                     }
                 </tbody>
             </table>
-
         </div>
 
 
     </div>
 </div>
 
+
+@if (ViewBag.Editable == true)
+{
+    <script>
+        @* add scripts here for drag n drop / editing shift times / deleteing shifts etc
+            add hidden values with shift ID's to each table cell with a shift so that it can be edited when clicked
+        *@
+
+    </script>
+}
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
