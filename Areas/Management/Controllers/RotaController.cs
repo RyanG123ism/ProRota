@@ -2,8 +2,10 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using ProRota.Areas.Management.ViewModels;
 using ProRota.Data;
 using ProRota.Models;
+using ProRota.Services;
 using System.Collections;
 using System.Security.Claims;
 
@@ -16,30 +18,34 @@ namespace ProRota.Areas.Management.Controllers
 
         private ApplicationDbContext _context;
         private UserManager<ApplicationUser> _userManager;
+        private readonly ISiteService _siteService;
+        private readonly IRotaService _rotaService;
 
-        public RotaController(ApplicationDbContext context, UserManager<ApplicationUser> userManager /*RoleManager<IdentityRole> roleManager*/)
+        public RotaController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, ISiteService siteService, IRotaService rotaService)
         {
             _context = context;
             _userManager = userManager;
+            _siteService = siteService;
+            _rotaService = rotaService;
         }
 
         public async Task<IActionResult> Index()
-        {              
+        {
             //generates rota list
             var rotas = await GeterateWeeklyRotaListForSiteAsync();
-            return View(rotas);    
+            return View(rotas);
         }
 
         public async Task<ActionResult> ViewWeeklyRota(string weekEnding)
-        {        
+        {
             //checks wether siteID is of user or the admins session (if admin is logged in)
-            var siteId = GetSiteIdFromSessionOrUser();
+            var siteId = _siteService.GetSiteIdFromSessionOrUser();
 
             var weekEndingDate = DateTime.Parse(weekEnding);
             var weekStartingDate = weekEndingDate.AddDays(-7); // Week start date from the end date
-            
+
             //passing true to view only if the rota is of this week or in the future
-            if(weekEndingDate >= DateTime.Now)
+            if (weekEndingDate >= DateTime.Now)
             {
                 ViewBag.Editable = true;
             }
@@ -58,7 +64,7 @@ namespace ProRota.Areas.Management.Controllers
 
         private async Task<Dictionary<string, Dictionary<string, List<Shift>>>> GeterateWeeklyRotaListForSiteAsync()
         {
-            var siteId = GetSiteIdFromSessionOrUser();
+            var siteId = _siteService.GetSiteIdFromSessionOrUser();
 
             //get shifts for the managers corresponding site for the last 12 weeks (84 days)
             var shifts = _context.Shifts.ToList().Where(s => s.SiteId == siteId).Where(s => s.StartDateTime > DateTime.Now.AddDays(-84));
@@ -77,10 +83,10 @@ namespace ProRota.Areas.Management.Controllers
             foreach (var shift in shifts)
             {
                 //gets the next sunday date
-                var weekEnding = CalculateNextSundayDateToString(shift);
+                var weekEnding = _rotaService.CalculateNextSundayDateToString(shift);
 
                 //if key doesnt exist then add it along with the shift value in a new list
-                if(!weeklyRotas.ContainsKey(weekEnding))
+                if (!weeklyRotas.ContainsKey(weekEnding))
                 {
                     weeklyRotas[weekEnding] = new List<Shift>
                     {
@@ -88,14 +94,14 @@ namespace ProRota.Areas.Management.Controllers
                     };
                 }
                 //add shift to existing key and list value
-                weeklyRotas[weekEnding].Add(shift);                           
+                weeklyRotas[weekEnding].Add(shift);
             }
 
             //orders the dictionary by decending date key values
             weeklyRotas.OrderByDescending(r => DateTime.Parse(r.Key)).ToDictionary(r => r.Key, r => r.Value);
 
             //determine the active week (this week ending Sunday)
-            var activeWeekKey = CalculateNextSundayDateToString(DateTime.Now);
+            var activeWeekKey = _rotaService.CalculateNextSundayDateToString(DateTime.Now);
 
             //loop through each weekly rota and categorise it
             foreach (var entry in weeklyRotas)
@@ -129,12 +135,13 @@ namespace ProRota.Areas.Management.Controllers
             return categorisedWeeklyRotas;
         }
 
+        [HttpGet]
         public async Task<IActionResult> CreateNewRota()
         {
-            var siteId = GetSiteIdFromSessionOrUser();
+            var siteId = _siteService.GetSiteIdFromSessionOrUser();
             var site = await _context.Sites.FindAsync(siteId);
 
-            if(site == null)
+            if (site == null)
             {
                 throw new Exception("Site Not Found");
             }
@@ -160,46 +167,27 @@ namespace ProRota.Areas.Management.Controllers
             return View(site);
         }
 
-
-
-        private string CalculateNextSundayDateToString(Shift shift)
+        [HttpPost]
+        public IActionResult CreateNewRota(CreateWeeklyRotaViewModel model)
         {
-            return CalculateNextSundayDateToString(shift.StartDateTime.Value);
-        }
-
-        private string CalculateNextSundayDateToString(DateTime date)
-        {
-            var daysUntilSunday = ((int)DayOfWeek.Sunday - (int)date.DayOfWeek + 7) % 7;
-            var endOfWeekDate = date.AddDays(daysUntilSunday);
-
-            return endOfWeekDate.ToString("yyyy-MM-dd");
-        }
-
-        public int GetSiteIdFromSessionOrUser()
-        {
-            var siteId = HttpContext.Session.GetInt32("AdminsCurrentSiteId");
-
-            if (siteId == null)
+            if (!ModelState.IsValid)
             {
-                //gets current users ID and then gets the user object
-                var userId = _userManager.GetUserId(User);
-                var user = _context.ApplicationUsers.FirstOrDefault(u => u.Id == userId);
-
-                //if not found
-                if (user == null)
-                {
-                    throw new Exception("Current user not found.");
-                }
-
-                if (user.SiteId == null)
-                {
-                    throw new Exception("Current site not found.");
-                }
-
-                siteId = user.SiteId;
+                return View(model);
             }
 
-            return (int)siteId;
+            // Debugging: Check values received
+            Console.WriteLine($"Week Ending Date: {model.WeekEndingDate}");
+            foreach (var day in model.Covers)
+            {
+                Console.WriteLine($"Day: {day.Key} - Covers: {string.Join(", ", day.Value)}");
+            }
+
+            // Save data to the database (example logic)
+            // _context.Rotas.Add(new Rota { WeekEnding = model.WeekEndingDate, Covers = model.Covers });
+            // _context.SaveChanges();
+
+            return RedirectToAction("Index");
         }
+
     }
 }

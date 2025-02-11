@@ -24,65 +24,76 @@
                 <dd class="col-sm-10">
                     @Html.DisplayFor(model => model.Company.CompanyName)
                 </dd>
-                <dt class="col-sm-2">
-                    @Html.DisplayNameFor(model => model.CoversCapacity)
-                </dt>
-                <dd class="col-sm-10">
-                    @Html.DisplayFor(model => model.CoversCapacity)
-                </dd>
-                <dt class="col-sm-2">
-                    @Html.DisplayNameFor(model => model.NumberOfSections)
-                </dt>
-                <dd class="col-sm-10">
-                    @Html.DisplayFor(model => model.NumberOfSections)
-                </dd>
-                <dt class="col-sm-2">
-                    @Html.DisplayNameFor(model => model.MaxFrontOfHouse)
-                </dt>
-                <dd class="col-sm-10">
-                    @Html.DisplayFor(model => model.MaxFrontOfHouse)
-                </dd>
-                <dt class="col-sm-2">
-                    @Html.DisplayNameFor(model => model.MaxBarTenders)
-                </dt>
-                <dd class="col-sm-10">
-                    @Html.DisplayFor(model => model.MaxBarTenders)
-                </dd>
-                <dt class="col-sm-2">
-                    @Html.DisplayNameFor(model => model.MaxManagement)
-                </dt>
-                <dd class="col-sm-10">
-                    @Html.DisplayFor(model => model.MaxManagement)
-                </dd>
-                <dt class="col-sm-2">
-                    @Html.DisplayNameFor(model => model.MinManagement)
-                </dt>
-                <dd class="col-sm-10">
-                    @Html.DisplayFor(model => model.MinManagement)
-                </dd>
-                <dt class="col-sm-2">
-                    @Html.DisplayNameFor(model => model.ConfigurationComplete)
-                </dt>
-                <dd class="col-sm-10">
-                    @Html.DisplayFor(model => model.ConfigurationComplete)
-                </dd>               
+
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Site Configuration</h5>
+                        @{
+                            if (Model.SiteConfiguration != null)
+                            {
+                                <dt class="col-sm-2">
+                                    @Html.DisplayNameFor(model => model.SiteConfiguration.BookingDuration)
+                                </dt>
+                                <dd class="col-sm-10">
+                                    @Html.DisplayFor(model => model.SiteConfiguration.BookingDuration)
+                                </dd>
+                                <dt class="col-sm-2">
+                                    @Html.DisplayNameFor(model => model.SiteConfiguration.CoversCapacity)
+                                </dt>
+                                <dd class="col-sm-10">
+                                    @Html.DisplayFor(model => model.SiteConfiguration.CoversCapacity)
+                                </dd>
+                                <dt class="col-sm-2">
+                                    @Html.DisplayNameFor(model => model.SiteConfiguration.NumberOfSections)
+                                </dt>
+                                <dd class="col-sm-10">
+                                    @Html.DisplayFor(model => model.SiteConfiguration.NumberOfSections)
+                                </dd>
+                                <dt class="col-sm-2">
+                                    @Html.DisplayNameFor(model => model.SiteConfiguration.MaxFrontOfHouse)
+                                </dt>
+                                <dd class="col-sm-10">
+                                    @Html.DisplayFor(model => model.SiteConfiguration.MaxFrontOfHouse)
+                                </dd>
+                                <dt class="col-sm-2">
+                                    @Html.DisplayNameFor(model => model.SiteConfiguration.MaxBarTenders)
+                                </dt>
+                                <dd class="col-sm-10">
+                                    @Html.DisplayFor(model => model.SiteConfiguration.MaxBarTenders)
+                                </dd>
+                                <dt class="col-sm-2">
+                                    @Html.DisplayNameFor(model => model.SiteConfiguration.MaxManagement)
+                                </dt>
+                                <dd class="col-sm-10">
+                                    @Html.DisplayFor(model => model.SiteConfiguration.MaxManagement)
+                                </dd>
+                                <dt class="col-sm-2">
+                                    @Html.DisplayNameFor(model => model.SiteConfiguration.MinManagement)
+                                </dt>
+                                <dd class="col-sm-10">
+                                    @Html.DisplayFor(model => model.SiteConfiguration.MinManagement)
+                                </dd>
+                            }
+                            else
+                            {
+                                <p class="card-text"> Your site configuration settings have not been created yet. In order for ProRota to create accurate and efficient schedules for @Model.Company.CompanyName @Model.SiteName this must be completed!</p>
+                                <div class="text-center">
+                                    <a href="javascript:void(0);" onclick="showEditSiteConfigurationPopUp('@Model.Id', '@Model.SiteName')" class="btn btn-primary btn-sm">Edit Configuration</a>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+                
             </dl>
         </div>
-        <div>
-            <a href="javascript:void(0);" onclick="showEditSiteConfigurationPopUp('@Model.Id', '@Model.SiteName')">
-                Edit Configuration
-            </a>
-            <br />
-        </div>
 
-
-
-        @* NESTED CARDS *@
+        @* TRADING SCHEDULE TABLE *@
         <div class="card shadow-sm mb-4" >
             <div class="card-body">
                 <h5 class="card-title">Trading Schedule</h5>
-                <p class="card-text">View @Model.Company.CompanyName @Model.SiteName's opening and closing times </p>
-                <p class="card-text">Click Here to Edit</p>
+                <p class="card-text">View @Model.Company.CompanyName @Model.SiteName's opening and closing times. </p>
+                <p class="card-text">Click on a day to edit.</p>
 
                 <table class="table table-hover">
                     <thead>
@@ -203,6 +214,15 @@
             </div>
             <div class="modal-body">
                 <form id="EditConfiguration" asp-area="Management" asp-controller="Site" asp-action="EditConfiguration" method="post">
+
+                    <!-- Booking Duration -->
+                    <div class="mb-3">
+                        <label for="bookingDuration" class="form-label">Standard Booking Duration</label>
+                        <input type="time" class="form-control" id="bookingDuration" name="bookingDuration" step="900" required />
+                        <div class="form-text">Enter the standard booking duration (e.g., 02:15 for 2 hours and 15 minutes).</div>
+                        <div class="invalid-feedback">Please enter a valid duration in HH:mm format.</div>
+                    </div>
+
                     <!-- Covers Capacity -->
                     <div class="mb-3">
                         <label for="coversCapacity" class="form-label">Restaurant Daily Capacity</label>

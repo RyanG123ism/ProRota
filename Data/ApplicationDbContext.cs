@@ -21,5 +21,7 @@ namespace ProRota.Data
 
         public DbSet<Site> Sites { get; set; }
 
+        public DbSet<SiteConfiguration> SiteConfigurations { get; set; }
+
     }
 }

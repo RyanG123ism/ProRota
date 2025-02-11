@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProRota.Data;
 using ProRota.Models;
+using ProRota.Services;
 
 namespace ProRota.Areas.Management.Controllers
 {
@@ -13,18 +14,20 @@ namespace ProRota.Areas.Management.Controllers
     {
         private ApplicationDbContext _context;
         private UserManager<ApplicationUser> _userManager;
+        private readonly ISiteService _siteService;
 
-        public SiteController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        public SiteController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, ISiteService siteService)
         {
             _context = context;
             _userManager = userManager;
+            _siteService = siteService;
         }
 
         public IActionResult Index()
         {
             //get the current site
-            var siteId = GetSiteIdFromSessionOrUser();
-            var site = _context.Sites.Where(s => s.Id == siteId).Include(s => s.Company).FirstOrDefault();
+            var siteId = _siteService.GetSiteIdFromSessionOrUser();
+            var site = _context.Sites.Where(s => s.Id == siteId).Include(s => s.Company).Include(s => s.SiteConfiguration).FirstOrDefault();
 
             if (site == null)
             {
@@ -33,8 +36,8 @@ namespace ProRota.Areas.Management.Controllers
 
             if (TempData["popUpMessage"] == null)
             {
-                //send pop up message if configuration isnt complete
-                if (!site.ConfigurationComplete)
+                //send pop up message if configuration hasnt been done
+                if (site.SiteConfiguration == null)
                 {
                     ViewBag.PopUpMessage = $"It seems although {site.SiteName} still needs to be configured before ProRota can automatically create your schedules. Please use the Edit Configuration button to finish your sites configuration!";
                 }
@@ -49,9 +52,9 @@ namespace ProRota.Areas.Management.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> EditConfiguration(int coversCapacity, int numberOfSections, int maxFrontOfHouse, int maxBartenders, int maxManagement, int minManagement)
+        public async Task<IActionResult> EditConfiguration(TimeSpan bookingDuration, int coversCapacity, int numberOfSections, int maxFrontOfHouse, int maxBartenders, int maxManagement, int minManagement)
         {
-            var siteId = GetSiteIdFromSessionOrUser();
+            var siteId = _siteService.GetSiteIdFromSessionOrUser();
             var site = _context.Sites.Find(siteId);
 
             if (site == null) 
@@ -59,24 +62,28 @@ namespace ProRota.Areas.Management.Controllers
                 throw new Exception("Site could not be found");
             }
 
-            //updating attributes
-            site.CoversCapacity = coversCapacity;
-            site.NumberOfSections = numberOfSections;
-            site.MaxFrontOfHouse = maxFrontOfHouse;
-            site.MaxBarTenders = maxBartenders;
-            site.MaxManagement = maxManagement;
-            site.MinManagement = minManagement;
-
-            //setting the config status to true
-            site.ConfigurationComplete = true;
+            //create new configuration
+            var config = new SiteConfiguration
+            {
+                BookingDuration = bookingDuration,
+                CoversCapacity = coversCapacity,
+                NumberOfSections = numberOfSections,
+                MaxFrontOfHouse = maxFrontOfHouse,
+                MaxBarTenders = maxBartenders,
+                MaxManagement = maxManagement,
+                MinManagement = minManagement,
+                SiteId = site.Id //attaching to current site
+            };
 
             //update entity and save to db 
-            _context.Sites.Update(site);
+            _context.SiteConfigurations.Add(config);
             var result = await _context.SaveChangesAsync();
+
             if (result <= 0)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "Failed to save changes to the database.");
             };
+
             //sending message back to the index action
             TempData["popUpMessage"] = "Site Configuration Updated!";
             return RedirectToAction("Index");
@@ -84,7 +91,7 @@ namespace ProRota.Areas.Management.Controllers
 
         public async Task<ActionResult> EditTradingTimes(DateTime openingTime, DateTime closingTime, int dayOfWeekEnum)
         {
-            var siteId = GetSiteIdFromSessionOrUser();
+            var siteId = _siteService.GetSiteIdFromSessionOrUser();
             var site = await _context.Sites.FindAsync(siteId);
 
             if (site == null)
@@ -152,7 +159,7 @@ namespace ProRota.Areas.Management.Controllers
 
         public async Task<ActionResult> RemoveTradingTimes(int dayOfWeekEnum2)
         {
-            var siteId = GetSiteIdFromSessionOrUser();
+            var siteId = _siteService.GetSiteIdFromSessionOrUser();
             var site = await _context.Sites.FindAsync(siteId);
 
             if (site == null)
@@ -203,33 +210,6 @@ namespace ProRota.Areas.Management.Controllers
 
             TempData["popUpMessage"] = "Trading Hours Updated!";
             return RedirectToAction("Index");
-        }
-
-        public int GetSiteIdFromSessionOrUser()
-        {
-            var siteId = HttpContext.Session.GetInt32("AdminsCurrentSiteId");
-
-            if (siteId == null)
-            {
-                //gets current users ID and then gets the user object
-                var userId = _userManager.GetUserId(User);
-                var user = _context.ApplicationUsers.FirstOrDefault(u => u.Id == userId);
-
-                //if not found
-                if (user == null)
-                {
-                    throw new Exception("Current user not found.");
-                }
-
-                if (user.SiteId == null)
-                {
-                    throw new Exception("Current site not found.");
-                }
-
-                siteId = user.SiteId;
-            }
-
-            return (int)siteId;
         }
     }
 }

@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Build.Framework;
 using Microsoft.EntityFrameworkCore;
 using ProRota.Data;
 using ProRota.Models;
+using ProRota.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,9 +32,6 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddRazorPages();
 
-//builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-//    .AddEntityFrameworkStores<ApplicationDbContext>()
-//    .AddDefaultTokenProviders();
 builder.Services.AddControllersWithViews();
 
 // Add session services
@@ -43,6 +42,11 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true; // Make the cookie accessible only by the server
     options.Cookie.IsEssential = true; // Required for GDPR compliance
 });
+
+//adding service classes and interfaces
+builder.Services.AddScoped<ISiteService, SiteService>();
+builder.Services.AddScoped<IRotaService, RotaService>(); ;
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 

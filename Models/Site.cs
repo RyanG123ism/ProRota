@@ -11,6 +11,8 @@ namespace ProRota.Models
         [Display(Name = "Name of Site:")]
         public string SiteName { get; set; } = string.Empty;
 
+        public SiteConfiguration? SiteConfiguration { get; set; }
+
         [Display(Name = "Monday Open Time")]
         [DisplayFormat(DataFormatString = "{0:HH:mm}", ApplyFormatInEditMode = true)]
         public DateTime? MondayOpenTime { get; set; } = null;
@@ -65,35 +67,7 @@ namespace ProRota.Models
 
         [Display(Name = "Sunday Close Time")]
         [DisplayFormat(DataFormatString = "{0:HH:mm}", ApplyFormatInEditMode = true)]
-        public DateTime? SundayCloseTime { get; set; } = null;
-
-        [Display(Name = "Covers Capacity")]
-        [Range(0, int.MaxValue, ErrorMessage = "Covers Capacity must be a non-negative number.")]
-        public int? CoversCapacity { get; set; } = 0;
-
-        [Display(Name = "Number of Sections")]
-        [Range(0, int.MaxValue, ErrorMessage = "Number of Sections must be a non-negative number.")]
-        public int? NumberOfSections { get; set; } = 0;
-
-        [Display(Name = "Max Front of House")]
-        [Range(0, int.MaxValue, ErrorMessage = "Max Front of House must be a non-negative number.")]
-        public int? MaxFrontOfHouse { get; set; } = 0;
-
-        [Display(Name = "Max Bartenders")]
-        [Range(0, int.MaxValue, ErrorMessage = "Max Bartenders must be a non-negative number.")]
-        public int? MaxBarTenders { get; set; } = 0;
-
-        [Display(Name = "Max Management")]
-        [Range(0, int.MaxValue, ErrorMessage = "Max Management must be a non-negative number.")]
-        public int? MaxManagement { get; set; } = 0;
-
-        [Display(Name = "Min Management")]
-        [Required(ErrorMessage = "At least one manager or supervisor must be present.")]
-        [Range(1, int.MaxValue, ErrorMessage = "Min Management must be at least 1.")]
-        public int? MinManagement { get; set; } = 1;
-
-        [Display(Name = "Configuration Complete")]
-        public bool ConfigurationComplete { get; set; } = false;
+        public DateTime? SundayCloseTime { get; set; } = null;       
 
         //navigational properties
 
