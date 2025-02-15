@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProRota.Data;
 
@@ -11,9 +12,11 @@ using ProRota.Data;
 namespace ProRota.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250214181318_AddRoleCategories")]
+    partial class AddRoleCategories
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -75,10 +78,12 @@ namespace ProRota.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("ProviderKey")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("ProviderDisplayName")
                         .HasColumnType("nvarchar(max)");
@@ -115,10 +120,12 @@ namespace ProRota.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("Value")
                         .HasColumnType("nvarchar(max)");
@@ -288,35 +295,6 @@ namespace ProRota.Migrations
                     b.ToTable("RoleCategories");
                 });
 
-            modelBuilder.Entity("ProRota.Models.RoleConfiguration", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("MaxEmployees")
-                        .HasColumnType("int");
-
-                    b.Property<int>("MinEmployees")
-                        .HasColumnType("int");
-
-                    b.Property<int>("RoleCategoryId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("SiteConfigurationId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RoleCategoryId");
-
-                    b.HasIndex("SiteConfigurationId");
-
-                    b.ToTable("RoleConfigurations");
-                });
-
             modelBuilder.Entity("ProRota.Models.Shift", b =>
                 {
                     b.Property<int>("Id")
@@ -430,6 +408,19 @@ namespace ProRota.Migrations
                         .HasColumnType("time");
 
                     b.Property<int?>("CoversCapacity")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("MaxBarTenders")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("MaxFrontOfHouse")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("MaxManagement")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("MinManagement")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<int?>("NumberOfSections")
@@ -547,21 +538,6 @@ namespace ProRota.Migrations
                     b.Navigation("Site");
                 });
 
-            modelBuilder.Entity("ProRota.Models.RoleConfiguration", b =>
-                {
-                    b.HasOne("ProRota.Models.RoleCategory", "RoleCategory")
-                        .WithMany()
-                        .HasForeignKey("RoleCategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ProRota.Models.SiteConfiguration", null)
-                        .WithMany("RoleConfigurations")
-                        .HasForeignKey("SiteConfigurationId");
-
-                    b.Navigation("RoleCategory");
-                });
-
             modelBuilder.Entity("ProRota.Models.Shift", b =>
                 {
                     b.HasOne("ProRota.Models.ApplicationUser", "ApplicationUser")
@@ -632,11 +608,6 @@ namespace ProRota.Migrations
                     b.Navigation("Shifts");
 
                     b.Navigation("SiteConfiguration");
-                });
-
-            modelBuilder.Entity("ProRota.Models.SiteConfiguration", b =>
-                {
-                    b.Navigation("RoleConfigurations");
                 });
 #pragma warning restore 612, 618
         }

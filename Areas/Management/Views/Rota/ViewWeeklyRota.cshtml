@@ -1,5 +1,5 @@
-﻿@model IEnumerable<ProRota.Models.ApplicationUser>
-@using ProRota.Models
+﻿@model Dictionary<string, ViewRotaViewModel>
+@using ProRota.Areas.Management.ViewModels
 
 @{
     ViewData["Title"] = "ViewWeeklyRota";
@@ -9,18 +9,16 @@
 <div class="card shadow-sm p-3 mb-5">
     <div class="card-header text-center">
         <h1 class="display-4">Rota Management</h1>
-        <h3>Week Commencing - <b>@weekStartingDate</b></h3>
+        <h3>Week Commencing - <b>@weekStartingDate.ToString("dd/MM/yyyy")</b></h3>
     </div>
     <div class="card-body text-center">
-
 
         <div class="text-center">
             <a asp-area="Management" asp-controller="Rota" asp-action="Index" class="btn btn-secondary btn-sm">Back to List</a>
         </div>
 
         <div class="table-responsive">
-
-            <table id="weeklyRotaTable" class="table table-hover" ">
+            <table id="weeklyRotaTable" class="table table-hover">
                 <thead>
                     <tr>
                         <th>Employee</th>
@@ -34,205 +32,50 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var employee in Model)
+                    @foreach (var kvp in Model) // Loop through the dictionary
                     {
+                        var employeeId = kvp.Key;
+                        var employeeData = kvp.Value; // Extract the value (assumed to be a DTO or dynamic object)
+                        var shifts = employeeData.Shifts as List<Shift>;
+                        var timeOffRequests = employeeData.TimeOffRequests as List<TimeOffRequest>;
+                        var employeeName = employeeData.FirstName + " " + employeeData.LastName; // Assuming name is part of the DTO
+
                         <tr>
-                            <td>@employee.FirstName @employee.LastName</td>
-                            <td>
-                                @{
-                                    //Getting the date value of the monday and using that to find an existing shift 
-                                    var mondayDate = weekStartingDate.AddDays((int)DayOfWeek.Monday - (int)weekStartingDate.DayOfWeek);
-                                    var monday = employee.Shifts.FirstOrDefault(s => s.StartDateTime.HasValue && s.StartDateTime.Value.Date == mondayDate.Date);
+                            <td>@employeeName</td>
 
-                                    if (monday != null)//if a shift doesnt exist
+                            @for (int i = 0; i < 7; i++)
+                            {
+                                var currentDate = weekStartingDate.AddDays(i);
+                                var shift = shifts?.FirstOrDefault(s => s.StartDateTime.HasValue && s.StartDateTime.Value.Date == currentDate.Date);
+                                var timeOffRequest = timeOffRequests?.FirstOrDefault(t => t.Date.Date == currentDate.Date);
+
+                                <td>
+                                    @if (shift != null)
                                     {
-                                        <span>@monday.StartDateTime.Value.ToString("HH:mm") - @monday.EndDateTime.Value.ToString("HH:mm")</span>
+                                        <span>@shift.StartDateTime.Value.ToString("HH:mm") - @shift.EndDateTime.Value.ToString("HH:mm")</span>
+                                    }
+                                    else if (timeOffRequest != null)
+                                    {
+                                        <span>HOLIDAY</span>
                                     }
                                     else
                                     {
-                                        //look for a timeoff Request instead
-                                        var mondayReq = employee.TimeOffRequests.FirstOrDefault(t => t.Date.Date == mondayDate.Date);
-                                        if (mondayReq != null)
-                                        {
-                                            <span>HOLIDAY</span>
-                                        }
-                                        else
-                                        {
-                                            //else display 'OFF'
-                                            <span>OFF</span>
-                                        }
+                                        <span>OFF</span>
                                     }
-                                }
-                                
-                            </td>
-                            <td>
-                                @{
-                                    var tuesdayDate = weekStartingDate.AddDays((int)DayOfWeek.Tuesday - (int)weekStartingDate.DayOfWeek);
-                                    var tuesday = employee.Shifts.FirstOrDefault(s => s.StartDateTime.HasValue && s.StartDateTime.Value.Date == tuesdayDate.Date);
-
-                                    if (tuesday != null)
-                                    {
-                                        <span>@tuesday.StartDateTime.Value.ToString("HH:mm") - @tuesday.EndDateTime.Value.ToString("HH:mm")</span>
-                                    }
-                                    else
-                                    {
-                                        var tuesdayReq = employee.TimeOffRequests.FirstOrDefault(t => t.Date.Date == tuesdayDate.Date);
-                                        if(tuesdayReq != null)
-                                        {
-                                            <span>HOLIDAY</span>
-                                        }
-                                        else
-                                        {
-                                            <span>OFF</span>
-                                        }
-                                        
-                                    }
-                                }
-                                
-                            </td>
-                            <td>
-                                @{
-                                    var wednesdayDate = weekStartingDate.AddDays((int)DayOfWeek.Wednesday - (int)weekStartingDate.DayOfWeek);
-                                    var wednesday = employee.Shifts.FirstOrDefault(s => s.StartDateTime.HasValue && s.StartDateTime.Value.Date == wednesdayDate.Date);
-
-                                    @if (wednesday != null)
-                                    {
-                                        <span>@wednesday.StartDateTime.Value.ToString("HH:mm") - @wednesday.EndDateTime.Value.ToString("HH:mm")</span>
-                                    }
-                                    else
-                                    {
-                                        var wednesdayReq = employee.TimeOffRequests.FirstOrDefault(t => t.Date.Date == wednesdayDate.Date);
-                                        if (wednesdayReq != null)
-                                        {
-                                            <span>HOLIDAY</span>
-                                        }
-                                        else
-                                        {
-                                            <span>OFF</span>
-                                        }
-
-                                    }
-                                }
-                                
-                            </td>
-                            <td>
-                                @{
-                                    var thursdayDate = weekStartingDate.AddDays((int)DayOfWeek.Thursday - (int)weekStartingDate.DayOfWeek);
-                                    var thursday = employee.Shifts.FirstOrDefault(s => s.StartDateTime.HasValue && s.StartDateTime.Value.Date == thursdayDate.Date);
-
-                                    @if (thursday != null)
-                                    {
-                                        <span>@thursday.StartDateTime.Value.ToString("HH:mm") - @thursday.EndDateTime.Value.ToString("HH:mm")</span>
-                                    }
-                                    else
-                                    {
-                                        var thursdayReq = employee.TimeOffRequests.FirstOrDefault(t => t.Date.Date == thursdayDate.Date);
-                                        if (thursdayReq != null)
-                                        {
-                                            <span>HOLIDAY</span>
-                                        }
-                                        else
-                                        {
-                                            <span>OFF</span>
-                                        }
-
-                                    }
-                                }
-                                
-                            </td>
-                            <td>
-                                @{
-                                    var fridayDate = weekStartingDate.AddDays((int)DayOfWeek.Friday - (int)weekStartingDate.DayOfWeek);
-                                    var friday = employee.Shifts.FirstOrDefault(s => s.StartDateTime.HasValue && s.StartDateTime.Value.Date == fridayDate.Date);
-
-                                    if (friday != null)
-                                    {
-                                        <span>@friday.StartDateTime.Value.ToString("HH:mm") - @friday.EndDateTime.Value.ToString("HH:mm")</span>
-                                    }
-                                    else
-                                    {
-                                        var fridayReq = employee.TimeOffRequests.FirstOrDefault(t => t.Date.Date == fridayDate.Date);
-                                        if (fridayReq != null)
-                                        {
-                                            <span>HOLIDAY</span>
-                                        }
-                                        else
-                                        {
-                                            <span>OFF</span>
-                                        }
-
-                                    }
-                                }
-                                
-                            </td>
-                            <td>
-                                @{
-                                    var saturdayDate = weekStartingDate.AddDays((int)DayOfWeek.Saturday - (int)weekStartingDate.DayOfWeek);
-                                    var saturday = employee.Shifts.FirstOrDefault(s => s.StartDateTime.HasValue && s.StartDateTime.Value.Date == saturdayDate.Date);
-
-                                    if (saturday != null)
-                                    {
-                                        <span>@saturday.StartDateTime.Value.ToString("HH:mm") - @saturday.EndDateTime.Value.ToString("HH:mm")</span>
-                                    }
-                                    else
-                                    {
-                                        var saturdayReq = employee.TimeOffRequests.FirstOrDefault(t => t.Date.Date == saturdayDate.Date);
-                                        if (saturdayReq != null)
-                                        {
-                                            <span>HOLIDAY</span>
-                                        }
-                                        else
-                                        {
-                                            <span>OFF</span>
-                                        }
-
-                                    }
-                                }
-                                
-                            </td>
-                            <td>
-                                @{
-                                    var sundayDate = weekStartingDate.AddDays((int)DayOfWeek.Sunday - (int)weekStartingDate.DayOfWeek);
-                                    var sunday = employee.Shifts.FirstOrDefault(s => s.StartDateTime.HasValue && s.StartDateTime.Value.Date == sundayDate.Date);
-
-                                    @if (sunday != null)
-                                    {
-                                        <span>@sunday.StartDateTime.Value.ToString("HH:mm") - @sunday.EndDateTime.Value.ToString("HH:mm")</span>
-                                    }
-                                    else
-                                    {
-                                        var sundayReq = employee.TimeOffRequests.FirstOrDefault(t => t.Date.Date == sundayDate.Date);
-                                        if (sundayReq != null)
-                                        {
-                                            <span>HOLIDAY</span>
-                                        }
-                                        else
-                                        {
-                                            <span>OFF</span>
-                                        }
-
-                                    }
-                                }
-                                
-                            </td>
+                                </td>
+                            }
                         </tr>
                     }
                 </tbody>
             </table>
         </div>
-
-
     </div>
 </div>
-
 
 @if (ViewBag.Editable == true)
 {
     <script>
-        @* add scripts here for drag n drop / editing shift times / deleteing shifts etc
-            add hidden values with shift ID's to each table cell with a shift so that it can be edited when clicked
-        *@
-
+        @* Add scripts here for editing shift times, drag/drop functionality *@
     </script>
 }
 
@@ -241,5 +84,3 @@
         highlightTableCellsforWeeklyRota(); // Call the specific function
     });
 </script>
-
-

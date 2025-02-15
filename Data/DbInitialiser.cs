@@ -1,6 +1,7 @@
 ﻿using Bogus;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.EntityFrameworkCore;
 using ProRota.Models;
 
 namespace ProRota.Data
@@ -21,9 +22,11 @@ namespace ProRota.Data
             {
                 await SeedSite(_services);
                 await SeedCompany(_services);
-                await SeedRolesAndUsers(_services);
+                await SeedRoles(_services);
+                await SeedUsers(_services);
                 await SeedShifts(_services);
                 await SeedTimeOffRequests(_services);
+
             }
             catch (Exception ex)
             {
@@ -33,10 +36,56 @@ namespace ProRota.Data
 
         }
 
-        private async Task SeedRolesAndUsers(IServiceProvider services)
+        public static async Task SeedRoles(IServiceProvider serviceProvider)
+        {
+            var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
+            var roleManager = serviceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
+
+            // Define Role Categories
+            var roleCategories = new Dictionary<string, List<string>>
+            {
+                { "FOH", new List<string> { "Front of House Assistant", "Head Waiter" } },
+                { "Bar", new List<string> { "Bartender", "Head Bartender" } },
+                { "Management", new List<string> { "Supervisor", "Assistant Manager", "General Manager" } },
+                { "BOH", new List<string> { "Chef de Partie", "Sous Chef", "Head Chef" } },
+                { "Admin", new List<string> { "Admin" } },
+                { "Deactivated", new List<string> { "Deactivated" } }
+            };
+
+            foreach (var category in roleCategories)
+            {
+                // Check if category exists
+                var roleCategory = await context.RoleCategories.FirstOrDefaultAsync(c => c.Name == category.Key);
+                if (roleCategory == null)
+                {
+                    roleCategory = new RoleCategory { Name = category.Key };
+                    context.RoleCategories.Add(roleCategory);
+                    await context.SaveChangesAsync();
+                }
+
+                // Add roles under this category
+                foreach (var role in category.Value)
+                {
+                    //check if role exists
+                    if (!await roleManager.RoleExistsAsync(role))
+                    {
+                        var identityRole = new ApplicationRole
+                        {
+                            Name = role,
+                            RoleCategoryId = roleCategory.Id
+                        };
+                        await roleManager.CreateAsync(identityRole);
+                    }
+                }
+            }
+
+            await context.SaveChangesAsync();
+        }
+
+        private async Task SeedUsers(IServiceProvider services)
         {
             var hasher = new PasswordHasher<ApplicationUser>();
-            var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+            var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
             var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
             var dbContext = services.GetRequiredService<ApplicationDbContext>();
 
@@ -45,30 +94,6 @@ namespace ProRota.Data
 
             try
             {
-                //Create roles if they do not exist
-                var roles = new List<string> {
-                    "Admin",
-                    "Front of House Assistant",
-                    "Head Waiter",
-                    "Supervisor",
-                    "Assistant Manager",
-                    "General Manager",
-                    "Operations Manager",
-                    "Bartender",
-                    "Chef de Partie",
-                    "Sous Chef",
-                    "Head Chef",
-                    "Executive Chef",
-                    "Deactivated"
-                };
-
-                foreach (var role in roles)
-                {
-                    if (!await roleManager.RoleExistsAsync(role))
-                    {
-                        await roleManager.CreateAsync(new IdentityRole(role));
-                    }
-                }
 
                 //adding admin user and asigning role if the account doesnt exist already 
                 var adminUser = await userManager.FindByEmailAsync("admin@admin.com");
@@ -94,36 +119,7 @@ namespace ProRota.Data
                     await userManager.CreateAsync(admin, "admin");
                     await userManager.AddToRoleAsync(admin, "Admin");
                     users.Add(admin);
-                }
-
-                //adding admin user and asigning role if the account doesnt exist already 
-                var operationsManagerUser = await userManager.FindByEmailAsync("operationsManager@sixbynico.co.uk");
-
-                if (operationsManagerUser == null)
-                {
-                    //creating admin user
-                    var operationsManager = new ApplicationUser()
-                    {
-                        FirstName = "Gary",
-                        LastName = "Drary",
-                        UserName = "operationsManager@sixbynico.co.uk",
-                        Email = "operationsManager@sixbynico.co.uk",
-                        NormalizedUserName = "OPERATIONSMANAGER@SIXBYNICO.CO.UK",
-                        NormalizedEmail = "OPERATIONSMANAGER@SIXBYNICO.CO.UK",
-                        PasswordHash = hasher.HashPassword(null!, "sbn"),
-                        EmailConfirmed = true,
-                        LockoutEnabled = true,
-                        PhoneNumberConfirmed = true,
-                        Salary = 15,
-                        ContractualHours = 45,
-                        Notes = "none"
-                        
-                    };
-
-                    await userManager.CreateAsync(operationsManager, "sbn");
-                    await userManager.AddToRoleAsync(operationsManager, "Operations Manager");
-                    users.Add(operationsManager);
-                }
+                }   
 
                 //adding general manager user and asigning role if the account doesnt exist already 
                 var generalManagerUser = await userManager.FindByEmailAsync("generalmanager@sixbynico.co.uk");

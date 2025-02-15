@@ -4,7 +4,7 @@ using ProRota.Models;
 
 namespace ProRota.Data
 {
-    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, string>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -12,16 +12,14 @@ namespace ProRota.Data
         }
 
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
-
         public DbSet<Company> Companies { get; set; }
-
         public DbSet<Shift> Shifts { get; set; }
-
         public DbSet<TimeOffRequest> TimeOffRequests { get; set; }
-
         public DbSet<Site> Sites { get; set; }
-
         public DbSet<SiteConfiguration> SiteConfigurations { get; set; }
+        public DbSet<RoleCategory> RoleCategories { get; set; }
+        public DbSet<RoleConfiguration> RoleConfigurations { get; set; }
+
 
     }
 }

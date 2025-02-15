@@ -20,13 +20,15 @@ namespace ProRota.Areas.Management.Controllers
         private UserManager<ApplicationUser> _userManager;
         private readonly ISiteService _siteService;
         private readonly IRotaService _rotaService;
+        private readonly IAlgorithmService _algorithmService;
 
-        public RotaController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, ISiteService siteService, IRotaService rotaService)
+        public RotaController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, ISiteService siteService, IRotaService rotaService, IAlgorithmService algorithmService)
         {
             _context = context;
             _userManager = userManager;
             _siteService = siteService;
             _rotaService = rotaService;
+            _algorithmService = algorithmService;
         }
 
         public async Task<IActionResult> Index()
@@ -50,12 +52,23 @@ namespace ProRota.Areas.Management.Controllers
                 ViewBag.Editable = true;
             }
 
-            // Get all users and include the shifts and time off requests within the given date parameters
+            //getting all users that belong to the site along with their shifts and time off requests
             var rota = await _context.ApplicationUsers
-                .Include(u => u.Shifts.Where(s => s.SiteId == siteId).Where(s => s.StartDateTime >= weekStartingDate && s.StartDateTime <= weekEndingDate).Where(s => s.IsPublished == true))
-                .Include(u => u.TimeOffRequests.Where(t => t.Date >= weekStartingDate && t.Date <= weekEndingDate).Where(t => t.IsApproved == ApprovedStatus.Approved))
                 .Where(u => u.SiteId == siteId)
-                .ToListAsync();
+                .Select(u => new ViewRotaViewModel
+                {
+                    Id = u.Id,
+                    FirstName = u.FirstName,
+                    LastName = u.LastName,
+                    Shifts = u.Shifts.Where(s => s.SiteId == siteId &&
+                                                 s.StartDateTime >= weekStartingDate &&
+                                                 s.StartDateTime <= weekEndingDate &&
+                                                 s.IsPublished == true).ToList(),
+                    TimeOffRequests = u.TimeOffRequests.Where(t => t.Date >= weekStartingDate &&
+                                                                   t.Date <= weekEndingDate &&
+                                                                   t.IsApproved == ApprovedStatus.Approved).ToList()
+                })
+                .ToDictionaryAsync(u => u.Id);
 
             ViewBag.WeekStartingDate = weekStartingDate;//passing starting date to view to help format dates
 
@@ -175,16 +188,18 @@ namespace ProRota.Areas.Management.Controllers
                 return View(model);
             }
 
-            // Debugging: Check values received
-            Console.WriteLine($"Week Ending Date: {model.WeekEndingDate}");
-            foreach (var day in model.Covers)
+            //get the site
+            var siteId = _siteService.GetSiteIdFromSessionOrUser();
+            var site = _context.Sites.Find(siteId);
+
+            if(site == null)
             {
-                Console.WriteLine($"Day: {day.Key} - Covers: {string.Join(", ", day.Value)}");
+                throw new Exception("Cannot find Site Object");
             }
 
-            // Save data to the database (example logic)
-            // _context.Rotas.Add(new Rota { WeekEnding = model.WeekEndingDate, Covers = model.Covers });
-            // _context.SaveChanges();
+            //passing the view model along with the site object to the alogrithm to create a new rota
+            //var newRota = _algorithmService.CreateWeeklyRota(model, site);
+
 
             return RedirectToAction("Index");
         }

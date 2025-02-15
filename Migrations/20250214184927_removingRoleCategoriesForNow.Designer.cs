@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProRota.Data;
 
@@ -11,9 +12,11 @@ using ProRota.Data;
 namespace ProRota.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250214184927_removingRoleCategoriesForNow")]
+    partial class removingRoleCategoriesForNow
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,6 +24,33 @@ namespace ProRota.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedName")
+                        .IsUnique()
+                        .HasDatabaseName("RoleNameIndex")
+                        .HasFilter("[NormalizedName] IS NOT NULL");
+
+                    b.ToTable("AspNetRoles", (string)null);
+                });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
@@ -75,10 +105,12 @@ namespace ProRota.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("ProviderKey")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("ProviderDisplayName")
                         .HasColumnType("nvarchar(max)");
@@ -115,10 +147,12 @@ namespace ProRota.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("Value")
                         .HasColumnType("nvarchar(max)");
@@ -126,38 +160,6 @@ namespace ProRota.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
-                });
-
-            modelBuilder.Entity("ProRota.Models.ApplicationRole", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("NormalizedName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<int?>("RoleCategoryId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NormalizedName")
-                        .IsUnique()
-                        .HasDatabaseName("RoleNameIndex")
-                        .HasFilter("[NormalizedName] IS NOT NULL");
-
-                    b.HasIndex("RoleCategoryId");
-
-                    b.ToTable("AspNetRoles", (string)null);
                 });
 
             modelBuilder.Entity("ProRota.Models.ApplicationUser", b =>
@@ -269,52 +271,6 @@ namespace ProRota.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Companies");
-                });
-
-            modelBuilder.Entity("ProRota.Models.RoleCategory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("RoleCategories");
-                });
-
-            modelBuilder.Entity("ProRota.Models.RoleConfiguration", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("MaxEmployees")
-                        .HasColumnType("int");
-
-                    b.Property<int>("MinEmployees")
-                        .HasColumnType("int");
-
-                    b.Property<int>("RoleCategoryId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("SiteConfigurationId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RoleCategoryId");
-
-                    b.HasIndex("SiteConfigurationId");
-
-                    b.ToTable("RoleConfigurations");
                 });
 
             modelBuilder.Entity("ProRota.Models.Shift", b =>
@@ -432,6 +388,19 @@ namespace ProRota.Migrations
                     b.Property<int?>("CoversCapacity")
                         .HasColumnType("int");
 
+                    b.Property<int?>("MaxBarTenders")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("MaxFrontOfHouse")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("MaxManagement")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("MinManagement")
+                        .IsRequired()
+                        .HasColumnType("int");
+
                     b.Property<int?>("NumberOfSections")
                         .HasColumnType("int");
 
@@ -480,7 +449,7 @@ namespace ProRota.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
-                    b.HasOne("ProRota.Models.ApplicationRole", null)
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -507,7 +476,7 @@ namespace ProRota.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
                 {
-                    b.HasOne("ProRota.Models.ApplicationRole", null)
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -529,15 +498,6 @@ namespace ProRota.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("ProRota.Models.ApplicationRole", b =>
-                {
-                    b.HasOne("ProRota.Models.RoleCategory", "RoleCategory")
-                        .WithMany("Roles")
-                        .HasForeignKey("RoleCategoryId");
-
-                    b.Navigation("RoleCategory");
-                });
-
             modelBuilder.Entity("ProRota.Models.ApplicationUser", b =>
                 {
                     b.HasOne("ProRota.Models.Site", "Site")
@@ -545,21 +505,6 @@ namespace ProRota.Migrations
                         .HasForeignKey("SiteId");
 
                     b.Navigation("Site");
-                });
-
-            modelBuilder.Entity("ProRota.Models.RoleConfiguration", b =>
-                {
-                    b.HasOne("ProRota.Models.RoleCategory", "RoleCategory")
-                        .WithMany()
-                        .HasForeignKey("RoleCategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ProRota.Models.SiteConfiguration", null)
-                        .WithMany("RoleConfigurations")
-                        .HasForeignKey("SiteConfigurationId");
-
-                    b.Navigation("RoleCategory");
                 });
 
             modelBuilder.Entity("ProRota.Models.Shift", b =>
@@ -620,11 +565,6 @@ namespace ProRota.Migrations
                     b.Navigation("Sites");
                 });
 
-            modelBuilder.Entity("ProRota.Models.RoleCategory", b =>
-                {
-                    b.Navigation("Roles");
-                });
-
             modelBuilder.Entity("ProRota.Models.Site", b =>
                 {
                     b.Navigation("ApplicationUsers");
@@ -632,11 +572,6 @@ namespace ProRota.Migrations
                     b.Navigation("Shifts");
 
                     b.Navigation("SiteConfiguration");
-                });
-
-            modelBuilder.Entity("ProRota.Models.SiteConfiguration", b =>
-                {
-                    b.Navigation("RoleConfigurations");
                 });
 #pragma warning restore 612, 618
         }

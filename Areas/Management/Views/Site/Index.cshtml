@@ -12,23 +12,11 @@
             <h4>@Model.Company.CompanyName @Model.SiteName Details</h4>
             <hr />
             <dl class="row">
-                <dt class="col-sm-2">
-                    @Html.DisplayNameFor(model => model.SiteName)
-                </dt>
-                <dd class="col-sm-10">
-                    @Html.DisplayFor(model => model.SiteName)
-                </dd>
-                <dt class="col-sm-2">
-                    @Html.DisplayNameFor(model => model.Company)
-                </dt>
-                <dd class="col-sm-10">
-                    @Html.DisplayFor(model => model.Company.CompanyName)
-                </dd>
-
                 <div class="card shadow-sm mb-4">
                     <div class="card-body">
                         <h5 class="card-title">Site Configuration</h5>
                         @{
+                            //if the site hasnt been configured yet
                             if (Model.SiteConfiguration != null)
                             {
                                 <dt class="col-sm-2">
@@ -49,30 +37,6 @@
                                 <dd class="col-sm-10">
                                     @Html.DisplayFor(model => model.SiteConfiguration.NumberOfSections)
                                 </dd>
-                                <dt class="col-sm-2">
-                                    @Html.DisplayNameFor(model => model.SiteConfiguration.MaxFrontOfHouse)
-                                </dt>
-                                <dd class="col-sm-10">
-                                    @Html.DisplayFor(model => model.SiteConfiguration.MaxFrontOfHouse)
-                                </dd>
-                                <dt class="col-sm-2">
-                                    @Html.DisplayNameFor(model => model.SiteConfiguration.MaxBarTenders)
-                                </dt>
-                                <dd class="col-sm-10">
-                                    @Html.DisplayFor(model => model.SiteConfiguration.MaxBarTenders)
-                                </dd>
-                                <dt class="col-sm-2">
-                                    @Html.DisplayNameFor(model => model.SiteConfiguration.MaxManagement)
-                                </dt>
-                                <dd class="col-sm-10">
-                                    @Html.DisplayFor(model => model.SiteConfiguration.MaxManagement)
-                                </dd>
-                                <dt class="col-sm-2">
-                                    @Html.DisplayNameFor(model => model.SiteConfiguration.MinManagement)
-                                </dt>
-                                <dd class="col-sm-10">
-                                    @Html.DisplayFor(model => model.SiteConfiguration.MinManagement)
-                                </dd>
                             }
                             else
                             {
@@ -80,6 +44,20 @@
                                 <div class="text-center">
                                     <a href="javascript:void(0);" onclick="showEditSiteConfigurationPopUp('@Model.Id', '@Model.SiteName')" class="btn btn-primary btn-sm">Edit Configuration</a>
                                 </div>
+                            }
+
+                            //if there are no roles related to this site yet
+                            if(Model.SiteConfiguration.RoleConfigurations == null || Model.SiteConfiguration.RoleConfigurations.Count == 0)
+                            {
+                                <p class="card-text"> No Roles or Role Categories have been created for this site yet. In order for ProRota to create accurate and efficient schedules for @Model.Company.CompanyName @Model.SiteName this must be completed!</p>
+                                //ADD LINK BUTTON HERE TO CONTROLLER ACTION TO DISPLAY CREATE ROLE CATEGORIES
+                            }
+                            else
+                            {
+                                foreach(var config in Model.SiteConfiguration.RoleConfigurations)
+                                {
+                                    
+                                }
                             }
                         }
                     </div>
@@ -234,41 +212,9 @@
                     <!-- Number of Sections -->
                     <div class="mb-3">
                         <label for="numberOfSections" class="form-label">Number of Sections</label>
-                        <input type="number" class="form-control" id="numberOfSections" name="numberOfSections" min="1" required />
+                        <input type="number" class="form-control" id="numberOfSections" name="numberOfSections" min="1" max="10" required />
                         <div class="form-text">How many sections is the restaurant floor split up into?</div>
-                        <div class="invalid-feedback">Please enter 1 or more sections.</div>
-                    </div>
-
-                    <!-- Max Front of House -->
-                    <div class="mb-3">
-                        <label for="maxFrontOfHouse" class="form-label">Maximum Front of House Staff</label>
-                        <input type="number" class="form-control" id="maxFrontOfHouse" name="maxFrontOfHouse" min="1" required />
-                        <div class="form-text">Enter the maximum number of front-of-house staff members (management included) that can work at one time.</div>
-                        <div class="invalid-feedback">Please enter 1 or more staff members.</div>
-                    </div>
-
-                    <!-- Max Bartenders -->
-                    <div class="mb-3">
-                        <label for="maxBartenders" class="form-label">Maximum Bartenders</label>
-                        <input type="number" class="form-control" id="maxBartenders" name="maxBartenders" min="1" required />
-                        <div class="form-text">Enter the maximum number of bartenders that can work during a shift.</div>
-                        <div class="invalid-feedback">Please enter 1 or more bartenders.</div>
-                    </div>
-
-                    <!-- Max Management -->
-                    <div class="mb-3">
-                        <label for="maxManagement" class="form-label">Maximum Management</label>
-                        <input type="number" class="form-control" id="maxManagement" name="maxManagement" min="1" required />
-                        <div class="form-text">Specify the maximum number of managers or supervisors allowed on shift simultaneously.</div>
-                        <div class="invalid-feedback">Please enter 1 or more managers.</div>
-                    </div>
-
-                    <!-- Min Management -->
-                    <div class="mb-3">
-                        <label for="minManagement" class="form-label">Minimum Management</label>
-                        <input type="number" class="form-control" id="minManagement" name="minManagement" min="1" required />
-                        <div class="form-text">Specify the minimum number of managers or supervisors required on shift at all times.</div>
-                        <div class="invalid-feedback">Please enter 1 or more managers.</div>
+                        <div class="invalid-feedback">Please enter between 1 and 10 sections.</div>
                     </div>
 
                     <div class="modal-footer">
@@ -348,9 +294,9 @@
         }
 
         //listener for any changes in forms
-        document.getElementById("EditConfiguration").addEventListener("change", function (event) {
-            validateSiteConfigurationForm();
-        });
+        // document.getElementById("EditConfiguration").addEventListener("change", function (event) {
+        //     validateSiteConfigurationForm();
+        // });
         document.getElementById("EditTradingTimes").addEventListener("change", function (event) {
             validateTradingHours();
         });

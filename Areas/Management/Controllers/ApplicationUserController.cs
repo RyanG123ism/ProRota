@@ -19,9 +19,9 @@ namespace ProRota.Areas.Management.Controllers
 
         private ApplicationDbContext _context;
         private UserManager<ApplicationUser> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly RoleManager<ApplicationRole> _roleManager;
 
-        public ApplicationUserController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+        public ApplicationUserController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager)
         {
             _context = context;
             _userManager = userManager;
@@ -57,12 +57,6 @@ namespace ProRota.Areas.Management.Controllers
             //Get all the users
             var users = _context.ApplicationUsers.ToList();
 
-            //Refresh the list if any changes are made
-            //foreach (var item in users)
-            //{
-            //    _context.Entry(item).Reload();
-            //}
-
             //Pass all the roles to the view so that you can search users by role
             ViewBag.Roles = _context.Roles.ToList();
 
@@ -76,12 +70,6 @@ namespace ProRota.Areas.Management.Controllers
 
             //Get all the users
             var users = _context.ApplicationUsers.Where(u => u.SiteId == siteId).ToList();
-
-            //Refresh the list if any changes are made
-            //foreach (var item in users)
-            //{
-            //    _context.Entry(item).Reload();
-            //}
 
             //Pass all the roles to the view so that you can search users by role
             ViewBag.Roles = _context.Roles.ToList();
@@ -334,6 +322,7 @@ namespace ProRota.Areas.Management.Controllers
                     await _userManager.RemoveFromRoleAsync(user, model.CurrentRole);
                     //Add the user to the new role
                     await _userManager.AddToRoleAsync(user, model.Role);
+
                 }
 
                 //Update the user in the database

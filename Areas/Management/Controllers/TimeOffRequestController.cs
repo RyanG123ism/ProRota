@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProRota.Data;
 using ProRota.Models;
+using ProRota.Services;
 
 namespace ProRota.Areas.Management.Controllers
 {
@@ -15,13 +16,17 @@ namespace ProRota.Areas.Management.Controllers
 
         private ApplicationDbContext _context;
         private UserManager<ApplicationUser> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly RoleManager<ApplicationRole> _roleManager;
+        private readonly ISiteService _siteService;
+        private readonly ITimeOffRequestService _timeOffRequestService;
 
-        public TimeOffRequestController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+        public TimeOffRequestController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, ISiteService siteService, ITimeOffRequestService timeOffRequestService)
         {
             _context = context;
             _userManager = userManager;
             _roleManager = roleManager;
+            _siteService = siteService;
+            _timeOffRequestService = timeOffRequestService;
         }
 
         public IActionResult Index(bool isAdmin = false)
@@ -34,12 +39,12 @@ namespace ProRota.Areas.Management.Controllers
                 var adminSession = HttpContext.Session.GetInt32("AdminsCurrentSiteId");
 
                 //if session exists then only users from that site will be fetched
-                requests = adminSession != null ? GetAllTimeOffRequestsBySite() : GetAllTimeOffRequests();
+                requests = adminSession != null ? _timeOffRequestService.GetAllTimeOffRequestsBySite() : _timeOffRequestService.GetAllTimeOffRequests();
                 return View("ViewAllUsers", requests);
             }
 
             //retrieves all time off requests by site - this is for all roles below admin
-            requests = GetAllTimeOffRequestsBySite();
+            requests = _timeOffRequestService.GetAllTimeOffRequestsBySite();
 
             //sends tomorrows date to view
             ViewBag.Tomorrow = DateTime.Now.AddDays(1).Date;
@@ -48,46 +53,12 @@ namespace ProRota.Areas.Management.Controllers
             ViewBag.ConformationMessage = TempData["ConformationMessage"];
 
             return View("ViewAllTimeOffRequests", requests);
-        }
-
-        public IEnumerable<TimeOffRequest> GetAllTimeOffRequests()
-        {
-            //Get all the requests
-            var requests = _context.TimeOffRequests.OrderByDescending(t => t.Date).Include(t => t.ApplicationUser).ToList();
-
-            //Refresh the list if any changes are made during runtime
-            foreach (var item in requests)
-            {
-                _context.Entry(item).Reload();
-            }
-
-            //Returns list of users
-            return requests;
-        }
-
-        public IEnumerable<TimeOffRequest> GetAllTimeOffRequestsBySite()
-        {
-            //gets the current siteId
-            var siteId = GetSiteIdFromSessionOrUser();
-
-            //Get all the time off requests from users that belong to the appropriate site
-            var requests = _context.TimeOffRequests.OrderByDescending(t => t.Date).Include(t => t.ApplicationUser)
-                .Where(t => t.ApplicationUser.SiteId == siteId);
-
-            //Refresh the list if any changes are made during runtime
-            foreach (var item in requests)
-            {
-                _context.Entry(item).Reload();
-            }
-
-            //Returns list of users
-            return requests;
-        }
+        } 
 
         public IActionResult SortByRequestStatus(string status)
         {
             //get siteID
-            var siteId = GetSiteIdFromSessionOrUser();
+            var siteId = _siteService.GetSiteIdFromSessionOrUser();
 
             //parse the status string into the approval status enum
             if(Enum.TryParse(status, out ApprovedStatus approvalStatus))
@@ -108,9 +79,9 @@ namespace ProRota.Areas.Management.Controllers
 
         public async Task<IActionResult> RevertTimeOffRequest(int id)
         {
-            var request = await ValidateTimeOffRequest(id) ?? throw new ArgumentNullException(nameof(id), "Time-off request is invalid.");
+            var request = await _timeOffRequestService.ValidateTimeOffRequest(id) ?? throw new ArgumentNullException(nameof(id), "Time-off request is invalid.");
 
-            var user = await ValidateUser(request.ApplicationUserId) ?? throw new ArgumentNullException(nameof(id), "User request is invalid.");
+            var user = await _timeOffRequestService.ValidateUser(request.ApplicationUserId) ?? throw new ArgumentNullException(nameof(id), "User request is invalid.");
 
             //reverts the users remaining holiday allowance depending on the status
             if (request.IsApproved == ApprovedStatus.Approved)
@@ -143,9 +114,9 @@ namespace ProRota.Areas.Management.Controllers
 
         public async Task<IActionResult> ApproveTimeOffRequest(int id)
         {
-            var request = await ValidateTimeOffRequest(id) ?? throw new ArgumentNullException(nameof(id), "Time-off request is invalid.");
+            var request = await _timeOffRequestService.ValidateTimeOffRequest(id) ?? throw new ArgumentNullException(nameof(id), "Time-off request is invalid.");
 
-            var user = await ValidateUser(request.ApplicationUserId) ?? throw new ArgumentNullException(nameof(id), "User request is invalid.");
+            var user = await _timeOffRequestService.ValidateUser(request.ApplicationUserId) ?? throw new ArgumentNullException(nameof(id), "User request is invalid.");
 
             //changes the approval status
             request.IsApproved = ApprovedStatus.Approved;
@@ -184,9 +155,9 @@ namespace ProRota.Areas.Management.Controllers
 
         public async Task<IActionResult> DeclineTimeOffRequest(int id)
         {
-            var request = await ValidateTimeOffRequest(id) ?? throw new ArgumentNullException(nameof(id), "Time-off request is invalid.");
+            var request = await _timeOffRequestService.ValidateTimeOffRequest(id) ?? throw new ArgumentNullException(nameof(id), "Time-off request is invalid.");
 
-            var user = await ValidateUser(request.ApplicationUserId) ?? throw new ArgumentNullException(nameof(id), "User request is invalid.");
+            var user = await _timeOffRequestService.ValidateUser(request.ApplicationUserId) ?? throw new ArgumentNullException(nameof(id), "User request is invalid.");
 
             //changes the approval status
             request.IsApproved = ApprovedStatus.Denied;
@@ -207,75 +178,6 @@ namespace ProRota.Areas.Management.Controllers
 
             //returns to the time off request index
             return RedirectToAction("Index");
-        }
-
-        
-        public async Task<TimeOffRequest?> ValidateTimeOffRequest(int id)
-        {
-            if (id == 0)
-            {
-                return null;
-            }
-
-            //get time off request
-            var request = await _context.TimeOffRequests.FindAsync(id);
-
-            if (request == null)
-            {
-                return null;
-            }
-
-            //returns the time off request
-            return request;
-        }
-
-        public async Task<ApplicationUser?> ValidateUser(string id)
-        {
-            if (id == null)
-            {
-                return null;
-            }
-
-            //get time off request
-            var user = await _context.ApplicationUsers.FindAsync(id);
-
-            if (user == null)
-            {
-                return null;
-            }
-
-            //returns the user
-            return user;
-        }
-
-        public int GetSiteIdFromSessionOrUser()
-        {
-            //gets admins current session
-            var siteId = HttpContext.Session.GetInt32("AdminsCurrentSiteId");
-
-            //if null
-            if (siteId == null)
-            {
-                //gets current users ID and then gets the user object
-                var userId = _userManager.GetUserId(User);
-                var user = _context.ApplicationUsers.FirstOrDefault(u => u.Id == userId);
-
-                //if not found
-                if (user == null)
-                {
-                    throw new Exception("Current user not found.");
-                }
-
-                if (user.SiteId == null)
-                {
-                    throw new Exception("Current site not found.");
-                }
-
-                //sets user siteId as the site ID
-                siteId = user.SiteId;
-            }
-
-            return (int)siteId;
-        }
+        } 
     }
 }

@@ -12,10 +12,22 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-//builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<ApplicationDbContext>();
+//builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
+//{
+//    options.SignIn.RequireConfirmedAccount = true;
+//    //password configuration - CHANGE THIS BACK TO NORMAL BEFORE SUBMITTING
+//    options.Password.RequireDigit = false;
+//    options.Password.RequiredLength = 1;
+//    options.Password.RequireNonAlphanumeric = false;
+//    options.Password.RequireUppercase = false;
+//    options.Password.RequireLowercase = true;
+//    options.Password.RequiredUniqueChars = 0;
 
-builder.Services.AddDefaultIdentity<ApplicationUser>(options => 
-{ 
+//}).AddRoles<IdentityRole>()//just added
+//.AddEntityFrameworkStores<ApplicationDbContext>();
+
+builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
+{
     options.SignIn.RequireConfirmedAccount = true;
     //password configuration - CHANGE THIS BACK TO NORMAL BEFORE SUBMITTING
     options.Password.RequireDigit = false;
@@ -25,8 +37,10 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
     options.Password.RequireLowercase = true;
     options.Password.RequiredUniqueChars = 0;
 
-}).AddRoles<IdentityRole>()//just added
-  .AddEntityFrameworkStores<ApplicationDbContext>();
+}).AddEntityFrameworkStores<ApplicationDbContext>()
+.AddDefaultTokenProviders();
+
+
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
@@ -38,14 +52,15 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDistributedMemoryCache(); // Required for session storage
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30); // Set session timeout
+    options.IdleTimeout = TimeSpan.FromMinutes(15); // Set session timeout
     options.Cookie.HttpOnly = true; // Make the cookie accessible only by the server
     options.Cookie.IsEssential = true; // Required for GDPR compliance
 });
 
 //adding service classes and interfaces
 builder.Services.AddScoped<ISiteService, SiteService>();
-builder.Services.AddScoped<IRotaService, RotaService>(); ;
+builder.Services.AddScoped<IRotaService, RotaService>();
+builder.Services.AddScoped<IAlgorithmService, AlgorithmService>();
 builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();

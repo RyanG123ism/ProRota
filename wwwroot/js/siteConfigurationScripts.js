@@ -69,26 +69,26 @@ function validateTradingHours() {
     }
 }
 
-function validateSiteConfigurationForm() {
-    const errorMessage = document.getElementById("errorMessage");
-    const submitButton = document.getElementById("submitButton");
+//function validateSiteConfigurationForm() {
+//    const errorMessage = document.getElementById("errorMessage");
+//    const submitButton = document.getElementById("submitButton");
 
-    const minManagement = parseInt(document.getElementById("minManagement").value, 10);
-    const maxManagement = parseInt(document.getElementById("maxManagement").value, 10);
+//    const minManagement = parseInt(document.getElementById("minManagement").value, 10);
+//    const maxManagement = parseInt(document.getElementById("maxManagement").value, 10);
 
-    if (minManagement > maxManagement) {
-        submitButton.disabled = true
-        errorMessage.textContent = "Minimum management cannot exceed maximum management.";
-        errorMessage.style.display = "block";
-        return;
-    }
-    else {
-        submitButton.disabled = false;
-        errorMessage.textContent = "";
-        errorMessage.style.display = "none";
-        return;
-    }
-}
+//    if (minManagement > maxManagement) {
+//        submitButton.disabled = true
+//        errorMessage.textContent = "Minimum management cannot exceed maximum management.";
+//        errorMessage.style.display = "block";
+//        return;
+//    }
+//    else {
+//        submitButton.disabled = false;
+//        errorMessage.textContent = "";
+//        errorMessage.style.display = "none";
+//        return;
+//    }
+//}
 
 
 

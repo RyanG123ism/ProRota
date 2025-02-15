@@ -27,7 +27,10 @@ namespace ProRota.Areas.Management.Controllers
         {
             //get the current site
             var siteId = _siteService.GetSiteIdFromSessionOrUser();
-            var site = _context.Sites.Where(s => s.Id == siteId).Include(s => s.Company).Include(s => s.SiteConfiguration).FirstOrDefault();
+            var site = _context.Sites.Where(s => s.Id == siteId)
+                .Include(s => s.Company)
+                .Include(s => s.SiteConfiguration)
+                .Include(s => s.SiteConfiguration.RoleConfigurations).SingleOrDefault();
 
             if (site == null)
             {
@@ -52,7 +55,7 @@ namespace ProRota.Areas.Management.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> EditConfiguration(TimeSpan bookingDuration, int coversCapacity, int numberOfSections, int maxFrontOfHouse, int maxBartenders, int maxManagement, int minManagement)
+        public async Task<IActionResult> EditConfiguration(TimeSpan bookingDuration, int coversCapacity, int numberOfSections)
         {
             var siteId = _siteService.GetSiteIdFromSessionOrUser();
             var site = _context.Sites.Find(siteId);
@@ -62,21 +65,32 @@ namespace ProRota.Areas.Management.Controllers
                 throw new Exception("Site could not be found");
             }
 
-            //create new configuration
-            var config = new SiteConfiguration
-            {
-                BookingDuration = bookingDuration,
-                CoversCapacity = coversCapacity,
-                NumberOfSections = numberOfSections,
-                MaxFrontOfHouse = maxFrontOfHouse,
-                MaxBarTenders = maxBartenders,
-                MaxManagement = maxManagement,
-                MinManagement = minManagement,
-                SiteId = site.Id //attaching to current site
-            };
+            var siteConfig = _context.SiteConfigurations.Where(s => s.SiteId == site.Id).FirstOrDefault();
 
-            //update entity and save to db 
-            _context.SiteConfigurations.Add(config);
+            //if a confiuration already exists
+            if(site.SiteConfiguration != null)
+            {
+                siteConfig.BookingDuration = bookingDuration;
+                siteConfig.CoversCapacity = coversCapacity;
+                siteConfig.NumberOfSections = numberOfSections;
+
+                _context.SiteConfigurations.Update(siteConfig);
+            }
+            else
+            {
+                //create new configuration
+                var config = new SiteConfiguration
+                {
+                    BookingDuration = bookingDuration,
+                    CoversCapacity = coversCapacity,
+                    NumberOfSections = numberOfSections,
+                    SiteId = site.Id //attaching to current site
+                };
+
+                //add new entity
+                _context.SiteConfigurations.Add(config);
+            }
+            
             var result = await _context.SaveChangesAsync();
 
             if (result <= 0)
