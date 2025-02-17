@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using ProRota.Areas.Management.Models;
 using ProRota.Data;
 using ProRota.Models;
+using ProRota.Services;
 using System.Security.Claims;
 using System.Security.Policy;
 
@@ -20,12 +21,14 @@ namespace ProRota.Areas.Management.Controllers
         private ApplicationDbContext _context;
         private UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
+        private readonly ISiteService _siteService;
 
-        public ApplicationUserController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager)
+        public ApplicationUserController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, ISiteService siteService)
         {
             _context = context;
             _userManager = userManager;
             _roleManager = roleManager;
+            _siteService = siteService;
         }
 
         public IActionResult Index(bool isAdmin = false)//default value is false for when no admins access index page
@@ -66,7 +69,7 @@ namespace ProRota.Areas.Management.Controllers
 
         public IEnumerable<ApplicationUser> ViewAllUsersBySite()
         {
-            var siteId = GetSiteIdFromSessionOrUser();
+            var siteId = _siteService.GetSiteIdFromSessionOrUser();
 
             //Get all the users
             var users = _context.ApplicationUsers.Where(u => u.SiteId == siteId).ToList();
@@ -81,7 +84,7 @@ namespace ProRota.Areas.Management.Controllers
         public ActionResult SearchForUser(string fullName)
         {
 
-            var siteId = GetSiteIdFromSessionOrUser();
+            var siteId = _siteService.GetSiteIdFromSessionOrUser();
 
             //Check if the fullName parameter is null or empty
             if (string.IsNullOrEmpty(fullName))
@@ -136,7 +139,7 @@ namespace ProRota.Areas.Management.Controllers
 
         public async Task<ActionResult> ViewAllUsersByRole(string id)
         {
-            var siteId = GetSiteIdFromSessionOrUser();
+            var siteId = _siteService.GetSiteIdFromSessionOrUser();
 
             //Find the role via the Id
             var role = await _context.Roles.FindAsync(id);
@@ -160,25 +163,30 @@ namespace ProRota.Areas.Management.Controllers
         [HttpGet]
         public ActionResult CreateApplicationUser()
         {
-            //Creating instance of "CreateApplicationUserViewModel"
-            CreateApplicationUserViewModel user = new CreateApplicationUserViewModel();
+            //getting siteConfig - for assigning roles
+            var siteId = _siteService.GetSiteIdFromSessionOrUser();    
+            var siteConfig = _context.SiteConfigurations.SingleOrDefault(s => s.SiteId == siteId) ?? throw new Exception("Cannot find Site Configuration");
 
-            //Below will get all the roles from the database and store them as a SelectListItem to be displayed within a drop-down list.
-            var roles = _context.Roles.Select(r => new SelectListItem
+            //get roles from via the roleConfig within a sites siteConfig
+            var roles = _context.RoleConfigurations
+                .Where(rc => rc.SiteConfigurationId == siteConfig.Id)
+                .SelectMany(rc => rc.RoleCategory.Roles) 
+                .Select(r => new SelectListItem
+                {
+                    Text = r.Name,
+                    Value = r.Name 
+                })
+                .ToList();
+
+            //creating instance of ViewModel
+            CreateApplicationUserViewModel user = new CreateApplicationUserViewModel
             {
-                Text = r.Name,
-                Value = r.Name
-            }).ToList();
+                Roles = roles
+            };
 
-            //Assign roles to ViewModel property
-            user.Roles = roles;
-
-            //Check if roles is null or empty
-            if (roles == null || !roles.Any())
+            if (!roles.Any())
             {
-                //Handle the scenario where no roles are available (e.g., display an error message)
-                ViewBag.ErrorMessage = "No roles available.";
-                return View(user);
+                ViewBag.ErrorMessage = "No roles available for this site.";
             }
 
             //Return the user model to the view
@@ -190,8 +198,11 @@ namespace ProRota.Areas.Management.Controllers
             [Bind(include: "Email,Password,FirstName,LastName, Salary, ContractualHours, Notes, Role")] CreateApplicationUserViewModel model)
         {
             //getting the siteId from the current user - to bind to user created
-            var siteId = GetSiteIdFromSessionOrUser();
-            
+            var siteId = _siteService.GetSiteIdFromSessionOrUser();
+
+            //getting siteConfig - for assigning roles
+            var siteConfig = _context.SiteConfigurations.SingleOrDefault(s => s.SiteId == siteId) ?? throw new Exception("Cannot find Site Configuration");
+
             if (ModelState.IsValid)
             {
                 // Validate email uniqueness before creating the user
@@ -199,6 +210,30 @@ namespace ProRota.Areas.Management.Controllers
                 if (existingUser != null)
                 {
                     ModelState.AddModelError(string.Empty, "Email is already in use.");
+                    return View(model);
+                }
+
+                //check for existing role within this site
+                var role = await _context.RoleConfigurations
+                    .Where(rc => rc.SiteConfigurationId == siteConfig.Id)
+                    .SelectMany(rc => rc.RoleCategory.Roles)
+                    .FirstOrDefaultAsync(r => r.Name == model.Role);
+
+                if (role == null)
+                {
+                    ModelState.AddModelError(string.Empty, "The selected role is not available for this site.");
+                    return View(model);
+                }
+
+                //find the role config linked to the role
+                var roleConfig = await _context.RoleConfigurations
+                    .Where(rc => rc.SiteConfigurationId == siteConfig.Id
+                                 && rc.RoleCategory.Roles.Any(r => r.Name == model.Role))//making sure that the role category belong to the correct site config
+                    .FirstOrDefaultAsync();
+
+                if (roleConfig == null)
+                {
+                    ModelState.AddModelError(string.Empty, "Role Configuration not found.");
                     return View(model);
                 }
 
@@ -238,11 +273,15 @@ namespace ProRota.Areas.Management.Controllers
             }
 
             //Reload roles and assign them to the model before returning to the view
-            var roles = _context.Roles.Select(r => new SelectListItem
-            {
-                Text = r.Name,
-                Value = r.Name
-            }).ToList();
+            var roles = _context.RoleConfigurations
+                .Where(rc => rc.SiteConfigurationId == siteConfig.Id)
+                .SelectMany(rc => rc.RoleCategory.Roles)
+                .Select(r => new SelectListItem
+                {
+                    Text = r.Name,
+                    Value = r.Name
+                })
+                .ToList();
             model.Roles = roles;
 
             //If ModelState is invalid or if something goes wrong, return to the view with the model
@@ -258,6 +297,10 @@ namespace ProRota.Areas.Management.Controllers
                 return BadRequest(); //If ID is null or empty, return a BadRequest response
             }
 
+            //getting siteConfig - for assigning roles
+            var siteId = _siteService.GetSiteIdFromSessionOrUser();
+            var siteConfig = _context.SiteConfigurations.SingleOrDefault(s => s.SiteId == siteId) ?? throw new Exception("Cannot find Site Configuration");
+
             //Retrieve the user using UserManager
             ApplicationUser user = await _userManager.FindByIdAsync(id);
 
@@ -267,18 +310,20 @@ namespace ProRota.Areas.Management.Controllers
             }
 
 
-            //Get the user's roles
+            //Get the user's roles and extracts the name 
             var role = await _userManager.GetRolesAsync(user);
-            //gets the name of the role to pass into the viewmodle
             string roleName = role.FirstOrDefault() ?? "No Role Assigned";
 
-            //Get all the roles from the database and create a list of SelectListItems
-            var roles = _roleManager.Roles.Select(r => new SelectListItem
-            {
-                Text = r.Name,
-                Value = r.Name,
-                Selected = r.Name == roleName
-            }).ToList();
+            //get roles from via the roleConfig within a sites siteConfig
+            var roles = _context.RoleConfigurations
+                .Where(rc => rc.SiteConfigurationId == siteConfig.Id)
+                .SelectMany(rc => rc.RoleCategory.Roles)
+                .Select(r => new SelectListItem
+                {
+                    Text = r.Name,
+                    Value = r.Name
+                })
+                .ToList();
 
             return View(new EditApplicationUserViewModel
             {
@@ -434,35 +479,6 @@ namespace ProRota.Areas.Management.Controllers
             //Return to the Index action of ApplicationUser controller
             return RedirectToAction("Index", "ApplicationUser");
         }
-
-        public int GetSiteIdFromSessionOrUser()
-        {
-            //gets current admin session if it exists
-            var siteId = HttpContext.Session.GetInt32("AdminsCurrentSiteId");
-
-            if (siteId == null)
-            {
-                //gets current users ID and then gets the user object
-                var userId = _userManager.GetUserId(User);
-                var user = _context.ApplicationUsers.FirstOrDefault(u => u.Id == userId);
-
-                //if not found
-                if (user == null)
-                {
-                    throw new Exception("Current user not found.");
-                }
-
-                if(user.SiteId == null)
-                {
-                    throw new Exception("Current site not found.");
-                }
-
-                //sets user siteId as the site ID
-                siteId = user.SiteId;
-            }
-
-            return (int)siteId;
-        }       
     }
 
 }

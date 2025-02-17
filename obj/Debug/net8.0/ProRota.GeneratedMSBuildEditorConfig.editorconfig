@@ -222,6 +222,26 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = QXJlYXNcTWFuYWdlbWVudFxWaWV3c1xIb21lXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/grant/OneDrive/Desktop/UNI/Year 4/Honours Project/ProRota/Areas/Management/Views/Role/CreateRole.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcTWFuYWdlbWVudFxWaWV3c1xSb2xlXENyZWF0ZVJvbGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/grant/OneDrive/Desktop/UNI/Year 4/Honours Project/ProRota/Areas/Management/Views/Role/CreateRoleConfiguration.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcTWFuYWdlbWVudFxWaWV3c1xSb2xlXENyZWF0ZVJvbGVDb25maWd1cmF0aW9uLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/grant/OneDrive/Desktop/UNI/Year 4/Honours Project/ProRota/Areas/Management/Views/Role/EditRole.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcTWFuYWdlbWVudFxWaWV3c1xSb2xlXEVkaXRSb2xlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/grant/OneDrive/Desktop/UNI/Year 4/Honours Project/ProRota/Areas/Management/Views/Role/EditRoleConfiguration.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcTWFuYWdlbWVudFxWaWV3c1xSb2xlXEVkaXRSb2xlQ29uZmlndXJhdGlvbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/grant/OneDrive/Desktop/UNI/Year 4/Honours Project/ProRota/Areas/Management/Views/Role/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcTWFuYWdlbWVudFxWaWV3c1xSb2xlXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/grant/OneDrive/Desktop/UNI/Year 4/Honours Project/ProRota/Areas/Management/Views/Rota/CreateNewRota.cshtml]
 build_metadata.AdditionalFiles.TargetPath = QXJlYXNcTWFuYWdlbWVudFxWaWV3c1xSb3RhXENyZWF0ZU5ld1JvdGEuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 

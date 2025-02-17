@@ -19,24 +19,35 @@
                             //if the site hasnt been configured yet
                             if (Model.SiteConfiguration != null)
                             {
-                                <dt class="col-sm-2">
-                                    @Html.DisplayNameFor(model => model.SiteConfiguration.BookingDuration)
-                                </dt>
-                                <dd class="col-sm-10">
-                                    @Html.DisplayFor(model => model.SiteConfiguration.BookingDuration)
-                                </dd>
-                                <dt class="col-sm-2">
-                                    @Html.DisplayNameFor(model => model.SiteConfiguration.CoversCapacity)
-                                </dt>
-                                <dd class="col-sm-10">
-                                    @Html.DisplayFor(model => model.SiteConfiguration.CoversCapacity)
-                                </dd>
-                                <dt class="col-sm-2">
-                                    @Html.DisplayNameFor(model => model.SiteConfiguration.NumberOfSections)
-                                </dt>
-                                <dd class="col-sm-10">
-                                    @Html.DisplayFor(model => model.SiteConfiguration.NumberOfSections)
-                                </dd>
+                                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                                    <!-- Booking Duration Card -->
+                                    <div class="card small-card">
+                                        <div class="card-body">
+                                            <h6 class="card-title">Booking Duration</h6>
+                                            <p class="card-value">@Model.SiteConfiguration.BookingDuration</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Covers Capacity Card -->
+                                    <div class="card small-card">
+                                        <div class="card-body">
+                                            <h6 class="card-title">Covers Capacity</h6>
+                                            <p class="card-value">@Model.SiteConfiguration.CoversCapacity</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Number of Sections Card -->
+                                    <div class="card small-card">
+                                        <div class="card-body">
+                                            <h6 class="card-title">Number of Sections</h6>
+                                            <p class="card-value">@Model.SiteConfiguration.NumberOfSections</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <br />
+                                <div class="text-center">
+                                    <a href="javascript:void(0);" onclick="showEditSiteConfigurationPopUp('@Model.Id', '@Model.SiteName')" class="btn btn-primary btn-sm">Edit Configuration</a>
+                                </div>
                             }
                             else
                             {
@@ -46,18 +57,31 @@
                                 </div>
                             }
 
+                            <br />
+                            <h5 class="card-title"> Roles and Categories</h5>
+
+
                             //if there are no roles related to this site yet
-                            if(Model.SiteConfiguration.RoleConfigurations == null || Model.SiteConfiguration.RoleConfigurations.Count == 0)
+                            if (Model.SiteConfiguration != null &&
+                                    Model.SiteConfiguration.RoleConfigurations != null &&
+                                    Model.SiteConfiguration.RoleConfigurations.Count == 0)
                             {
-                                <p class="card-text"> No Roles or Role Categories have been created for this site yet. In order for ProRota to create accurate and efficient schedules for @Model.Company.CompanyName @Model.SiteName this must be completed!</p>
-                                //ADD LINK BUTTON HERE TO CONTROLLER ACTION TO DISPLAY CREATE ROLE CATEGORIES
+                                <p class="card-text">
+                                    No Roles or Role Categories have been created for this site yet.
+                                    In order for ProRota to create accurate and efficient schedules for @Model.Company.CompanyName @Model.SiteName, this must be completed!
+                                </p>
+
+                                <!-- Link button to Manage Roles -->
+                                <a asp-area="Management" asp-controller="Role" asp-action="Index" class="btn btn-primary">
+                                    Add Roles and Categories
+                                </a>
                             }
                             else
                             {
-                                foreach(var config in Model.SiteConfiguration.RoleConfigurations)
-                                {
-                                    
-                                }
+                                <!-- Manage roles button when roles exist -->
+                                <a asp-area="Management" asp-controller="Role" asp-action="Index" class="btn btn-primary">
+                                    Manage Roles
+                                </a>
                             }
                         }
                     </div>
@@ -181,6 +205,7 @@
 
     </div>
 </div>
+<br>
 
 <!-- hidden pop up for editing the site configuration -->
 <div class="modal fade" id="EditSiteConfigurationPopUp" tabindex="-1" aria-labelledby="EditSiteConfigurationModalLabel" aria-hidden="true">

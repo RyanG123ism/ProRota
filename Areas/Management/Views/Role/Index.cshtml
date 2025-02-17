@@ -1,0 +1,105 @@
+﻿@model ProRota.Models.SiteConfiguration
+
+<div class="card shadow-sm p-3 mb-5">
+    <div class="card-header text-center">
+        <h1 class="display-4">Role Configuration</h1>
+        <h3>Roles and Role Categories for ADD SITE HERE</h3>
+    </div>
+
+    <div class="card-body text-center">
+        @if (Model == null)
+        {
+            <!-- If SiteConfiguration does not exist -->
+            <div class="alert alert-warning">
+                <p class="lead">This site has not been configured yet. Please add role categories to continue.</p>
+                <a asp-controller="Role" asp-action="CreateRoleConfiguration" class="btn btn-primary">
+                    Add Role Categories
+                </a>
+            </div>
+        }
+        else
+        {
+            <!-- If SiteConfiguration exists -->
+            <div class="row">
+                <div class="col-md-12">
+                    <h4 class="text-center">Role Configurations</h4>
+                    <table class="table table-bordered table-striped">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Role Category</th>
+                                <th>Min Employees</th>
+                                <th>Max Employees</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.RoleConfigurations != null && Model.RoleConfigurations.Any())
+                            {
+                                @foreach (var roleConfig in Model.RoleConfigurations)
+                                {
+                                    <tr>
+                                        <td>@roleConfig.RoleCategory.Name</td>
+                                        <td>@roleConfig.MinEmployees</td>
+                                        <td>@roleConfig.MaxEmployees</td>
+                                        <td>
+                                            <a asp-action="EditRoleConfiguration" asp-route-id="@roleConfig.Id" class="btn btn-warning btn-sm">Edit</a>
+                                            <a asp-action="DeleteRoleConfiguration" asp-route-id="@roleConfig.Id" class="btn btn-danger btn-sm">Delete</a>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr><td colspan="4" class="text-muted text-center">No role configurations found.</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                    <a asp-action="CreateRoleConfiguration" asp-controller="Role" class="btn btn-success">Add Role Configuration</a>
+                </div>
+            </div>
+
+            <hr />
+
+            <div class="row">
+                <div class="col-md-12">
+                    <h4 class="text-center">Roles Inside All Role Categories</h4>
+                    <table class="table table-bordered table-striped">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Role Category</th>
+                                <th>Role Name</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.RoleConfigurations != null && Model.RoleConfigurations.Any(rc => rc.RoleCategory.Roles.Any()))
+                            {
+                                @foreach (var roleConfig in Model.RoleConfigurations)
+                                {
+                                    @foreach (var role in roleConfig.RoleCategory.Roles)
+                                    {
+                                        <tr>
+                                            <td>@roleConfig.RoleCategory.Name</td>
+                                            <td>@role.Name</td>
+                                            <td>
+                                                <a asp-action="EditRole" asp-route-id="@role.Id" class="btn btn-warning btn-sm">Edit</a>
+                                                <a asp-action="DeleteRole" asp-route-id="@role.Id" class="btn btn-danger btn-sm">Delete</a>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                <tr><td colspan="3" class="text-muted text-center">No roles found.</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                    <a asp-controller="Role" asp-action="CreateRole" class="btn btn-primary">
+                        Create Role
+                    </a>
+                </div>
+            </div>
+        }
+    </div>
+</div>

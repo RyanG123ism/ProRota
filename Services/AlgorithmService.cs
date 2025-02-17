@@ -47,7 +47,7 @@ namespace ProRota.Services
             var weeklyCoverBreakdown = viewModel.Covers;
             var dailyTotalCovers = CalculateDailyCoversByPriority(weeklyCoverBreakdown);
 
-            //STEP3: calculate neccecary staff for each day --THIS WILL NEED TO BE EDITED IF WE ARE GOING TO CREATE ROLES DYNAMICALY WITHIN THE APP IN FUTURE
+            //STEP3: calculate neccecary staff for each day
 
             //looping through days, starts with my significant (busiest) day
             foreach (var day in dailyTotalCovers)

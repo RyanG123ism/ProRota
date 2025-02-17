@@ -1,0 +1,58 @@
+﻿@using ProRota.Areas.Management.ViewModels
+@model EditRoleViewModel
+
+@{
+    ViewData["Title"] = "Edit Role";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header text-center">
+                    <h2>Edit Role</h2>
+                </div>
+                <div class="card-body">
+                    <form asp-action="EditRole" method="post">
+                        <!-- Hidden ID Field (Required for Model Binding) -->
+                        <input type="hidden" asp-for="Id" />
+
+                        <!-- Role Name Input -->
+                        <div class="mb-3">
+                            <label asp-for="RoleName" class="form-label"></label>
+                            <input asp-for="RoleName" class="form-control" type="text" />
+                            <span asp-validation-for="RoleName" class="text-danger"></span>
+                        </div>
+
+                        <!-- Role Category Dropdown -->
+                        <div class="mb-3">
+                            <label asp-for="SelectedRoleCategoryId" class="form-label"></label>
+                            <select asp-for="SelectedRoleCategoryId" asp-items="Model.RoleCategories" class="form-control">
+                                <option value="">-- Select a Role Category --</option>
+                            </select>
+                            <span asp-validation-for="SelectedRoleCategoryId" class="text-danger"></span>
+                        </div>
+
+                        <!-- Submit & Cancel Buttons -->
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                        </div>
+
+                        <!-- Display ViewBag Error Message -->
+                        @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+                        {
+                            <div class="alert alert-danger text-center mt-3">
+                                @ViewBag.ErrorMessage
+                            </div>
+                        }
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

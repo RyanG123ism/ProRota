@@ -12,20 +12,6 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-//builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
-//{
-//    options.SignIn.RequireConfirmedAccount = true;
-//    //password configuration - CHANGE THIS BACK TO NORMAL BEFORE SUBMITTING
-//    options.Password.RequireDigit = false;
-//    options.Password.RequiredLength = 1;
-//    options.Password.RequireNonAlphanumeric = false;
-//    options.Password.RequireUppercase = false;
-//    options.Password.RequireLowercase = true;
-//    options.Password.RequiredUniqueChars = 0;
-
-//}).AddRoles<IdentityRole>()//just added
-//.AddEntityFrameworkStores<ApplicationDbContext>();
-
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 {
     options.SignIn.RequireConfirmedAccount = true;
