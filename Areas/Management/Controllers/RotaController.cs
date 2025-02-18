@@ -52,7 +52,8 @@ namespace ProRota.Areas.Management.Controllers
                 ViewBag.Editable = true;
             }
 
-            //getting all users that belong to the site along with their shifts and time off requests
+            //querying all users of the site
+            //formatting data into a dictionary of the ViewRotaViewModel
             var rota = await _context.ApplicationUsers
                 .Where(u => u.SiteId == siteId)
                 .Select(u => new ViewRotaViewModel
@@ -181,16 +182,21 @@ namespace ProRota.Areas.Management.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateNewRota(CreateWeeklyRotaViewModel model)
+        public async Task<IActionResult> CreateNewRota(CreateWeeklyRotaViewModel model)
         {
             if (!ModelState.IsValid)
             {
                 return View(model);
             }
 
-            //get the site
+            //get the site with the site configuration and role objects attached
             var siteId = _siteService.GetSiteIdFromSessionOrUser();
-            var site = _context.Sites.Find(siteId);
+            var site = await _context.Sites.Where(s => s.Id == siteId)
+                .Include(s => s.SiteConfiguration)
+                .ThenInclude(sc => sc.RoleConfigurations)
+                .ThenInclude(rc => rc.RoleCategory)
+                .ThenInclude(rc => rc.Roles)
+                .FirstOrDefaultAsync();
 
             if(site == null)
             {
@@ -198,7 +204,7 @@ namespace ProRota.Areas.Management.Controllers
             }
 
             //passing the view model along with the site object to the alogrithm to create a new rota
-            //var newRota = _algorithmService.CreateWeeklyRota(model, site);
+            var newRota = _algorithmService.CreateWeeklyRota(model, site);
 
 
             return RedirectToAction("Index");

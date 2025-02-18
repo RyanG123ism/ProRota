@@ -375,7 +375,7 @@ namespace ProRota.Areas.Management.Controllers
         
                 role.Name = model.RoleName;
             }
-            
+
             await _roleManager.UpdateAsync(role);
             await _context.SaveChangesAsync();
 

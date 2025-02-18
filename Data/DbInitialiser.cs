@@ -54,7 +54,7 @@ namespace ProRota.Data
 
             foreach (var category in roleCategories)
             {
-                // Check if category exists
+                // Check if RoleCategory exists, if not, create it
                 var roleCategory = await context.RoleCategories.FirstOrDefaultAsync(c => c.Name == category.Key);
                 if (roleCategory == null)
                 {
@@ -66,7 +66,6 @@ namespace ProRota.Data
                 // Add roles under this category
                 foreach (var role in category.Value)
                 {
-                    //check if role exists
                     if (!await roleManager.RoleExistsAsync(role))
                     {
                         var identityRole = new ApplicationRole
@@ -77,10 +76,41 @@ namespace ProRota.Data
                         await roleManager.CreateAsync(identityRole);
                     }
                 }
-            }
 
-            await context.SaveChangesAsync();
+                // Associate this RoleCategory with RoleConfigurations for each Site
+                var sites = await context.Sites.Include(s => s.SiteConfiguration).ToListAsync();
+
+                foreach (var site in sites)
+                {
+                    if (site.SiteConfiguration == null)
+                    {
+                        site.SiteConfiguration = new SiteConfiguration();
+                        context.SiteConfigurations.Add(site.SiteConfiguration);
+                        await context.SaveChangesAsync();
+                    }
+
+                    // Check if RoleConfiguration already exists
+                    var existingRoleConfig = await context.RoleConfigurations
+                        .FirstOrDefaultAsync(rc => rc.RoleCategoryId == roleCategory.Id && rc.SiteConfigurationId == site.SiteConfiguration.Id);
+
+                    if (existingRoleConfig == null)
+                    {
+                        var roleConfig = new RoleConfiguration
+                        {
+                            RoleCategoryId = roleCategory.Id,
+                            SiteConfigurationId = site.SiteConfiguration.Id,
+                            MinEmployees = 1,
+                            MaxEmployees = 5
+                        };
+
+                        context.RoleConfigurations.Add(roleConfig);
+                    }
+                }
+
+                await context.SaveChangesAsync();
+            }
         }
+
 
         private async Task SeedUsers(IServiceProvider services)
         {
@@ -526,8 +556,54 @@ namespace ProRota.Data
             {
                 var sites = new List<Site>()
                 {
-                    new Site {SiteName = "Merchant City"},
-                    new Site {SiteName = "Southside"},
+                    new Site {
+                        SiteName = "Merchant City",
+                        MondayOpenTime = new DateTime(1, 1, 1, 12, 0, 0), // 12:00 PM
+                        MondayCloseTime = new DateTime(1, 1, 1, 22, 0, 0), // 10:00 PM
+                        TuesdayOpenTime = new DateTime(1, 1, 1, 12, 0, 0),
+                        TuesdayCloseTime = new DateTime(1, 1, 1, 22, 0, 0),
+                        WednesdayOpenTime = new DateTime(1, 1, 1, 12, 0, 0),
+                        WednesdayCloseTime = new DateTime(1, 1, 1, 22, 0, 0),
+                        ThursdayOpenTime = new DateTime(1, 1, 1, 12, 0, 0),
+                        ThursdayCloseTime = new DateTime(1, 1, 1, 22, 0, 0),
+                        FridayOpenTime = new DateTime(1, 1, 1, 12, 0, 0),
+                        FridayCloseTime = new DateTime(1, 1, 1, 22, 0, 0),
+                        SaturdayOpenTime = new DateTime(1, 1, 1, 12, 0, 0),
+                        SaturdayCloseTime = new DateTime(1, 1, 1, 22, 0, 0),
+                        SundayOpenTime = new DateTime(1, 1, 1, 12, 0, 0),
+                        SundayCloseTime = new DateTime(1, 1, 1, 22, 0, 0),
+                        SiteConfiguration = new SiteConfiguration
+                        {
+                            NumberOfSections = 3,
+                            CoversCapacity = 170,
+                            BookingDuration = new TimeSpan(2, 15, 0),
+                            RoleConfigurations = new List<RoleConfiguration>(),
+                        }
+                    },
+                    new Site {
+                        SiteName = "Southside",
+                        MondayOpenTime = new DateTime(1, 1, 1, 12, 0, 0), // 12:00 PM
+                        MondayCloseTime = new DateTime(1, 1, 1, 22, 0, 0), // 10:00 PM
+                        TuesdayOpenTime = new DateTime(1, 1, 1, 12, 0, 0),
+                        TuesdayCloseTime = new DateTime(1, 1, 1, 22, 0, 0),
+                        WednesdayOpenTime = new DateTime(1, 1, 1, 12, 0, 0),
+                        WednesdayCloseTime = new DateTime(1, 1, 1, 22, 0, 0),
+                        ThursdayOpenTime = new DateTime(1, 1, 1, 12, 0, 0),
+                        ThursdayCloseTime = new DateTime(1, 1, 1, 22, 0, 0),
+                        FridayOpenTime = new DateTime(1, 1, 1, 12, 0, 0),
+                        FridayCloseTime = new DateTime(1, 1, 1, 22, 0, 0),
+                        SaturdayOpenTime = new DateTime(1, 1, 1, 12, 0, 0),
+                        SaturdayCloseTime = new DateTime(1, 1, 1, 22, 0, 0),
+                        SundayOpenTime = new DateTime(1, 1, 1, 12, 0, 0),
+                        SundayCloseTime = new DateTime(1, 1, 1, 22, 0, 0),
+                        SiteConfiguration = new SiteConfiguration
+                        {
+                            NumberOfSections = 2,
+                            CoversCapacity = 125,
+                            BookingDuration = new TimeSpan(2, 15, 0),
+                            RoleConfigurations = new List<RoleConfiguration>()
+                        }
+                    },
                     new Site {SiteName = "No Site"}
                 };
 
