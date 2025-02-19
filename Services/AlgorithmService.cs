@@ -23,7 +23,7 @@ namespace ProRota.Services
             _roleManager = roleManager;
             _scopeFactory = scopeFactory;
         }
-        public async Task<int> CreateWeeklyRota(CreateWeeklyRotaViewModel viewModel, Site site)
+        public async Task<Dictionary<DateTime, Dictionary<string, List<Shift>>>> CreateWeeklyRota(CreateWeeklyRotaViewModel viewModel, Site site)
         {
             if(viewModel == null)
             {
@@ -36,7 +36,7 @@ namespace ProRota.Services
             }
 
             //final rota variable that will be returned
-            var rota = new Dictionary<DateTime, Dictionary<string, List<Tuple<string, TimeSpan, TimeSpan>>>>();
+            var rota = new Dictionary<DateTime, Dictionary<string, List<Shift>>>();       
 
             var siteConfig = site.SiteConfiguration;
             var roleConfigs = site.SiteConfiguration.RoleConfigurations;
@@ -47,14 +47,13 @@ namespace ProRota.Services
                 .ToListAsync();
 
             //STEP 1: Sort users by role
-            var sortedUsers = await SortUsersByRole(users) ?? throw new Exception("Error Sorting Users by Role");
+            var sortedUsers = await SortUsersByRoleCategory(users) ?? throw new Exception("Error Sorting Users by Role");
 
             //STEP 2: calculate daily covers and assess which days to prioritise
             var weeklyCoverBreakdown = viewModel.Covers;
             var dailyTotalCovers = CalculateDailyCoversByPriority(weeklyCoverBreakdown) ?? throw new Exception("Error calculating daily covers by priority"); ;
 
             //STEP3: calculate neccecary staff for each day
-
             //looping through days, starts with my significant (busiest) day
             foreach (var day in dailyTotalCovers)
             {
@@ -64,21 +63,29 @@ namespace ProRota.Services
                 //returns the staffing requirements for each day
                 var requiredEmployees = CalculateDailyEmployeeRequirments(site, day, weeklyCoverBreakdown[day.Key]);
 
+                //STEP 4: Calculate all shift times
                 var shiftTimes = CalculateShiftTimes(day.Key, date, requiredEmployees, site);
 
-                var dayRota = AllocateShifts(shiftTimes, sortedUsers);
+                //STEP 5: Assign shifts to users
+                var dayRota = await Task.Run(() => AllocateShifts(shiftTimes, sortedUsers)) ;
+
+                //STEP 5: Review?
+
+                //add a step here to review the algorithm and make changes where needed?
+
+                //STEP 6: Return result
+                if(dayRota.Count > 0)
+                {
+                    var (dateKey, shifts) = dayRota.First();
+
+                    if (date.Date.CompareTo(dateKey) == 0)//comparing key to actual date to make sure they match up before adding
+                    {
+                        rota[date.Date] = shifts;
+                    }
+                }
             }
 
-
-
-            //STEP 4: Assign shifts to users
-
-            //STEP 5: Review?
-
-            //STEP 6: return dictionary
-
-            return 0;
-            
+            return rota;
         }
 
         public async Task<Dictionary<string, List<ApplicationUser>>> SortUsersByRole(List<ApplicationUser> users)
@@ -115,6 +122,62 @@ namespace ProRota.Services
 
             return sortedUsersByRole;
         }
+
+        public async Task<Dictionary<string, List<ApplicationUser>>> SortUsersByRoleCategory(List<ApplicationUser> users)
+        {
+            if (users == null || users.Count == 0)
+            {
+                throw new Exception("Error accessing user list");
+            }
+
+            using var scope = _scopeFactory.CreateScope();
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+            var sortedUsersByRoleCategory = new Dictionary<string, List<ApplicationUser>>();
+
+            var userRoleCategories = new List<(ApplicationUser User, string RoleCategory)>();
+
+            foreach (var user in users)
+            {
+                // Get user's roles
+                var roles = await userManager.GetRolesAsync(user);
+
+                if (roles == null || roles.Count == 0)
+                {
+                    // If no roles found, assign "No Role Category"
+                    userRoleCategories.Add((user, "No Role Category"));
+                    continue;
+                }
+
+                // Get the corresponding RoleCategory for the first role found
+                var roleCategory = await dbContext.Roles
+                    .Where(r => roles.Contains(r.Name))
+                    .Select(r => r.RoleCategory.Name)
+                    .FirstOrDefaultAsync();
+
+                // Default to "Uncategorized" if RoleCategory is not found
+                var categoryName = roleCategory ?? "Uncategorized";
+
+                userRoleCategories.Add((user, categoryName));
+            }
+
+            // Group users by RoleCategory
+            foreach (var userRoleCategory in userRoleCategories)
+            {
+                var category = userRoleCategory.RoleCategory;
+
+                if (!sortedUsersByRoleCategory.ContainsKey(category))
+                {
+                    sortedUsersByRoleCategory[category] = new List<ApplicationUser>();
+                }
+
+                sortedUsersByRoleCategory[category].Add(userRoleCategory.User);
+            }
+
+            return sortedUsersByRoleCategory;
+        }
+
 
         public Dictionary<string, int> CalculateDailyCoversByPriority(Dictionary<string, Dictionary<int, int>> covers)
         {
@@ -305,78 +368,96 @@ namespace ProRota.Services
             return shiftSchedule;
         }
 
-        public Dictionary<string, List<Tuple<string, TimeSpan, TimeSpan>>>AllocateShifts(Dictionary<string, List<Tuple<TimeSpan, TimeSpan>>> shiftTimes,
+        public Dictionary<DateTime, Dictionary<string, List<Shift>>>
+    AllocateShifts(Dictionary<DateTime, Dictionary<string, List<Tuple<TimeSpan, TimeSpan>>>> shiftTimes,
                    Dictionary<string, List<ApplicationUser>> users)
         {
-            // Dictionary to store assigned shifts
-            var assignedShifts = new Dictionary<string, List<Tuple<string, TimeSpan, TimeSpan>>>();
+            // Dictionary to store assigned shifts (Date -> UserID -> List of Shifts)
+            var assignedShifts = new Dictionary<DateTime, Dictionary<string, List<Shift>>>();
 
-            // Dictionary to track hours already assigned during this runtime
-            var assignedHours = users
-                .SelectMany(kvp => kvp.Value.Select(user => new { user.Id, Hours = 0.0 }))
-                .ToDictionary(x => x.Id, x => x.Hours);
-
-            // Iterate through each role category in shiftTimes
-            foreach (var roleCategory in shiftTimes)
+            // Iterate through each date in shiftTimes (only one date per method call)
+            foreach (var dateShifts in shiftTimes)
             {
-                string category = roleCategory.Key;
-                var shifts = roleCategory.Value;
+                DateTime date = dateShifts.Key;
+                assignedShifts[date] = new Dictionary<string, List<Shift>>();
 
-                // Get the users assigned to this role category
-                if (!users.ContainsKey(category) || users[category].Count == 0)
+                // Iterate through each role category
+                foreach (var roleCategoryShifts in dateShifts.Value)
                 {
-                    Console.WriteLine($"No available users for {category}");
-                    continue;
-                }
+                    string roleCategory = roleCategoryShifts.Key;
+                    var shifts = roleCategoryShifts.Value;
 
-                // Sort users into those **below** and **above** contractual hours
-                var usersBelowContract = users[category]
-                    .Where(user => assignedHours[user.Id] < user.ContractualHours)
-                    .OrderBy(user => assignedHours[user.Id]) // Prioritize those with fewer assigned hours
-                    .ToList();
-
-                var usersAboveContract = users[category]
-                    .Where(user => assignedHours[user.Id] >= user.ContractualHours)
-                    .OrderBy(user => assignedHours[user.Id]) // Prioritize fairness after contract hours
-                    .ToList();
-
-                // Merge lists, prioritizing those below contract first
-                var sortedUsers = usersBelowContract.Concat(usersAboveContract).ToList();
-
-                if (sortedUsers.Count == 0)
-                {
-                    Console.WriteLine($"No available users for {category}");
-                    continue;
-                }
-
-                // Assign shifts
-                foreach (var shift in shifts)
-                {
-                    TimeSpan shiftStart = shift.Item1;
-                    TimeSpan shiftEnd = shift.Item2;
-                    TimeSpan shiftDuration = shiftEnd - shiftStart;
-                    double shiftHours = shiftDuration.TotalHours;
-
-                    // Find the best user to assign
-                    var userToAssign = sortedUsers
-                        .Where(user => !user.TimeOffRequests.Any(to => to.Date == shiftTimes)) // Ensure no time off conflicts
-                        .FirstOrDefault();
-
-                    if (userToAssign != null)
+                    // Get the users assigned to this role category
+                    if (!users.ContainsKey(roleCategory) || users[roleCategory].Count == 0)
                     {
-                        // Assign shift
-                        if (!assignedShifts.ContainsKey(category))
-                            assignedShifts[category] = new List<Tuple<string, TimeSpan, TimeSpan>>();
+                        Console.WriteLine($"⚠ No available users for {roleCategory} on {date}");
+                        continue;
+                    }
 
-                        assignedShifts[category].Add(
-                            new Tuple<string, TimeSpan, TimeSpan>(userToAssign.Id, shiftStart, shiftEnd) // Store User ID instead of Name
-                        );
+                    // Track assigned hours dynamically for this run
+                    var assignedHours = users[roleCategory].ToDictionary(user => user.Id, user => 0.0);
 
-                        // Update dynamically tracked assigned hours
-                        assignedHours[userToAssign.Id] += shiftHours;
+                    // Sort users: First prioritize those below contract hours, then by fairness
+                    var usersBelowContract = users[roleCategory]
+                        .Where(user => assignedHours[user.Id] < user.ContractualHours)
+                        .OrderBy(user => assignedHours[user.Id]) // Fewest assigned hours first
+                        .ToList();
 
-                        // Resort users dynamically to maintain fairness
-                        sortedUsers = sortedUsers.OrderBy(user => assignedHours[user.Id]).ToList();
+                    var usersAboveContract = users[roleCategory]
+                        .Where(user => assignedHours[user.Id] >= user.ContractualHours)
+                        .OrderBy(user => assignedHours[user.Id]) // Prioritize fairness
+                        .ToList();
+
+                    // Merge lists, prioritizing those below contract first
+                    var sortedUsers = usersBelowContract.Concat(usersAboveContract).ToList();
+
+                    if (sortedUsers.Count == 0)
+                    {
+                        Console.WriteLine($"No available users for {roleCategory} on {date}");
+                        continue;
+                    }
+
+                    // Assign shifts
+                    foreach (var shift in shifts)
+                    {
+                        TimeSpan shiftStart = shift.Item1;
+                        TimeSpan shiftEnd = shift.Item2;
+                        TimeSpan shiftDuration = shiftEnd - shiftStart;
+                        double shiftHours = shiftDuration.TotalHours;
+
+                        // Find the best user to assign (who is available and has no time-off)
+                        var userToAssign = sortedUsers
+                            .Where(user => !user.TimeOffRequests.Any(to => to.Date.Date == date.Date)) // Ensure no time off conflicts
+                            .FirstOrDefault();
+
+                        if (userToAssign != null)
+                        {
+                            // Create a Shift instance
+                            var newShift = new Shift
+                            {
+                                ApplicationUserId = userToAssign.Id,
+                                ApplicationUser = userToAssign,
+                                StartDateTime = date.Date + shiftStart,
+                                EndDateTime = date.Date + shiftEnd,
+                                ShiftNotes = "", 
+                                IsPublished = false,
+                                SiteId = userToAssign.SiteId
+                            };
+
+                            // Check if the user already has an entry
+                            if (!assignedShifts[date].ContainsKey(userToAssign.Id))
+                            {
+                                assignedShifts[date][userToAssign.Id] = new List<Shift>();
+                            }
+
+                            assignedShifts[date][userToAssign.Id].Add(newShift);
+
+                            // Update dynamically tracked assigned hours
+                            assignedHours[userToAssign.Id] += shiftHours;
+
+                            // Resort users dynamically to maintain fairness
+                            sortedUsers = sortedUsers.OrderBy(user => assignedHours[user.Id]).ToList();
+                        }
                     }
                 }
             }
@@ -386,16 +467,26 @@ namespace ProRota.Services
 
 
 
+
+
+
         public (TimeSpan openingTime, TimeSpan closingTime) GetOpeningAndClosingTimes(Site site, string day)
         {
-            string openingPropertyName = $"{day}OpeningTime";
-            string closingPropertyName = $"{day}ClosingTime"; 
-
-            var openingTime = (TimeSpan?)site.GetType().GetProperty(openingPropertyName)?.GetValue(site) ?? TimeSpan.Zero;
-            var closingTime = (TimeSpan?)site.GetType().GetProperty(closingPropertyName)?.GetValue(site) ?? TimeSpan.Zero;
-
-            return (openingTime, closingTime);
+            return day switch
+            {
+                "Monday" => (site.MondayOpenTime?.TimeOfDay ?? TimeSpan.Zero, site.MondayCloseTime?.TimeOfDay ?? TimeSpan.Zero),
+                "Tuesday" => (site.TuesdayOpenTime?.TimeOfDay ?? TimeSpan.Zero, site.TuesdayCloseTime?.TimeOfDay ?? TimeSpan.Zero),
+                "Wednesday" => (site.WednesdayOpenTime?.TimeOfDay ?? TimeSpan.Zero, site.WednesdayCloseTime?.TimeOfDay ?? TimeSpan.Zero),
+                "Thursday" => (site.ThursdayOpenTime?.TimeOfDay ?? TimeSpan.Zero, site.ThursdayCloseTime?.TimeOfDay ?? TimeSpan.Zero),
+                "Friday" => (site.FridayOpenTime?.TimeOfDay ?? TimeSpan.Zero, site.FridayCloseTime?.TimeOfDay ?? TimeSpan.Zero),
+                "Saturday" => (site.SaturdayOpenTime?.TimeOfDay ?? TimeSpan.Zero, site.SaturdayCloseTime?.TimeOfDay ?? TimeSpan.Zero),
+                "Sunday" => (site.SundayOpenTime?.TimeOfDay ?? TimeSpan.Zero, site.SundayCloseTime?.TimeOfDay ?? TimeSpan.Zero),
+                _ => throw new ArgumentException("Invalid day", nameof(day))
+            };
         }
+
+
+
 
 
 

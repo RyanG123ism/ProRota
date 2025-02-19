@@ -204,10 +204,36 @@ namespace ProRota.Areas.Management.Controllers
             }
 
             //passing the view model along with the site object to the alogrithm to create a new rota
-            var newRota = _algorithmService.CreateWeeklyRota(model, site);
+            var rota = await _algorithmService.CreateWeeklyRota(model, site);
 
+            //convert rota into a dictionary where the key is the User ID and value is a ViewRotaViewModel
+            var viewModel = rota
+                .SelectMany(r => r.Value) //flatten the dictionary
+                .GroupBy(r => r.Key) //group shifts by UserId
+                .ToDictionary(
+                    g => g.Key, 
+                    g => new ViewRotaViewModel
+                    {
+                        Id = g.Key,
+                        FirstName = g.First().Value.First().ApplicationUser?.FirstName ?? "Unknown", // Get first shift's user
+                        LastName = g.First().Value.First().ApplicationUser?.LastName ?? "Unknown",
+                        Shifts = g.SelectMany(x => x.Value).ToList(), // Flatten all shifts into a single list
+                        TimeOffRequests = new List<TimeOffRequest>() // Placeholder for now
+                    });
+            var allShifts = rota
+                .SelectMany(r => r.Value) // Flatten Dictionary<DateTime, Dictionary<string, List<Shift>>>
+                .SelectMany(kvp => kvp.Value) // Get all shifts
+                .ToList();
 
-            return RedirectToAction("Index");
+            // Find the earliest shift date (if any shifts exist)
+            DateTime? earliestShiftDate = allShifts.Any()
+                ? allShifts.Min(s => s.StartDateTime?.Date) // Get the earliest StartDateTime (ignoring time)
+                : null;
+
+            //passing starting date to view to help format dates
+            ViewBag.WeekStartingDate = earliestShiftDate;
+
+            return View("ViewWeeklyRota", viewModel);
         }
 
     }
