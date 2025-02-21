@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProRota.Data;
@@ -6,6 +7,8 @@ using ProRota.Models;
 
 namespace ProRota.Areas.Management.Controllers
 {
+    [Area("Management")]
+    [Authorize]
     public class HomeController : Controller
     {
 
@@ -19,10 +22,9 @@ namespace ProRota.Areas.Management.Controllers
 
         }
 
-        [Area("Management")]
-        public async Task<IActionResult> Index(int siteId = 0)
+        public async Task<IActionResult> Index(int siteId = 0)//siteId is only passed in if an Admin/Owner is logged in
         {
-
+            //if its a non admin/owner user 
             if(siteId == 0)
             {
                 //get the current user's ID
@@ -38,14 +40,17 @@ namespace ProRota.Areas.Management.Controllers
             }
             else
             {
-                //teminates any current sessions running for admin
-                HttpContext.Session.Remove("AdminsCurrentSiteId");
+                if(User.IsInRole("Owner") || User.IsInRole("Admin"))
+                {
+                    //teminates any current sessions running for admin
+                    HttpContext.Session.Remove("UsersCurrentSite");
 
-                var site = _context.Sites.Find(siteId);
-                ViewBag.SiteName = site.SiteName;
+                    var site = _context.Sites.Find(siteId);
+                    ViewBag.SiteName = site.SiteName;
 
-                //creates a session for the admin to store the current site that they are viewing
-                HttpContext.Session.SetInt32("AdminsCurrentSiteId", siteId);
+                    //creates a session for the admin to store the current site that they are viewing
+                    HttpContext.Session.SetInt32("UsersCurrentSite", siteId);
+                }            
             }      
 
             return View();

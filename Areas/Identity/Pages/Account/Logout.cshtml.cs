@@ -28,6 +28,16 @@ namespace ProRota.Areas.Identity.Pages.Account
         {
             await _signInManager.SignOutAsync();
             _logger.LogInformation("User logged out.");
+
+
+            if(User.IsInRole("Admin") || User.IsInRole("Owner"))
+            {
+                //removing any potentially open sessions when a user logs out
+                HttpContext.Session.Remove("UsersCurrentSite");
+                HttpContext.Session.Remove("UsersCompany");
+            }
+            
+
             if (returnUrl != null)
             {
                 return LocalRedirect(returnUrl);

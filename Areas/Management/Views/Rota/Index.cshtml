@@ -3,7 +3,7 @@
 
 @{
     //categories that represent all the key values within the parent dictionary
-    var categories = new List<string> { "Unpublished", "ActiveWeek", "Published" };
+    var categories = new List<string> { "Unpublished Rotas", "Current Week", "Published Rotas" };
 }
 
 <div class="card shadow-sm p-3 mb-5">
@@ -24,7 +24,7 @@
                 {
                     <div class="card mb-4">
                         <div class="card-header text-center">
-                            <h2>@category Rotas</h2>
+                            <h2>@category</h2>
                         </div>
                         <div class="card-body">
                             <table class="table table-bordered table-striped table-hover">
@@ -42,37 +42,9 @@
                                             <td>@entry.Key</td> <!-- Week Ending Date -->
                                             <td>@entry.Value.Count</td> <!-- Count of shifts -->
                                             <td>
-                                                @{
-                                                    if (category == "Unpublished")
-                                                    {
-                                                        <div>
-                                                            @Html.ActionLink("Delete Draft", "ViewWeeklyRota", new { weekEnding = entry.Key }) |
-                                                            @Html.ActionLink("Publish Rota", "ViewWeeklyRota", new { weekEnding = entry.Key }) |
-                                                            @Html.ActionLink("Edit", "EditWeeklyRota", new { weekEnding = entry.Key })
-                                                        </div>
-                                                        
-                                                    }
-                                                    if (category == "ActiveWeek")
-                                                    {
-                                                        <div>
-                                                            @Html.ActionLink("Edit", "EditWeeklyRota", new { weekEnding = entry.Key }) |
-                                                            @Html.ActionLink("View", "ViewWeeklyRota", new { weekEnding = entry.Key }) 
-                                                       </div>     
-                                                    }
-                                                    if (category == "Published")
-                                                    {
-                                                        if(DateTime.Parse(entry.Key) > ViewBag.Today)
-                                                        {
-                                                            <div>
-                                                                @Html.ActionLink("Edit", "EditWeeklyRota", new { weekEnding = entry.Key }) |
-                                                            </div>  
-                                                        }
-
-                                                        @Html.ActionLink("View", "ViewWeeklyRota", new { weekEnding = entry.Key })
-                                                    }
-                                                                
-                                                                
-                                                }                                              
+                                                <div>
+                                                    @Html.ActionLink("View", "ViewWeeklyRota", new { weekEnding = entry.Key })
+                                                </div>
                                             </td>
                                         </tr>
                                     }

@@ -20,11 +20,11 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.7" />
+    <PackageReference Include="Stripe.net" Version="47.4.0-beta.1" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Areas\Admin\Data\" />
-    <Folder Include="Areas\Admin\Models\" />
     <Folder Include="Areas\Management\Data\" />
     <Folder Include="Data\Migrations\" />
   </ItemGroup>

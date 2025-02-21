@@ -26,7 +26,7 @@ namespace ProRota.Services
                 throw new Exception("HTTP context is not available.");
             }
 
-            var siteId = httpContext.Session.GetInt32("AdminsCurrentSiteId");
+            var siteId = httpContext.Session.GetInt32("UsersCurrentSite");
 
             if (siteId == null)
             {

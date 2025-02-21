@@ -1,0 +1,73 @@
+﻿@{
+    ViewData["Title"] = "Services & Pricing";
+}
+
+<div class="container mt-5" style="color:white">
+    <div class="text-center">
+        <h1 class="display-4">ProRota Pricing Plans</h1>
+        <p class="lead">Choose the right plan for your business.</p>
+    </div>
+
+    <div class="row mt-5 justify-content-center">
+        <!-- Single License -->
+        <div class="col-md-4">
+            <div class="card bg-dark text-white shadow-lg p-4 text-center">
+                <h3>Single License</h3>
+                <h4 class="text-primary">£100 / year</h4>
+                <p>Perfect for single-site restaurants.</p>
+                <ul class="list-unstyled">
+                    <li>✔ 1 restaurant/site</li>
+                    <li>✔ Unlimited employees</li>
+                    <li>✔ Shift & rota management</li>
+                </ul>
+                <form asp-controller="Payment" asp-action="Checkout" method="post">
+                    <input type="hidden" name="plan" value="single">
+                    <input type="hidden" name="price" value="100">
+                    <button type="submit" class="btn btn-primary">Get Started</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Multi-License -->
+        <div class="col-md-4">
+            <div class="card bg-dark text-white shadow-lg p-4 text-center">
+                <h3>Multi License</h3>
+                <h4 class="text-success">£250 / year</h4>
+                <p>For businesses with multiple locations.</p>
+                <ul class="list-unstyled">
+                    <li>✔ Up to 10 sites</li>
+                    <li>✔ Unlimited employees</li>
+                    <li>✔ Advanced reporting & analytics</li>
+                </ul>
+                <form asp-controller="Payment" asp-action="Checkout" method="post">
+                    <input type="hidden" name="plan" value="multi">
+                    <input type="hidden" name="price" value="250">
+                    <button type="submit" class="btn btn-success">Get Started</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Unlimited License -->
+        <div class="col-md-4">
+            <div class="card bg-dark text-white shadow-lg p-4 text-center">
+                <h3>Unlimited License</h3>
+                <h4 class="text-warning">£1000 / year</h4>
+                <p>For large businesses with unlimited sites.</p>
+                <ul class="list-unstyled">
+                    <li>✔ Unlimited sites</li>
+                    <li>✔ Unlimited employees</li>
+                    <li>✔ Premium support & features</li>
+                </ul>
+                <form asp-controller="Payment" asp-action="Checkout" method="post">
+                    <input type="hidden" name="plan" value="unlimited">
+                    <input type="hidden" name="price" value="1000">
+                    <button type="submit" class="btn btn-warning">Get Started</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-5">
+        <p>Need a custom solution? <a href="/contact" class="text-info">Contact us</a> for enterprise plans.</p>
+    </div>
+</div>

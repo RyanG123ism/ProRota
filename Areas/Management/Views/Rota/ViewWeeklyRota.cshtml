@@ -12,10 +12,75 @@
         <h3>Week Commencing - <b>@weekStartingDate.ToString("dd/MM/yyyy")</b></h3>
     </div>
     <div class="card-body text-center">
+        @{
+            if (ViewBag.Today > ViewBag.WeekEndingDate)
+            {
+                //old rota - no functionality
+                <div class="text-center">
+                    <a asp-area="Management" asp-controller="Rota" asp-action="Index" class="btn btn-secondary btn-sm">Back to List</a>
+                </div>
+            }
+            else if (ViewBag.Today >= ViewBag.WeekStartingDate && ViewBag.Today < ViewBag.WeekEndingDate)
+            {
+                <a asp-area="Management" asp-controller="Rota" asp-action="Index" class="btn btn-secondary btn-sm">Back to List</a>
 
-        <div class="text-center">
-            <a asp-area="Management" asp-controller="Rota" asp-action="Index" class="btn btn-secondary btn-sm">Back to List</a>
-        </div>
+                //current week - unpublished shifts
+                if (ViewBag.UnpublishedShifts)
+                {
+                    <div class="text-center">
+                        <form asp-area="Management" asp-controller="Rota" asp-action="SaveRota" method="post">
+                            <input type="hidden" name="serializedModel" value='@Json.Serialize(Model)' />
+                            <input type="hidden" name="publishStatus" value="true" />
+                            <button type="submit" class="btn btn-secondary btn-sm">Publish Rota</button>
+                        </form>
+                    </div>
+                }
+                else //current week - published shifts
+                {
+                    //edit button?
+                }
+            }
+            else if (ViewBag.Today < ViewBag.WeekStartingDate)
+            {
+                //future week - unpublished rota
+                if (ViewBag.UnpublishedShifts)
+                {
+                    
+                    <div class="text-center">
+                        <a asp-area="Management" asp-controller="Rota" asp-action="Index" class="btn btn-secondary btn-sm">Back to List</a>
+                        <form asp-area="Management" asp-controller="Rota" asp-action="SaveRota" method="post">
+                            <input type="hidden" name="serializedModel" value='@Json.Serialize(Model)' />
+                            <input type="hidden" name="publishStatus" value="true" />
+                            <button type="submit" class="btn btn-secondary btn-sm">Publish Rota</button>
+                        </form>
+                        @if (ViewBag.InitialCreate)
+                        {
+                            <a asp-area="Management" asp-controller="Rota" asp-action="Index" class="btn btn-secondary btn-sm">Back to List</a>
+                            <form asp-area="Management" asp-controller="Rota" asp-action="SaveRota" method="post">
+                                <input type="hidden" name="serializedModel" value='@Json.Serialize(Model)' />
+                                <input type="hidden" name="publishStatus" value="false" />
+                                <button type="submit" class="btn btn-secondary btn-sm">Save Shifts and Exit</button>
+                            </form>
+                        }
+                    </div>
+                }
+                else
+                {
+                    //future week - published rota
+                    <a asp-area="Management" asp-controller="Rota" asp-action="Index" class="btn btn-secondary btn-sm">Back to List</a>
+                    <form asp-area="Management" asp-controller="Rota" asp-action="UnPublishRota" method="post">
+                        <input type="hidden" name="serializedModel" value='@Json.Serialize(Model)' />
+                        <button type="submit" class="btn btn-secondary btn-sm">UnPublish</button>
+                    </form>
+                    <form asp-area="Management" asp-controller="Rota" asp-action="DeleteRota" method="post">
+                        <input type="hidden" name="serializedModel" value='@Json.Serialize(Model)' />
+                        <button type="submit" class="btn btn-secondary btn-sm">Delete Rota</button>
+                    </form>
+                }
+            }               
+        }
+
+        
 
         <div class="table-responsive">
             <table id="weeklyRotaTable" class="table table-hover">

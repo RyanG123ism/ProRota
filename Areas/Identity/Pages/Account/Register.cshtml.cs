@@ -26,6 +26,7 @@ namespace ProRota.Areas.Identity.Pages.Account
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly IUserStore<ApplicationUser> _userStore;
         private readonly IUserEmailStore<ApplicationUser> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
@@ -33,12 +34,14 @@ namespace ProRota.Areas.Identity.Pages.Account
 
         public RegisterModel(
             UserManager<ApplicationUser> userManager,
+            RoleManager<ApplicationRole> roleManager,
             IUserStore<ApplicationUser> userStore,
             SignInManager<ApplicationUser> signInManager,
             ILogger<RegisterModel> logger,
             IEmailSender emailSender)
         {
             _userManager = userManager;
+            _roleManager = roleManager;
             _userStore = userStore;
             _emailStore = GetEmailStore();
             _signInManager = signInManager;
@@ -128,10 +131,6 @@ namespace ProRota.Areas.Identity.Pages.Account
                 user.FirstName = Input.FirstName;
                 user.LastName = Input.LastName;
 
-                //default already set in model
-                //user.Salary = 0.00F;
-                //user.ContractualHours = 0;
-
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
                 var result = await _userManager.CreateAsync(user, Input.Password);
@@ -141,6 +140,10 @@ namespace ProRota.Areas.Identity.Pages.Account
                     _logger.LogInformation("User created a new account with password.");
 
                     var userId = await _userManager.GetUserIdAsync(user);
+
+                    //assigning the user a partial user role (unpaid)
+                    await _userManager.AddToRoleAsync(user, "Partial_User_Unpaid");
+
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                     var callbackUrl = Url.Page(
@@ -159,7 +162,8 @@ namespace ProRota.Areas.Identity.Pages.Account
                     else
                     {
                         await _signInManager.SignInAsync(user, isPersistent: false);
-                        return LocalRedirect(returnUrl);
+                        return RedirectToAction("Services", "Home");
+                        //return LocalRedirect(returnUrl);
                     }
                 }
                 foreach (var error in result.Errors)

@@ -368,96 +368,112 @@ namespace ProRota.Services
             return shiftSchedule;
         }
 
-        public Dictionary<DateTime, Dictionary<string, List<Shift>>>
-    AllocateShifts(Dictionary<DateTime, Dictionary<string, List<Tuple<TimeSpan, TimeSpan>>>> shiftTimes,
-                   Dictionary<string, List<ApplicationUser>> users)
+        public Dictionary<DateTime, Dictionary<string, List<Shift>>>AllocateShifts(Dictionary<DateTime, Dictionary<string, List<Tuple<TimeSpan, TimeSpan>>>> shiftTimes,
+               Dictionary<string, List<ApplicationUser>> users)
         {
             // Dictionary to store assigned shifts (Date -> UserID -> List of Shifts)
             var assignedShifts = new Dictionary<DateTime, Dictionary<string, List<Shift>>>();
 
-            // Iterate through each date in shiftTimes (only one date per method call)
+            //tracks the assinged hours of users across the full week
+            var weeklyAssignedHours = users
+                .SelectMany(kv => kv.Value) //flatten from role category
+                .Distinct()
+                .ToDictionary(user => user.Id, user => 0.0);
+
             foreach (var dateShifts in shiftTimes)
             {
-                DateTime date = dateShifts.Key;
+                DateTime date = dateShifts.Key;//date for that day
                 assignedShifts[date] = new Dictionary<string, List<Shift>>();
 
-                // Iterate through each role category
+                //assign shifts according to role category
                 foreach (var roleCategoryShifts in dateShifts.Value)
                 {
                     string roleCategory = roleCategoryShifts.Key;
                     var shifts = roleCategoryShifts.Value;
 
-                    // Get the users assigned to this role category
+                    //if no users in a role categroy
                     if (!users.ContainsKey(roleCategory) || users[roleCategory].Count == 0)
                     {
                         Console.WriteLine($"⚠ No available users for {roleCategory} on {date}");
                         continue;
                     }
 
-                    // Track assigned hours dynamically for this run
-                    var assignedHours = users[roleCategory].ToDictionary(user => user.Id, user => 0.0);
-
-                    // Sort users: First prioritize those below contract hours, then by fairness
-                    var usersBelowContract = users[roleCategory]
-                        .Where(user => assignedHours[user.Id] < user.ContractualHours)
-                        .OrderBy(user => assignedHours[user.Id]) // Fewest assigned hours first
+                    //sort users based on their weekly assigned hours and filter our users with an approved request for today
+                    var sortedUsers = users[roleCategory]
+                        .Where(user => !user.TimeOffRequests.Any(to => to.Date.Date == date.Date))
+                        .OrderBy(user => weeklyAssignedHours[user.Id])
+                        .ThenBy(_ => Guid.NewGuid()) //add slight randomness to make things fairer
                         .ToList();
-
-                    var usersAboveContract = users[roleCategory]
-                        .Where(user => assignedHours[user.Id] >= user.ContractualHours)
-                        .OrderBy(user => assignedHours[user.Id]) // Prioritize fairness
-                        .ToList();
-
-                    // Merge lists, prioritizing those below contract first
-                    var sortedUsers = usersBelowContract.Concat(usersAboveContract).ToList();
 
                     if (sortedUsers.Count == 0)
                     {
-                        Console.WriteLine($"No available users for {roleCategory} on {date}");
+                        Console.WriteLine($"⚠ No available users for {roleCategory} on {date}");
                         continue;
                     }
 
-                    // Assign shifts
+                    int lastAssignedIndex = 0;
                     foreach (var shift in shifts)
                     {
-                        TimeSpan shiftStart = shift.Item1;
-                        TimeSpan shiftEnd = shift.Item2;
-                        TimeSpan shiftDuration = shiftEnd - shiftStart;
-                        double shiftHours = shiftDuration.TotalHours;
+                        int attempts = 0;
+                        ApplicationUser? userToAssign = null;
+                        TimeSpan shiftDuration = shift.Item2 - shift.Item1;//duration of shift
 
-                        // Find the best user to assign (who is available and has no time-off)
-                        var userToAssign = sortedUsers
-                            .Where(user => !user.TimeOffRequests.Any(to => to.Date.Date == date.Date)) // Ensure no time off conflicts
-                            .FirstOrDefault();
-
-                        if (userToAssign != null)
+                        //finds next available user
+                        while (attempts < sortedUsers.Count)
                         {
-                            // Create a Shift instance
-                            var newShift = new Shift
-                            {
-                                ApplicationUserId = userToAssign.Id,
-                                ApplicationUser = userToAssign,
-                                StartDateTime = date.Date + shiftStart,
-                                EndDateTime = date.Date + shiftEnd,
-                                ShiftNotes = "", 
-                                IsPublished = false,
-                                SiteId = userToAssign.SiteId
-                            };
+                            var potentialUser = sortedUsers[lastAssignedIndex % sortedUsers.Count];
 
-                            // Check if the user already has an entry
-                            if (!assignedShifts[date].ContainsKey(userToAssign.Id))
+                            //skip if the user has a time-off request
+                            if (potentialUser.TimeOffRequests.Any(to => to.Date.Date == date.Date))
                             {
-                                assignedShifts[date][userToAssign.Id] = new List<Shift>();
+                                lastAssignedIndex++;
+                                attempts++;
+                                continue;
                             }
 
-                            assignedShifts[date][userToAssign.Id].Add(newShift);
+                            //skip if the user would be working more than 48 hours
+                            if (weeklyAssignedHours[potentialUser.Id] + shiftDuration.TotalHours > 48)//hard coded amount - change this in future to a property within user ('max hours' for example)
+                            {
+                                lastAssignedIndex++;
+                                attempts++;
+                                continue;
+                            }
 
-                            // Update dynamically tracked assigned hours
-                            assignedHours[userToAssign.Id] += shiftHours;
-
-                            // Resort users dynamically to maintain fairness
-                            sortedUsers = sortedUsers.OrderBy(user => assignedHours[user.Id]).ToList();
+                            userToAssign = potentialUser;
+                            break; //user found
                         }
+
+                        if (userToAssign == null)
+                        {
+                            Console.WriteLine($"⚠ No available users for {roleCategory} on {date} (All have time-off)");
+                            continue; // Skip this shift if no one is available
+                        }
+
+                        //if user already has shifts - assign to excisting key
+                        if (!assignedShifts[date].ContainsKey(userToAssign.Id))
+                        {
+                            assignedShifts[date][userToAssign.Id] = new List<Shift>();
+                        }
+
+                        //create new key and add shift
+                        assignedShifts[date][userToAssign.Id].Add(new Shift
+                        {
+                            StartDateTime = date.Date + shift.Item1,
+                            EndDateTime = date.Date + shift.Item2,
+                            ShiftNotes = "",
+                            IsPublished = false,
+                            ApplicationUserId = userToAssign.Id,
+                            ApplicationUser = userToAssign
+                        }); 
+
+                        //add duration of shift to users weekly hours
+                        weeklyAssignedHours[userToAssign.Id] += shiftDuration.TotalHours;
+
+                        //resort users after every shift is assinged to keep things fair
+                        sortedUsers = sortedUsers.OrderBy(user => weeklyAssignedHours[user.Id]).ToList();
+
+                        //go to next user
+                        lastAssignedIndex++;
                     }
                 }
             }
@@ -468,6 +484,32 @@ namespace ProRota.Services
 
 
 
+
+        public async Task<Dictionary<string, List<TimeOffRequest>>> MapTimeOffRequests(DateTime weekEndingDate, int siteId)
+        {
+            // Get the start of the week (assuming Sunday as the start)
+            DateTime weekStart = weekEndingDate.AddDays(-6);
+
+            // Fetch only the time-off requests for users at the given site
+            var timeOffRequests = await _context.TimeOffRequests
+                .Where(t =>
+                    t.ApplicationUser.SiteId == siteId &&  // Ensure the user belongs to the given site
+                    t.Date >= weekStart &&
+                    t.Date <= weekEndingDate &&
+                    t.IsApproved == ApprovedStatus.Approved)
+                .ToListAsync();
+
+
+            // Map to dictionary grouped by user ID
+            var timeOffRequestsByUser = timeOffRequests
+                .GroupBy(t => t.ApplicationUserId)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.ToList() // Convert grouped requests into a list
+                );
+
+            return timeOffRequestsByUser;
+        }
 
 
         public (TimeSpan openingTime, TimeSpan closingTime) GetOpeningAndClosingTimes(Site site, string day)

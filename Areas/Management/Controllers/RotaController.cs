@@ -2,12 +2,16 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using ProRota.Areas.Management.ViewModels;
 using ProRota.Data;
+using ProRota.Migrations;
 using ProRota.Models;
 using ProRota.Services;
 using System.Collections;
 using System.Security.Claims;
+using System.Security.Policy;
 
 namespace ProRota.Areas.Management.Controllers
 {
@@ -46,12 +50,6 @@ namespace ProRota.Areas.Management.Controllers
             var weekEndingDate = DateTime.Parse(weekEnding);
             var weekStartingDate = weekEndingDate.AddDays(-7); // Week start date from the end date
 
-            //passing true to view only if the rota is of this week or in the future
-            if (weekEndingDate >= DateTime.Now)
-            {
-                ViewBag.Editable = true;
-            }
-
             //querying all users of the site
             //formatting data into a dictionary of the ViewRotaViewModel
             var rota = await _context.ApplicationUsers
@@ -71,12 +69,28 @@ namespace ProRota.Areas.Management.Controllers
                 })
                 .ToDictionaryAsync(u => u.Id);
 
-            ViewBag.WeekStartingDate = weekStartingDate;//passing starting date to view to help format dates
+            //passing starting and ending and today date to view to help format dates
+            ViewBag.WeekStartingDate = weekStartingDate;
+            ViewBag.WeekEndingDate = weekEndingDate;
+            ViewBag.Today = DateTime.Today;
+
+            //passing true to view only if the rota is of this week or in the future
+            if (weekEndingDate >= DateTime.Now)
+            {
+                ViewBag.Editable = true;
+            }
+
+            //passing the publish status of the rota to the view
+            bool UnpublishedShifts = rota.Values.Any(r => r.Shifts.Any(s => !s.IsPublished));
+            ViewBag.UnpublishedShifts = UnpublishedShifts;
+
+            
+
 
             return View(rota);
         }
 
-        private async Task<Dictionary<string, Dictionary<string, List<Shift>>>> GeterateWeeklyRotaListForSiteAsync()
+        public async Task<Dictionary<string, Dictionary<string, List<Shift>>>> GeterateWeeklyRotaListForSiteAsync()
         {
             var siteId = _siteService.GetSiteIdFromSessionOrUser();
 
@@ -89,9 +103,9 @@ namespace ProRota.Areas.Management.Controllers
             //dictionary to hold multiple dicitonaries of catagorised weekly rotas 
             var categorisedWeeklyRotas = new Dictionary<string, Dictionary<string, List<Shift>>>
             {
-                { "Unpublished", new Dictionary<string, List<Shift>>() },
-                { "ActiveWeek", new Dictionary<string, List<Shift>>() },
-                { "Published", new Dictionary<string, List<Shift>>() }
+                { "Unpublished Rotas", new Dictionary<string, List<Shift>>() },
+                { "Current Week", new Dictionary<string, List<Shift>>() },
+                { "Published Rotas", new Dictionary<string, List<Shift>>() }
             };
 
             foreach (var shift in shifts)
@@ -112,7 +126,7 @@ namespace ProRota.Areas.Management.Controllers
             }
 
             //orders the dictionary by decending date key values
-            weeklyRotas.OrderByDescending(r => DateTime.Parse(r.Key)).ToDictionary(r => r.Key, r => r.Value);
+            weeklyRotas = weeklyRotas.OrderByDescending(r => DateTime.Parse(r.Key)).ToDictionary(r => r.Key, r => r.Value);
 
             //determine the active week (this week ending Sunday)
             var activeWeekKey = _rotaService.CalculateNextSundayDateToString(DateTime.Now);
@@ -129,17 +143,17 @@ namespace ProRota.Areas.Management.Controllers
                 if (weekEnding == activeWeekKey)
                 {
                     //set as active week
-                    categorisedWeeklyRotas["ActiveWeek"][weekEnding] = shiftsInWeek;
+                    categorisedWeeklyRotas["Current Week"][weekEnding] = shiftsInWeek;
                 }
                 else if (hasUnpublishedShifts)
                 {
                     //add to Unpublished if at least one shift is not published
-                    categorisedWeeklyRotas["Unpublished"][weekEnding] = shiftsInWeek;
+                    categorisedWeeklyRotas["Unpublished Rotas"][weekEnding] = shiftsInWeek;
                 }
                 else
                 {
                     //otherwise, add to Published
-                    categorisedWeeklyRotas["Published"][weekEnding] = shiftsInWeek;
+                    categorisedWeeklyRotas["Published Rotas"][weekEnding] = shiftsInWeek;
                 }
             }
 
@@ -169,8 +183,8 @@ namespace ProRota.Areas.Management.Controllers
             //loops through day of week and tried to find open and closing times for the site
             foreach (var day in week)
             {
-                var openTime = typeof(Site).GetProperty($"{day}OpenTime")?.GetValue(site) as DateTime?;
-                var closeTime = typeof(Site).GetProperty($"{day}CloseTime")?.GetValue(site) as DateTime?;
+                var openTime = typeof(ProRota.Models.Site).GetProperty($"{day}OpenTime")?.GetValue(site) as DateTime?;
+                var closeTime = typeof(ProRota.Models.Site).GetProperty($"{day}CloseTime")?.GetValue(site) as DateTime?;
                 openDays[day] = openTime != null && closeTime != null; //returns true if both times exist
             }
 
@@ -205,6 +219,13 @@ namespace ProRota.Areas.Management.Controllers
 
             //passing the view model along with the site object to the alogrithm to create a new rota
             var rota = await _algorithmService.CreateWeeklyRota(model, site);
+            var timeOffRequests = await _algorithmService.MapTimeOffRequests(model.WeekEndingDate, site.Id);
+
+            var allShifts = rota.SelectMany(r => r.Value).SelectMany(kvp => kvp.Value).ToList();
+
+            //find the earliest shift date to pass to the view model as the week starting date
+            DateTime? earliestShiftDate = allShifts.Any() ? allShifts.Min(s => s.StartDateTime?.Date)  : null;
+            ViewBag.WeekStartingDate = earliestShiftDate;
 
             //convert rota into a dictionary where the key is the User ID and value is a ViewRotaViewModel
             var viewModel = rota
@@ -218,23 +239,95 @@ namespace ProRota.Areas.Management.Controllers
                         FirstName = g.First().Value.First().ApplicationUser?.FirstName ?? "Unknown", // Get first shift's user
                         LastName = g.First().Value.First().ApplicationUser?.LastName ?? "Unknown",
                         Shifts = g.SelectMany(x => x.Value).ToList(), // Flatten all shifts into a single list
-                        TimeOffRequests = new List<TimeOffRequest>() // Placeholder for now
+                        TimeOffRequests = timeOffRequests.ContainsKey(g.Key) ? timeOffRequests[g.Key] : new List<TimeOffRequest>()
                     });
-            var allShifts = rota
-                .SelectMany(r => r.Value) // Flatten Dictionary<DateTime, Dictionary<string, List<Shift>>>
-                .SelectMany(kvp => kvp.Value) // Get all shifts
-                .ToList();
 
-            // Find the earliest shift date (if any shifts exist)
-            DateTime? earliestShiftDate = allShifts.Any()
-                ? allShifts.Min(s => s.StartDateTime?.Date) // Get the earliest StartDateTime (ignoring time)
-                : null;
+            //user keys
+            var assignedUserIds = new HashSet<string>(viewModel.Keys);
 
-            //passing starting date to view to help format dates
-            ViewBag.WeekStartingDate = earliestShiftDate;
+            //users that didnt get assigned any shifts
+            var unasignedUsers = await _context.ApplicationUsers.Where(u => u.SiteId == site.Id && !assignedUserIds.Contains(u.Id)).Include(u => u.TimeOffRequests.Where(t => t.IsApproved == ApprovedStatus.Approved)).ToListAsync() ?? null;
+            
+
+            if (unasignedUsers != null || unasignedUsers.Count > 0 ) 
+            {
+                //adding unasigned users to the viewModel
+                foreach (var user in unasignedUsers)
+                {
+                    viewModel.Add(user.Id, new ViewRotaViewModel
+                    {
+                        Id = user.Id,
+                        FirstName = user.FirstName,
+                        LastName = user.LastName,
+                        Shifts = new List<Shift>(),
+                        TimeOffRequests = user.TimeOffRequests.ToList()
+                    }); ;
+                }
+            }
+
+            //lets the view know that this is the first instance of this rota, its not been saved yet
+            ViewBag.InitialCreate = true;
+
+            //passing starting and ending and today date to view to help format dates
+            ViewBag.WeekStartingDate = model.WeekEndingDate.AddDays(-6);
+            ViewBag.WeekEndingDate = model.WeekEndingDate;
+            ViewBag.Today = DateTime.Today;
+
+            //passing true to view only if the rota is of this week or in the future
+            if (model.WeekEndingDate >= DateTime.Now)
+            {
+                ViewBag.Editable = true;
+            }
+
+            //passing the publish status of the rota to the view
+            ViewBag.UnpublishedShifts = true;
 
             return View("ViewWeeklyRota", viewModel);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> SaveRota(string serializedModel, bool publishStatus)
+        {
+            //if no data is passed in
+            if (string.IsNullOrEmpty(serializedModel))
+            {
+                TempData["PopUp"] = "Error: Rota Data missing from JSON";
+                return RedirectToAction("Index");
+            }
+
+            //extract the serialized model
+            var model = JsonConvert.DeserializeObject<Dictionary<string, ViewRotaViewModel>>(serializedModel);
+            var siteId = _siteService.GetSiteIdFromSessionOrUser();
+
+            if(model.IsNullOrEmpty())
+            {
+                TempData["PopUp"] = "Error: Could not extract rota data from form";
+                return RedirectToAction("Index");
+            }
+
+            foreach (var userId in model.Keys)
+            {
+                foreach (var shift in model[userId].Shifts)
+                {
+                    shift.ApplicationUserId = userId;
+                    shift.SiteId = siteId;
+                    shift.IsPublished = publishStatus;//changing published status
+                    _context.Shifts.Add(shift);//adding to db
+                }
+            }
+
+            var result = await _context.SaveChangesAsync();
+            if(result < 0)
+            {
+                ViewBag.PopUp = "Error: Could not save new shifts to DB";
+                return View(model);
+            }
+
+            return RedirectToAction("Index");
+
+        }
+
+        
 
     }
 }

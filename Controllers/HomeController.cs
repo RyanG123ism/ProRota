@@ -1,6 +1,9 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.ValueGeneration.Internal;
 using ProRota.Models;
+using ProRota.Services;
 using System.Diagnostics;
 
 namespace ProRota.Controllers
@@ -9,19 +12,45 @@ namespace ProRota.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private SignInManager<ApplicationUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ICompanyService _companyService;
 
-        public HomeController(ILogger<HomeController> logger, SignInManager<ApplicationUser> signInManager)
+        public HomeController(ILogger<HomeController> logger, SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, ICompanyService companyService)
         {
             _logger = logger;
             _signInManager = signInManager;
+            _userManager = userManager;
+            _companyService = companyService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            //will return the home page if a user is signed in
+             
+            //checks is user is logged in
             if(_signInManager.IsSignedIn(User))
             {
-                return RedirectToAction("Home");
+                if(User.IsInRole("Partial_User_Unpaid"))//unpaid account
+                {
+                    return View("Services");
+                }
+                else if(User.IsInRole("Partial_User_Paid"))//paid account - still to set up company account
+                {
+                    return RedirectToAction("CreateCompany", "Company", new { area = "Admin" });
+                }
+                else
+                {
+                    if (TempData["InitialLogin"] != null)
+                    {
+                        if ((bool)TempData["InitialLogin"] == true)
+                        {
+                            //create session for initial login (once account ans company fully created)
+                            await _companyService.CreateSession();
+                            TempData.Remove("InitialLogin");//drop data
+                        }
+                    }
+
+                    return RedirectToAction("Home");//fully set up account - goes to normal home page
+                }  
             }
 
             //otherwise return the welcomepage / index
@@ -40,6 +69,11 @@ namespace ProRota.Controllers
 
 
         public IActionResult About()
+        {
+            return View();
+        }
+
+        public IActionResult Services()
         {
             return View();
         }

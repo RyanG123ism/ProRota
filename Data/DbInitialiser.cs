@@ -23,6 +23,7 @@ namespace ProRota.Data
                 await SeedSite(_services);
                 await SeedCompany(_services);
                 await SeedRoles(_services);
+                await SeedSiteRoles(_services);
                 await SeedUsers(_services);
                 await SeedShifts(_services);
                 await SeedTimeOffRequests(_services);
@@ -35,8 +36,34 @@ namespace ProRota.Data
             }
 
         }
-
         public static async Task SeedRoles(IServiceProvider serviceProvider)
+        {
+            var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
+            var roleManager = serviceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
+
+            //partial user - this gets assigned to users when first creating an account - before the fully register
+            var partialUserRole_Unpaid = new ApplicationRole
+            {
+                Name = "Partial_User_Unpaid"
+            };
+
+            //partial user - assigned to user after payment completed - still to full set up company account
+            var partialUserRole_Paid = new ApplicationRole
+            {
+                Name = "Partial_User_Paid"
+            };
+
+            var owner = new ApplicationRole
+            {
+                Name = "Owner"
+            };
+
+            await roleManager.CreateAsync(partialUserRole_Unpaid);
+            await roleManager.CreateAsync(partialUserRole_Paid);
+            await roleManager.CreateAsync(owner);
+            await context.SaveChangesAsync();
+        }
+        public static async Task SeedSiteRoles(IServiceProvider serviceProvider)
         {
             var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
             var roleManager = serviceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
@@ -49,7 +76,7 @@ namespace ProRota.Data
                 { "Management", new List<string> { "Supervisor", "Assistant Manager", "General Manager" } },
                 { "BOH", new List<string> { "Chef de Partie", "Sous Chef", "Head Chef" } },
                 { "Admin", new List<string> { "Admin" } },
-                { "Deactivated", new List<string> { "Deactivated" } }
+                { "Deactivated", new List<string> { "Deactivated" } },
             };
 
             foreach (var category in roleCategories)

@@ -1,4 +1,5 @@
 ﻿using ProRota.Models;
+using System.Text.Json.Serialization;
 
 namespace ProRota.Areas.Management.ViewModels
 {

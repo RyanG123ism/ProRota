@@ -29,6 +29,9 @@
                                 <i class="fas fa-user-cog mr-2"></i> @site.SiteName
                             </a>
                         }
+                        <div class="btn-container">
+                            <a class="btn btn-secondary" href="javascript:void(0);" onclick="createSitePopUp()">Join Now</a>
+                        </div>
                     </ul>
 
                     <!-- Unused Links Section -->
@@ -50,3 +53,44 @@
         </div>
     </div>
 </div>
+
+@* Hidden pop-up to create a new site *@
+<div class="modal fade" id="CreateSitePopUp" tabindex="-1" aria-labelledby="createSiteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createSiteModalLabel">Create New Site</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form asp-action="/CreateSite" asp-area="Admin" asp-controller="Site" method="post">
+                    <!-- Site Name -->
+                    <div class="mb-3">
+                        <label for="siteName" class="form-label">Site Name</label>
+                        <input type="text" class="form-control" id="siteName" name="siteName" placeholder="Enter site name..." required maxlength="50" />
+                        <small class="form-text text-muted">Maximum 50 characters.</small>
+                    </div>
+
+                    <div class="modal-footer">
+                        <!-- Cancel Button -->
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn btn-primary">Create Site</button>
+                        <!-- Error Message -->
+                        <div class="text-center">
+                            <span id="errorMessage" style="color: red; display: none;"></span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (TempData["AlertMessage"] != null)
+{
+    <script>
+        alert("@TempData["AlertMessage"]");
+    </script>
+}
+

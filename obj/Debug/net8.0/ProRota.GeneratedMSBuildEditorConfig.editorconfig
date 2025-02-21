@@ -26,6 +26,10 @@ build_property.GenerateRazorMetadataSourceChecksumAttributes =
 build_property.MSBuildProjectDirectory = C:\Users\grant\OneDrive\Desktop\UNI\Year 4\Honours Project\ProRota
 build_property._RazorSourceGeneratorDebug = 
 
+[C:/Users/grant/OneDrive/Desktop/UNI/Year 4/Honours Project/ProRota/Areas/Admin/Views/Company/CreateCompany.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcQWRtaW5cVmlld3NcQ29tcGFueVxDcmVhdGVDb21wYW55LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/grant/OneDrive/Desktop/UNI/Year 4/Honours Project/ProRota/Areas/Admin/Views/Home/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = QXJlYXNcQWRtaW5cVmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -284,6 +288,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/grant/OneDrive/Desktop/UNI/Year 4/Honours Project/ProRota/Views/Home/Privacy.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQcml2YWN5LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/grant/OneDrive/Desktop/UNI/Year 4/Honours Project/ProRota/Views/Home/Services.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxTZXJ2aWNlcy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/grant/OneDrive/Desktop/UNI/Year 4/Honours Project/ProRota/Views/Shared/Error.cshtml]

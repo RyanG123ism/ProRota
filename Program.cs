@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Build.Framework;
 using Microsoft.EntityFrameworkCore;
 using ProRota.Data;
 using ProRota.Models;
 using ProRota.Services;
+using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,7 +34,13 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddRazorPages();
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+        options.JsonSerializerOptions.WriteIndented = true; // Optional: Makes JSON more readable
+    });
+
 
 // Add session services
 builder.Services.AddDistributedMemoryCache(); // Required for session storage
@@ -47,9 +55,17 @@ builder.Services.AddSession(options =>
 builder.Services.AddScoped<ISiteService, SiteService>();
 builder.Services.AddScoped<IRotaService, RotaService>();
 builder.Services.AddScoped<IAlgorithmService, AlgorithmService>();
+builder.Services.AddScoped<ITimeOffRequestService, TimeOffRequestService>();
+builder.Services.AddScoped<ICompanyService, CompanyService>();
+builder.Services.AddScoped<StripePaymentService>(); // stripe service
+builder.Services.AddSingleton<IEmailSender, EmailSenderService>(); //email service
 builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
+
+//adding stripe 
+var stripeSettings = builder.Configuration.GetSection("Stripe");
+StripeConfiguration.ApiKey = stripeSettings["SecretKey"];
 
 // Use session
 app.UseSession();

@@ -10,12 +10,12 @@
             <img src="/images/AccountLogo.png" alt="User Profile" class="user-profile-img">
             <div class="user-dropdown-menu">
                 <a asp-area="Identity" asp-page="/Account/Manage/Index">My Profile</a>
-                 @if(User.Identity.IsAuthenticated)
+                        @if(User.Identity.IsAuthenticated)
                         {
-                            @if(User.IsInRole("Admin"))
+                            @if (User.IsInRole("Admin") || User.IsInRole("Owner"))
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" style="color:black" asp-area="Admin" asp-controller="Home" asp-action="Index">Admin Dashboard</a>
+                                    <a class="nav-link text-dark" style="color:black" asp-area="Admin" asp-controller="Home" asp-action="Index">Admin/Owner Dashboard</a>
                                 </li>
 
                             }
@@ -24,6 +24,10 @@
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" style="color:black" asp-area="Management" asp-controller="Home" asp-action="Index">Management Dashboard</a>
                                 </li>
+                            }
+                            else if (User.IsInRole("Partial_User_Paid") || User.IsInRole("Partial_User_Unpaid"))
+                            {
+                                //display nothing
                             }
                             else
                             {

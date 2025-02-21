@@ -15,6 +15,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 using ProRota.Models;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
+using ProRota.Data;
+using ProRota.Services;
+using Microsoft.AspNetCore.Http;
 
 namespace ProRota.Areas.Identity.Pages.Account
 {
@@ -22,11 +27,16 @@ namespace ProRota.Areas.Identity.Pages.Account
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger<LoginModel> _logger;
+        private readonly ICompanyService _companyService;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public LoginModel(SignInManager<ApplicationUser> signInManager, ILogger<LoginModel> logger)
+
+        public LoginModel(SignInManager<ApplicationUser> signInManager, ILogger<LoginModel> logger, ICompanyService companyService, UserManager<ApplicationUser> userManager)
         {
             _signInManager = signInManager;
             _logger = logger;
+            _companyService = companyService;
+            _userManager = userManager;
         }
 
         /// <summary>
@@ -115,8 +125,10 @@ namespace ProRota.Areas.Identity.Pages.Account
                 var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
                 if (result.Succeeded)
                 {
+                    TempData["InitialLogin"] = true;
+
                     _logger.LogInformation("User logged in.");
-                    return LocalRedirect(returnUrl);
+                    return RedirectToAction("Index", "Home", new {area = ""});
                 }
                 if (result.RequiresTwoFactor)
                 {
