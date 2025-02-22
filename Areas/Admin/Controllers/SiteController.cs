@@ -25,6 +25,7 @@ namespace ProRota.Areas.Admin.Controllers
             _companyService = companyService;
         }
 
+        [HttpPost]
         public async Task<IActionResult> CreateSite(string siteName)
         {
             if(siteName.IsNullOrEmpty())

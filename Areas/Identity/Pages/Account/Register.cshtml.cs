@@ -144,8 +144,10 @@ namespace ProRota.Areas.Identity.Pages.Account
                     //assigning the user a partial user role (unpaid)
                     await _userManager.AddToRoleAsync(user, "Partial_User_Unpaid");
 
+                    //generate email conformation token
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+
                     var callbackUrl = Url.Page(
                         "/Account/ConfirmEmail",
                         pageHandler: null,

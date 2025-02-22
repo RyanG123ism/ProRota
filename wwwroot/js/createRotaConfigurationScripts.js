@@ -4,18 +4,21 @@
     days.forEach(day => {
         let total = 0;
 
-        //select all input fields for the given day
+        // Select all input fields for the given day
         const inputs = document.querySelectorAll(`.covers-input[data-day='${day}']`);
 
-        //loop through each input and add its value to total
-        inputs.forEach(input => {
-            total += parseInt(input.value) || 0; // Convert input value to number, default to 0 if empty
-        });
+        if (inputs.length > 0) {
+            //Loop through each input and add its value to total
+            inputs.forEach(input => {
+                total += parseInt(input.value) || 0; // Convert input value to number, default to 0 if empty
+            });
 
-        //update the total row for this day
-        document.getElementById(`total-${day}`).textContent = `${day} Covers: ${total}`;
+            // Update the total row for this day
+            document.getElementById(`total-${day}`).textContent = `${day} Covers: ${total}`;
+        }
     });
 }
+
 
 function calculateQuaterlyTimes() {
     console.log("Running script to calculate times")
