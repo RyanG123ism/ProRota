@@ -128,7 +128,8 @@ namespace ProRota.Areas.Identity.Pages.Account
                     TempData["InitialLogin"] = true;
 
                     _logger.LogInformation("User logged in.");
-                    return RedirectToAction("Index", "Home", new {area = ""});
+
+                    return Redirect(returnUrl ?? Url.Action("Index", "Home"));
                 }
                 if (result.RequiresTwoFactor)
                 {

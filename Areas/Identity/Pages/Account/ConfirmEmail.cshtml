@@ -1,8 +1,22 @@
 ﻿@page
 @model ConfirmEmailModel
 @{
-    ViewData["Title"] = "Confirm email";
+    ViewData["Title"] = "Confirm Email";
+    Layout = "_LayoutNavBarRemoved";
 }
 
-<h1>@ViewData["Title"]</h1>
-<partial name="_StatusMessage" model="Model.StatusMessage" />
+<!-- Full Page Centering -->
+<div class="d-flex align-items-center justify-content-center min-vh-100">
+    <div class="card shadow-lg p-4 text-center" style="max-width: 400px; width: 100%;">
+        <div class="card-body">
+            <hr />
+            @if (TempData["ConfirmationMessage"] != null)
+            {
+                <div class="alert text-white borderless-alert">
+                    @TempData["ConfirmationMessage"]
+                </div>
+            }
+        </div>
+    </div>
+</div>
+

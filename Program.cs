@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Build.Framework;
 using Microsoft.EntityFrameworkCore;
 using ProRota.Data;
+using ProRota.Hubs;
 using ProRota.Models;
 using ProRota.Services;
 using Stripe;
@@ -34,6 +35,8 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddRazorPages();
 
+builder.Services.AddSignalR();//Register SignalR
+
 builder.Services.AddControllersWithViews()
     .AddJsonOptions(options =>
     {
@@ -59,6 +62,7 @@ builder.Services.AddScoped<ITimeOffRequestService, TimeOffRequestService>();
 builder.Services.AddScoped<ICompanyService, CompanyService>();
 builder.Services.AddScoped<StripePaymentService>(); // stripe service
 builder.Services.AddSingleton<IEmailSender, EmailSenderService>(); //email service
+builder.Services.AddSingleton<EmailConfirmationHub>();
 builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
@@ -121,5 +125,6 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 app.MapRazorPages();
+app.MapHub<EmailConfirmationHub>("/emailConfirmationHub");
 
 app.Run();

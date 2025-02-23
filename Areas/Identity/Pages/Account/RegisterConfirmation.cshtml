@@ -1,23 +1,93 @@
 ﻿@page
 @model RegisterConfirmationModel
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+
 @{
-    ViewData["Title"] = "Register confirmation";
+    ViewData["Title"] = "Register Confirmation";
+    if (!SignInManager.IsSignedIn(User))
+    {
+        Layout = "_LayoutNavBarRemoved";
+    }
 }
 
-<h1>@ViewData["Title"]</h1>
-@{
-    if (@Model.DisplayConfirmAccountLink)
-    {
-<p>
-    This app does not currently have a real email sender registered, see <a href="https://aka.ms/aspaccountconf">these docs</a> for how to configure a real email sender.
-    Normally this would be emailed: <a id="confirm-link" href="@Model.EmailConfirmationUrl">Click here to confirm your account</a>
-</p>
+<!-- Full Page Centering -->
+<div class="d-flex align-items-center justify-content-center min-vh-100">
+    <div class="card shadow-lg p-4 text-center" style="max-width: 400px; width: 100%;">
+        <div class="card-body">
+            <h2 class="card-title text-center">Email Sent!</h2>
+            <hr />
+            <p class="lead">
+                Thank you for registering! An email confirmation has been sent to your inbox.
+            </p>
+            <p>
+                Please check your email and follow the link to confirm your account.
+            </p>
+            <p>
+                If you are not automatically redirected after confirmation, you can:
+            </p>
+
+            <!-- Buttons for Login and Home -->
+            <div class="d-grid gap-2">
+                <a href="@Url.Page("/Account/Login")" class="btn btn-primary">Click here to log in</a>
+                <a href="@Url.Page("Index", "Home", new {area = ""})" class="btn btn-secondary">Go back to Home</a>
+            </div>
+
+            <div id="confirmationMessage" class="borderless-alert text-center d-flex flex-column align-items-center" style="display: none;">
+                <span id="loadingSpinner" class="spinner-border spinner-border-sm mb-2" role="status" aria-hidden="true" style="display: none;"></span>
+                <span id="messageText"> </span>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+
+<script>
+    function getQueryParam(param) {
+        let queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        const value = urlParams.get(param);
+        return value;
     }
-    else
-    {
-<p>
-        Please check your email to confirm your account.
-</p>
-    }
-}
+
+    const userId = getQueryParam("userId");
+    console.log("userId from URL =", userId); 
+
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/emailConfirmationHub")
+        .configureLogging(signalR.LogLevel.Information)
+        .build();
+
+    connection.start()
+        .then(() => {
+            console.log("✅ Connected to SignalR");
+
+            if (userId && userId !== "null" && userId !== "") {
+                connection.invoke("RegisterUser", userId).catch(err => console.error(err));
+            } else {
+                console.warn("⚠️ User ID is null or not available.");
+            }
+        })
+        .catch(err => console.error("❌ SignalR connection failed:", err));
+
+    connection.on("ReceiveConfirmation", function () {
+        let confirmationMessage = document.getElementById("confirmationMessage");
+        confirmationMessage.style.display = "block";
+
+        let loadingSpinner = document.getElementById("loadingSpinner");
+        loadingSpinner.style.display = "block";
+
+        let messageText = document.getElementById("messageText");
+        messageText.innerHTML = "Your account has been confirmed! Redirecting to login...";
+
+        setTimeout(() => {
+            window.location.href = "/Identity/Account/Login";
+        }, 7000);
+    });
+</script>
+
+
 

@@ -4,11 +4,17 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - ProRota</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/ProRota.styles.css" asp-append-version="true" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    
 
 
 </head>
@@ -50,6 +56,8 @@
     <script src="~/js/siteConfigurationScripts.js" asp-append-version="true"></script>
     <script src="~/js/tableScripts.js" asp-append-version="true"></script>
     <script src="~/js/userDashboardScripts.js" asp-append-version="true"></script>
+    <script src="~/js/signalRScripts.js" asp-append-version="true"></script>
+    <!-- Include SignalR -->
     @await RenderSectionAsync("Scripts", required: false)
 
 </body>

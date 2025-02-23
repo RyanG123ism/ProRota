@@ -9,13 +9,16 @@
         <div class="col-md-6">
             <div class="card bg-dark text-white p-4 shadow-lg">
                 <h2 class="text-center">Create Your Company</h2>
+                <p class="lead">
+                    Just one last thing before your account is fully set up! Tell us the name of your business.
+                </p>
                 <form asp-action="CreateCompany" method="post">
 
                     <!-- Hidden User ID -->
                     <input type="hidden" asp-for="ApplicationUserId" />
 
                     <!-- Company Name -->
-                    <div class="form-group mt-3">
+                    <div class="form-group mt-3 text-center">
                         <label asp-for="CompanyName"></label>
                         <input asp-for="CompanyName" class="form-control" placeholder="Enter company name" />
                         <span asp-validation-for="CompanyName" class="text-danger"></span>

@@ -6,6 +6,15 @@
     <div class="text-center">
         <h1 class="display-4">ProRota Pricing Plans</h1>
         <p class="lead">Choose the right plan for your business.</p>
+        <br/>
+    </div>
+
+    <div class="text-center">
+        <h5>
+            To access ProRota, you must select a license type.
+            Licenses are billed annually and can be changed or canceled at any time.
+        </h5>
+        <p class="lead">Simply select a plan that fits your business needs, and you can always adjust it later.</p>
     </div>
 
     <div class="row mt-5 justify-content-center">
@@ -20,15 +29,24 @@
                     <li>✔ Unlimited employees</li>
                     <li>✔ Shift & rota management</li>
                 </ul>
-                <form asp-controller="Payment" asp-action="Checkout" method="post">
-                    <input type="hidden" name="plan" value="single">
-                    <input type="hidden" name="price" value="100">
-                    <button type="submit" class="btn btn-primary">Get Started</button>
-                </form>
+                @if (!User.Identity.IsAuthenticated)
+                {
+                    <form asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Url.Action("Services", "Home")">
+                        <button type="submit" class="btn btn-primary">Get Started</button>
+                    </form>
+                }
+                else
+                {
+                    <form asp-controller="Payment" asp-action="Checkout" method="post">
+                        <input type="hidden" name="plan" value="single">
+                        <input type="hidden" name="price" value="100">
+                        <button type="submit" class="btn btn-primary">Get Started</button>
+                    </form>
+                }
             </div>
         </div>
 
-        <!-- Multi-License -->
+        <!-- Multi License -->
         <div class="col-md-4">
             <div class="card bg-dark text-white shadow-lg p-4 text-center">
                 <h3>Multi License</h3>
@@ -39,11 +57,20 @@
                     <li>✔ Unlimited employees</li>
                     <li>✔ Advanced reporting & analytics</li>
                 </ul>
-                <form asp-controller="Payment" asp-action="Checkout" method="post">
-                    <input type="hidden" name="plan" value="multi">
-                    <input type="hidden" name="price" value="250">
-                    <button type="submit" class="btn btn-success">Get Started</button>
-                </form>
+                @if (!User.Identity.IsAuthenticated)
+                {
+                    <form asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Url.Action("Services", "Home")">
+                        <button type="submit" class="btn btn-success">Get Started</button>
+                    </form>
+                }
+                else
+                {
+                    <form asp-controller="Payment" asp-action="Checkout" method="post">
+                        <input type="hidden" name="plan" value="multi">
+                        <input type="hidden" name="price" value="250">
+                        <button type="submit" class="btn btn-success">Get Started</button>
+                    </form>
+                }
             </div>
         </div>
 
@@ -58,16 +85,37 @@
                     <li>✔ Unlimited employees</li>
                     <li>✔ Premium support & features</li>
                 </ul>
-                <form asp-controller="Payment" asp-action="Checkout" method="post">
-                    <input type="hidden" name="plan" value="unlimited">
-                    <input type="hidden" name="price" value="1000">
-                    <button type="submit" class="btn btn-warning">Get Started</button>
-                </form>
+                @if (!User.Identity.IsAuthenticated)
+                {
+                    <form asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Url.Action("Services", "Home")">
+                        <button type="submit" class="btn btn-warning">Get Started</button>
+                    </form>
+                }
+                else
+                {
+                    <form asp-controller="Payment" asp-action="Checkout" method="post">
+                        <input type="hidden" name="plan" value="unlimited">
+                        <input type="hidden" name="price" value="1000">
+                        <button type="submit" class="btn btn-warning">Get Started</button>
+                    </form>
+                }
             </div>
         </div>
     </div>
 
+    <!-- Navigation Buttons -->
     <div class="text-center mt-5">
+        <a class="btn btn-primary" asp-area="" asp-page="/Home/Index">Back to Home</a>
+
+        @if (User.Identity.IsAuthenticated)
+        {
+            <form asp-area="Identity" asp-page="/Account/Logout" method="post" class="d-inline">
+                <button type="submit" class="btn btn-secondary">Log Out</button>
+            </form>
+        }
+    </div>
+
+    <div class="text-center mt-4">
         <p>Need a custom solution? <a href="/contact" class="text-info">Contact us</a> for enterprise plans.</p>
     </div>
 </div>
