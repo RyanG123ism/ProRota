@@ -8,7 +8,7 @@ using ProRota.Services;
 
 namespace ProRota.Areas.Management.Controllers
 {
-    [Authorize(Roles = "Admin, General Manager, Assistant Manager, Head Chef, Executive Chef, Operations Manager")]
+    [Authorize(Roles = "Owner, Admin, General Manager, Assistant Manager, Head Chef, Executive Chef")]
     [Area("Management")]
     public class SiteController : Controller
     {
@@ -42,12 +42,12 @@ namespace ProRota.Areas.Management.Controllers
                 //send pop up message if configuration hasnt been done
                 if (site.SiteConfiguration == null)
                 {
-                    ViewBag.PopUpMessage = $"It seems although {site.SiteName} still needs to be configured before ProRota can automatically create your schedules. Please use the Edit Configuration button to finish your sites configuration!";
+                    ViewBag.Alert = $"It seems although {site.SiteName} still needs to be configured before ProRota can automatically create your schedules. Please use the Edit Configuration button to finish your sites configuration!";
                 }
             }
             else
             {
-                ViewBag.PopUpMessage = TempData["popUpMessage"];
+                ViewBag.Success = TempData["popUpMessage"];
             }
             
 

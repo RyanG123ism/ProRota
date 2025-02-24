@@ -15,7 +15,7 @@ using System.Security.Policy;
 
 namespace ProRota.Areas.Management.Controllers
 {
-    [Authorize(Roles = "Admin, General Manager, Assistant Manager, Head Chef, Executive Chef, Operations Manager")]
+    [Authorize(Roles = "Owner, Admin, General Manager, Assistant Manager, Head Chef, Executive Chef")]
     [Area("Management")]
     public class RoleController : Controller
     {
@@ -180,7 +180,7 @@ namespace ProRota.Areas.Management.Controllers
 
             if(roles.Any(r => r.Name == model.RoleName)) 
             {
-                ViewBag.PopUpMessage = "Role already exists";
+                ViewBag.Error = "Role already exists";
                 return View(model);
             }
 

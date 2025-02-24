@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ProRota.Areas.Admin.Models.ViewModels;
 using ProRota.Data;
 using ProRota.Models;
@@ -54,6 +55,14 @@ namespace ProRota.Areas.Admin.Controllers
                 return View(model); 
             }
 
+            var existingCompany = await _context.Companies.Where(c => c.CompanyName == model.CompanyName).FirstOrDefaultAsync();
+
+            if(existingCompany != null)
+            {
+                ViewBag.Error = "Company name already exists";
+                return View(model);
+            }
+
             var user = await _context.ApplicationUsers.FindAsync(model.ApplicationUserId);
 
             var company = new Company
@@ -71,7 +80,7 @@ namespace ProRota.Areas.Admin.Controllers
                 await _userManager.RemoveFromRoleAsync(user, "Partial_User_Paid");
             }
 
-            await _userManager.AddToRoleAsync(user, "owner");
+            await _userManager.AddToRoleAsync(user, "Owner");
 
             //refresh the users authentication so we can access new role
             await _signInManager.RefreshSignInAsync(user);
@@ -80,5 +89,44 @@ namespace ProRota.Areas.Admin.Controllers
 
             return RedirectToAction("Index", "Home", new { area = "" });
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Details(int id)
+        {
+            if (id == 0)
+            {
+                throw new Exception("Invalid company ID");
+            }
+
+            var company = await _context.Companies
+                .Where(c => c.Id == id)
+                .Include(c => c.Sites)
+                .Include(c => c.ApplicationUser)
+                .FirstOrDefaultAsync();
+
+            if (company == null)
+            {
+                throw new Exception("Invalid company ID");
+            }
+
+            // Get employee count per site
+            var siteEmployeeCounts = await _context.Sites
+                .Where(s => s.CompanyId == id)
+                .Select(s => new
+                {
+                    SiteId = s.Id,
+                    EmployeeCount = s.ApplicationUsers.Count()
+                })
+                .ToDictionaryAsync(s => s.SiteId, s => s.EmployeeCount);
+
+            // Store employee count in ViewBag
+            ViewBag.SiteEmployeeCounts = siteEmployeeCounts;
+
+            ViewBag.SitesCount = company.Sites.Count();
+            ViewBag.TotalEmployees = siteEmployeeCounts.Values.Sum(); // Total employees across all sites
+
+            return View(company);
+        }
+
     }
 }

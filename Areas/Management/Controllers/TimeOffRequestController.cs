@@ -9,7 +9,7 @@ using ProRota.Services;
 
 namespace ProRota.Areas.Management.Controllers
 {
-    [Authorize(Roles = "Admin, General Manager, Assistant Manager, Head Chef, Executive Chef, Operations Manager")]
+    [Authorize(Roles = "Owner, Admin, General Manager, Assistant Manager, Head Chef, Executive Chef")]
     [Area("Management")]
     public class TimeOffRequestController : Controller
     {
@@ -36,7 +36,7 @@ namespace ProRota.Areas.Management.Controllers
             if (isAdmin)
             {
                 //checks for existing admin siteId session
-                var adminSession = HttpContext.Session.GetInt32("AdminsCurrentSiteId");
+                var adminSession = HttpContext.Session.GetInt32("UsersCurrentSite");
 
                 //if session exists then only users from that site will be fetched
                 requests = adminSession != null ? _timeOffRequestService.GetAllTimeOffRequestsBySite() : _timeOffRequestService.GetAllTimeOffRequests();
@@ -50,7 +50,7 @@ namespace ProRota.Areas.Management.Controllers
             ViewBag.Tomorrow = DateTime.Now.AddDays(1).Date;
 
             //send temp data from other actions back into the view
-            ViewBag.ConformationMessage = TempData["ConformationMessage"];
+            ViewBag.Success = TempData["ConformationMessage"];
 
             return View("ViewAllTimeOffRequests", requests);
         } 

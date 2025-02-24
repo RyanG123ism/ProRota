@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@using System.Web
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -57,7 +59,32 @@
     <script src="~/js/tableScripts.js" asp-append-version="true"></script>
     <script src="~/js/userDashboardScripts.js" asp-append-version="true"></script>
     <script src="~/js/signalRScripts.js" asp-append-version="true"></script>
-    <!-- Include SignalR -->
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Error Message Handling
+            var errorMessage = '@HttpUtility.JavaScriptStringEncode(ViewBag.Error ?? "")';
+            if (errorMessage && errorMessage.trim() !== '') {
+                console.log('❌ PopUp Error:', errorMessage);
+                popUpMessageError(errorMessage);
+            }
+
+            // Success Message Handling
+            var successMessage = '@HttpUtility.JavaScriptStringEncode(ViewBag.Success ?? "")';
+            if (successMessage && successMessage.trim() !== '') {
+                console.log('✅ PopUp Success:', successMessage);
+                popUpMessageSuccess(successMessage);
+            }
+
+            // General Alert Message Handling
+            var alertMessage = '@HttpUtility.JavaScriptStringEncode(ViewBag.Alert ?? "")';
+            if (alertMessage && alertMessage.trim() !== '') {
+                console.log('⚠️ PopUp Alert:', alertMessage);
+                popUpMessageAlert(alertMessage);
+            }
+        });
+    </script>
+    
     @await RenderSectionAsync("Scripts", required: false)
 
 </body>

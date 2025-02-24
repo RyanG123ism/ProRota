@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using ProRota.Models;
+using static Azure.Core.HttpHeader;
 
 namespace ProRota.Data
 {
@@ -21,9 +23,9 @@ namespace ProRota.Data
             try
             {
                 await SeedSite(_services);
-                await SeedCompany(_services);
                 await SeedRoles(_services);
                 await SeedSiteRoles(_services);
+                await SeedCompany(_services);
                 await SeedUsers(_services);
                 await SeedShifts(_services);
                 await SeedTimeOffRequests(_services);
@@ -664,16 +666,25 @@ namespace ProRota.Data
 
             var sites = dbContext.Sites.ToList();
 
+            var userOwner = await SeedCompanyOwner(services);
+            
             //if company  isnt found
             if (!dbContext.Companies.Any(c => c.CompanyName == "Six by Nico"))
             {
+                var testCompany = new Company()
+                {
+                    CompanyName = "Test Company",
+                    ApplicationUserId = userOwner.Id
+                };
 
                 var company = new Company()
                 {
                     CompanyName = "Six by Nico"
                 };
 
-                dbContext.Companies.Add(company);
+                await dbContext.Companies.AddAsync(company);
+                await dbContext.Companies.AddAsync(testCompany);
+
 
                 foreach (var site in sites)
                 {
@@ -684,6 +695,37 @@ namespace ProRota.Data
                 }
                 await dbContext.SaveChangesAsync();
             }
+        }
+
+        public async Task<ApplicationUser> SeedCompanyOwner(IServiceProvider services)
+        {
+            var dbContext = services.GetRequiredService<ApplicationDbContext>();
+            var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+
+            var testUser = new ApplicationUser()
+            {
+                FirstName = "RyanOwner",
+                LastName = "GrantOwner",
+                Shifts = new List<Shift>(),
+                TimeOffRequests = new List<TimeOffRequest>(),
+                UserName = "owner@gmail.com",
+                Email = "owner@gmail.com",
+                NormalizedUserName = "OWNER@GMAIL.COM",
+                NormalizedEmail = "OWNER@GMAIL.COM",
+                EmailConfirmed = true,
+                LockoutEnabled = true,
+                PhoneNumberConfirmed = true,
+                Salary = 15,
+                ContractualHours = 45,
+                Notes = "none"
+
+            };         
+
+            await userManager.CreateAsync(testUser, "sbn");
+            await userManager.AddToRoleAsync(testUser, "Owner");
+            await dbContext.SaveChangesAsync();
+
+            return testUser;
         }
 
         public async Task SeedTimeOffRequests(IServiceProvider services)

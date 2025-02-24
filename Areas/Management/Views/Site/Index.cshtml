@@ -312,12 +312,6 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        var message = '@HttpUtility.JavaScriptStringEncode(ViewBag.PopUpMessage)';
-        if (message && message.trim() !== '') {
-            console.log('PopUp Message:', message);
-            popUpMessage(message);
-        }
-
         //listener for any changes in forms
         // document.getElementById("EditConfiguration").addEventListener("change", function (event) {
         //     validateSiteConfigurationForm();

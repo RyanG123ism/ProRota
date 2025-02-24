@@ -1,0 +1,83 @@
+﻿@using ProRota.Models
+@model Company
+
+@{
+    ViewData["Title"] = "Company Overview";
+
+    // ✅ Retrieve `siteEmployeeCounts` safely
+    var siteEmployeeCounts = ViewBag.SiteEmployeeCounts as Dictionary<int, int> ?? new Dictionary<int, int>();
+}
+
+<div class="container mt-5">
+    <div class="card shadow-lg p-4">
+        <div class="card-body text-center">
+            <h2 class="card-title">@Model.CompanyName</h2>
+            <hr />
+
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Owner:</h5>
+                    <p class="text-muted">
+                        @(Model.ApplicationUser != null ? Model.ApplicationUser.FirstName + " " + Model.ApplicationUser.LastName : "Not Assigned")
+                    </p>
+                </div>
+
+                <div class="col-md-6">
+                    <h5>Total Sites:</h5>
+                    <p class="text-muted">@ViewBag.SitesCount</p>
+                </div>
+
+                <div class="col-md-6 mt-3">
+                    <h5>Total Employees:</h5>
+                    <p class="text-muted">@ViewBag.TotalEmployees</p>
+                </div>
+            </div>
+
+            <hr />
+
+            <h4 class="mt-4">Sites</h4>
+            @if (Model.Sites.Any())
+            {
+                <div class="d-flex justify-content-center">
+                    <!-- Centers the accordion -->
+                    <div class="accordion mt-3 text-center" id="siteAccordion" style="max-width: 600px; width: 100%;">
+                        @foreach (var site in Model.Sites)
+                        {
+                            // ✅ Get employee count safely
+                            var siteEmployeeCount = siteEmployeeCounts.TryGetValue(site.Id, out var count) ? count : 0;
+
+                            // ✅ Bootstrap requires unique IDs
+                            var collapseId = $"collapse-{site.Id}";
+                            var headingId = $"heading-{site.Id}";
+
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="@headingId">
+                                    <button class="accordion-button collapsed btn-primary text-white w-100" type="button" data-bs-toggle="collapse" data-bs-target="#@collapseId" aria-expanded="false" aria-controls="@collapseId">
+                                        <i class="fas fa-building me-2"></i> @site.SiteName
+                                    </button>
+                                </h2>
+                                <div id="@collapseId" class="accordion-collapse collapse" aria-labelledby="@headingId" data-bs-parent="#siteAccordion">
+                                    <div class="accordion-body text-center">
+                                        <strong>Total Employees:</strong>
+                                        <span class="text-success fw-bold">Total Employees: @siteEmployeeCount</span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="text-center">
+                    <p class="text-muted">No sites found for this company.</p>
+                </div>
+            }
+
+
+            <div class="mt-4">
+                <a href="@Url.Action("Index", "Home")" class="btn btn-secondary"><i class="fas fa-home"></i> Back to Home</a>
+            </div>
+        </div>
+    </div>
+</div>

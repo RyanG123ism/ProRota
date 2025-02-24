@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProRota.Data;
+using ProRota.Models;
 using ProRota.Services;
 using SQLitePCL;
 using System.Security.Claims;
@@ -32,12 +33,24 @@ namespace ProRota.Areas.Admin.Controllers
             
             if(company != null)
             {
-                //sends the company's sites to view
+                //sends the company and sites to view
                 var sites = company.Sites.ToList();
-                ViewBag.Sites = sites; 
+                ViewBag.Sites = await RefreshSites(compnayId);
             }
 
-            return View();
+            return View(company);
+        }
+
+        public async Task<IEnumerable<Site>> RefreshSites(int id)
+        {
+            if(id == 0)
+            {
+                return Enumerable.Empty<Site>();
+            }
+
+            var sites = await _context.Sites.Where(s => s.CompanyId == id).ToListAsync();
+
+            return sites;
         }
 
         

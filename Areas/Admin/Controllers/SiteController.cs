@@ -41,7 +41,8 @@ namespace ProRota.Areas.Admin.Controllers
 
             if (existingSite != null)
             {
-                TempData["AlertMessage"] = $"Error: {siteName} already exists. Choose another name";
+                ViewBag.Error = $"Error: {siteName} already exists. Choose another name";
+                return RedirectToAction("Index", "Home");
             }
 
             var site = new Site
@@ -53,7 +54,7 @@ namespace ProRota.Areas.Admin.Controllers
             await _context.Sites.AddAsync(site);
             await _context.SaveChangesAsync();
 
-            return View();
+            return RedirectToAction("Index", "Home");
         }
     }
 }

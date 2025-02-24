@@ -16,16 +16,17 @@ using Microsoft.AspNetCore.WebUtilities;
 using ProRota.Hubs;
 using ProRota.Models;
 using ProRota.Services;
+using Stripe;
 
 namespace ProRota.Areas.Identity.Pages.Account
 {
     public class ConfirmEmailModel : PageModel
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IEmailSender _emailSenderService;
+        private readonly IExtendedEmailSender _emailSenderService;
         private readonly IHubContext<EmailConfirmationHub> _hubContext;
 
-        public ConfirmEmailModel(UserManager<ApplicationUser> userManager, IEmailSender emailSenderService, IHubContext<EmailConfirmationHub> hubContext)
+        public ConfirmEmailModel(UserManager<ApplicationUser> userManager, IExtendedEmailSender emailSenderService, IHubContext<EmailConfirmationHub> hubContext)
         {
             _userManager = userManager;
             _emailSenderService = emailSenderService;
@@ -39,7 +40,7 @@ namespace ProRota.Areas.Identity.Pages.Account
         [TempData]
         public string StatusMessage { get; set; }
 
-        public async Task<IActionResult> OnGetAsync(string userId, string code)
+        public async Task<IActionResult> OnGetAsync(string userId, string code, bool? invited)
         {
             if (userId == null || code == null)
             {
@@ -57,30 +58,38 @@ namespace ProRota.Areas.Identity.Pages.Account
 
             if (result.Succeeded)
             {
-                //delays 5 seconds so siganl R can establish a connection with the user first
-                string? connectionId = null;
-                for (int i = 0; i < 5; i++)
-                {
-                    connectionId = EmailConfirmationHub.GetConnectionIdByUserId(user.Id);
-                    if (!string.IsNullOrEmpty(connectionId))
-                    {
-                        break;
-                    }
-                    await Task.Delay(1000); // Wait 1 second before retrying
-                }
-                if (!string.IsNullOrEmpty(connectionId))
-                {
-                    await _hubContext.Clients.Client(connectionId).SendAsync("ReceiveConfirmation");
-                    Console.WriteLine($"📌 SignalR Alert Sent to Connection ID: {connectionId}");
-                }
-                else
-                {
-                    Console.WriteLine("⚠️ No SignalR connection found for this user.");
-                }
 
                 //Send a welcome email
-                await _emailSenderService.SendEmailAsync(user.Email, "Welcome to ProRota!",
-                        $"<p>Hi {user.FirstName},</p> <p>Your account is now active! You can log in.</p>");
+                var emailBody = _emailSenderService.CreateWelcomeEmailBody(user);
+                await _emailSenderService.SendEmailAsync(user.Email, "Welcome to ProRota!", emailBody);
+
+                if (invited == true)//invite email (an employee)
+                {
+                    return RedirectToAction("Index", "Home", new {area = ""});
+                }
+                else //normal account holder 
+                {
+                    //delays 5 seconds so siganl R can establish a connection with the user first
+                    string? connectionId = null;
+                    for (int i = 0; i < 5; i++)
+                    {
+                        connectionId = EmailConfirmationHub.GetConnectionIdByUserId(user.Id);
+                        if (!string.IsNullOrEmpty(connectionId))
+                        {
+                            break;
+                        }
+                        await Task.Delay(1000); // Wait 1 second before retrying
+                    }
+                    if (!string.IsNullOrEmpty(connectionId))
+                    {
+                        await _hubContext.Clients.Client(connectionId).SendAsync("ReceiveConfirmation");
+                        Console.WriteLine($"📌 SignalR Alert Sent to Connection ID: {connectionId}");
+                    }
+                    else
+                    {
+                        Console.WriteLine("⚠️ No SignalR connection found for this user.");
+                    }
+                }
 
                 return Content("Your email has been confirmed! Please close this page and head back to the application. You can now log in.");
             }

@@ -4,21 +4,24 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProRota.Data;
 using ProRota.Models;
+using ProRota.Services;
 
 namespace ProRota.Areas.Management.Controllers
 {
     [Area("Management")]
-    [Authorize]
+    [Authorize(Roles = "Owner, Admin, General Manager, Assistant Manager, Head Chef, Executive Chef")]
     public class HomeController : Controller
     {
 
         private ApplicationDbContext _context;
         private UserManager<ApplicationUser> _userManager;
+        private ICompanyService _companyService;
 
-        public HomeController(ApplicationDbContext context, UserManager<ApplicationUser> userManager /*RoleManager<IdentityRole> roleManager*/)
+        public HomeController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, ICompanyService companyService /*RoleManager<IdentityRole> roleManager*/)
         {
             _context = context;
             _userManager = userManager;
+            _companyService = companyService;
 
         }
 
@@ -51,7 +54,18 @@ namespace ProRota.Areas.Management.Controllers
                     //creates a session for the admin to store the current site that they are viewing
                     HttpContext.Session.SetInt32("UsersCurrentSite", siteId);
                 }            
-            }      
+            }
+
+            //get the company info and pass to view
+            var companyId = await _companyService.GetCompanyIdFromSessionOrUser();
+
+            if (companyId == null)
+            {
+                throw new Exception("Cannot find company Id");
+            }
+
+            var company = await _context.Companies.Where(c => c.Id == companyId).FirstOrDefaultAsync();
+            ViewBag.CompanyName = company.CompanyName;
 
             return View();
         }

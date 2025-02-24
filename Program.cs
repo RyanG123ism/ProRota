@@ -61,7 +61,7 @@ builder.Services.AddScoped<IAlgorithmService, AlgorithmService>();
 builder.Services.AddScoped<ITimeOffRequestService, TimeOffRequestService>();
 builder.Services.AddScoped<ICompanyService, CompanyService>();
 builder.Services.AddScoped<StripePaymentService>(); // stripe service
-builder.Services.AddSingleton<IEmailSender, EmailSenderService>(); //email service
+builder.Services.AddSingleton<IExtendedEmailSender, EmailSenderService>(); //email service
 builder.Services.AddSingleton<EmailConfirmationHub>();
 builder.Services.AddHttpContextAccessor();
 

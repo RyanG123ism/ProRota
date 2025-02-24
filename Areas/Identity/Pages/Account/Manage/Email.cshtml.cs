@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using ProRota.Models;
+using ProRota.Services;
 
 namespace ProRota.Areas.Identity.Pages.Account.Manage
 {
@@ -20,12 +21,12 @@ namespace ProRota.Areas.Identity.Pages.Account.Manage
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly IEmailSender _emailSender;
+        private readonly IExtendedEmailSender _emailSender;
 
         public EmailModel(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            IEmailSender emailSender)
+            IExtendedEmailSender emailSender)
         {
             _userManager = userManager;
             _signInManager = signInManager;

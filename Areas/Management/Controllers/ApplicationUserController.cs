@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using ProRota.Areas.Management.Models;
 using ProRota.Data;
@@ -10,10 +12,12 @@ using ProRota.Models;
 using ProRota.Services;
 using System.Security.Claims;
 using System.Security.Policy;
+using System.Text.Encodings.Web;
+using System.Text;
 
 namespace ProRota.Areas.Management.Controllers
 {
-    [Authorize(Roles = "Admin, General Manager, Assistant Manager, Head Chef, Executive Chef, Operations Manager")]
+    [Authorize(Roles = "Owner, Admin, General Manager, Assistant Manager, Head Chef, Executive Chef")]
     [Area("Management")]
     public class ApplicationUserController : Controller
     {
@@ -22,60 +26,78 @@ namespace ProRota.Areas.Management.Controllers
         private UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly ISiteService _siteService;
-
-        public ApplicationUserController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, ISiteService siteService)
+        private readonly ICompanyService _companyService;
+        private readonly IExtendedEmailSender _emailSender;
+        public ApplicationUserController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, ISiteService siteService, ICompanyService companyService, IExtendedEmailSender emailSender)
         {
             _context = context;
             _userManager = userManager;
             _roleManager = roleManager;
             _siteService = siteService;
+            _companyService = companyService;
+            _emailSender = emailSender;
         }
 
-        public IActionResult Index(bool isAdmin = false)//default value is false for when no admins access index page
+        public async Task<IActionResult> Index(bool isAdmin = false)//default value is false for when no admins access index page
         {
 
             IEnumerable<ApplicationUser> users;
 
+            //if link is accessed by admin or owner
             if (isAdmin)
             {
                 //checks for existing admin siteId session
-                var adminSession = HttpContext.Session.GetInt32("AdminsCurrentSiteId");
+                var currentSession = HttpContext.Session.GetInt32("UsersCurrentSite");
 
-                //if session exists then only users from that site will be fetched
-                users = adminSession != null ? ViewAllUsersBySite() : ViewAllUsers();
+                //if session exists then only users from that site will be fetched ELSE all company users will be returned
+                users = currentSession != null ? await ViewAllUsersBySite() : await ViewAllUsersByCompany();
 
                 return View("ViewAllUsers", users);
 
             }
 
             //Calls the ViewAllUsers method to retrieve the list of users
-            users = ViewAllUsersBySite();
+            users = await ViewAllUsersBySite();
 
             return View("ViewAllUsers", users);
        
         }
-        
-        public IEnumerable<ApplicationUser> ViewAllUsers()
-        {    
-            //Get all the users
-            var users = _context.ApplicationUsers.ToList();
 
-            //Pass all the roles to the view so that you can search users by role
-            ViewBag.Roles = _context.Roles.ToList();
+        public async Task<IEnumerable<ApplicationUser>> ViewAllUsersByCompany()
+        {
+            var companyId = await _companyService.GetCompanyIdFromSessionOrUser();
 
-            //Returns list of users
+            if (companyId == null)
+            {
+                throw new Exception("Cannot retrieve company ID from session");
+            }
+            var company = await _context.Companies.Where(c => c.Id == companyId).ToListAsync();
+
+            var users = await _context.Companies
+                .Where(c => c.Id == companyId)
+                .SelectMany(c => c.Sites)
+                .SelectMany(s => s.ApplicationUsers)
+                .ToListAsync();
+
+            if (TempData["PopUp"] != null)
+            {
+                ViewBag.Alert = TempData["PopUp"];
+            }
+            ViewBag.Roles = await _context.Roles.ToListAsync();
+
             return users;
         }
 
-        public IEnumerable<ApplicationUser> ViewAllUsersBySite()
+
+        public async Task<IEnumerable<ApplicationUser>> ViewAllUsersBySite()
         {
             var siteId = _siteService.GetSiteIdFromSessionOrUser();
 
             //Get all the users
-            var users = _context.ApplicationUsers.Where(u => u.SiteId == siteId).ToList();
+            var users = await _context.ApplicationUsers.Where(u => u.SiteId == siteId).ToListAsync();
 
             //Pass all the roles to the view so that you can search users by role
-            ViewBag.Roles = _context.Roles.ToList();
+            ViewBag.Roles = await _context.Roles.ToListAsync();
 
             //Returns list of users
             return users;
@@ -199,9 +221,9 @@ namespace ProRota.Areas.Management.Controllers
         {
             //getting the siteId from the current user - to bind to user created
             var siteId = _siteService.GetSiteIdFromSessionOrUser();
-
+            var site = await _context.Sites.FindAsync(siteId);
             //getting siteConfig - for assigning roles
-            var siteConfig = _context.SiteConfigurations.SingleOrDefault(s => s.SiteId == siteId) ?? throw new Exception("Cannot find Site Configuration");
+            var siteConfig = await _context.SiteConfigurations.SingleOrDefaultAsync(s => s.SiteId == siteId) ?? throw new Exception("Cannot find Site Configuration");
 
             if (ModelState.IsValid)
             {
@@ -238,7 +260,7 @@ namespace ProRota.Areas.Management.Controllers
                 }
 
                 //Creates a new user and populates data via the model input
-                ApplicationUser u = new ApplicationUser()
+                ApplicationUser user = new ApplicationUser()
                 {
                     Email = model.Email,
                     UserName = model.Email,
@@ -247,19 +269,34 @@ namespace ProRota.Areas.Management.Controllers
                     Salary = model.Salary,
                     ContractualHours = model.ContractualHours,
                     Notes = model.Notes,
-                    EmailConfirmed = true, // this is so the user can login - IF I have time will change to 2fa
+                    EmailConfirmed = false,
                     SiteId= siteId
                 };
 
                 //Creates the user in the DB and adds the password
-                var result = await _userManager.CreateAsync(u, model.Password);
+                var result = await _userManager.CreateAsync(user, model.Password);
 
                 if (result.Succeeded)
                 {
-                    await _userManager.AddToRoleAsync(u, model.Role);
+                    var userId = await _userManager.GetUserIdAsync(user);
+                    await _userManager.AddToRoleAsync(user, model.Role);
 
-                    TempData["SuccessMessage"] = "User Account Created!";
+                    //send email invite here
+                    //generate email conformation token
+                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
 
+                    var callbackUrl = Url.Page(
+                        "/Account/ConfirmEmail",
+                        pageHandler: "ConfirmEmail",
+                        values: new { area = "Identity", userId = userId, code = code, invited = true},
+                    protocol: Request.Scheme);
+
+                    var emailBody = _emailSender.CreateInviteEmailBody(user, model.Role, site.SiteName, callbackUrl);
+
+                    await _emailSender.SendEmailAsync(user.Email, "You're Invited to Join ProRota!", emailBody);
+
+                    TempData["PopUp"] = "User Account Created and Invitation Sent!";
                     return RedirectToAction("Index", "ApplicationUser");
                 }
                 else

@@ -15,7 +15,7 @@ using System.Security.Policy;
 
 namespace ProRota.Areas.Management.Controllers
 {
-    [Authorize(Roles = "Admin, General Manager, Assistant Manager, Head Chef, Executive Chef, Operations Manager")]
+    [Authorize(Roles = "Owner, Admin, General Manager, Assistant Manager, Head Chef, Executive Chef")]
     [Area("Management")]
     public class RotaController : Controller
     {
@@ -319,7 +319,7 @@ namespace ProRota.Areas.Management.Controllers
             var result = await _context.SaveChangesAsync();
             if(result < 0)
             {
-                ViewBag.PopUp = "Error: Could not save new shifts to DB";
+                ViewBag.Error = "Error: Could not save new shifts to DB";
                 return View(model);
             }
 

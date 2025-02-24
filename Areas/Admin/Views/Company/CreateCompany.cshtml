@@ -29,6 +29,13 @@
                         <button type="submit" class="btn btn-primary btn-lg">Create Company</button>
                     </div>
                 </form>
+                <!-- Error Message -->
+                <div class="text-center">
+                    @if (ViewBag.ErrorMessage != null)
+                    {
+                        <span>@ViewBag.ErrorMessage</span>
+                    }
+                </div>
             </div>
         </div>
     </div>
