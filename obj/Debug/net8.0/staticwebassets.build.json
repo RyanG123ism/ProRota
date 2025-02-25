@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "Wo89rqr331PSkxiU5IGiqDCbeIGW31BTzHn4ZM0/V9U=",
+  "Hash": "FmDAtLWSubvz3/PVHyvHwaSvGgw/YsBUqjDdZnTbyb0=",
   "Source": "ProRota",
   "BasePath": "_content/ProRota",
   "Mode": "Default",
@@ -1366,6 +1366,25 @@
       "OriginalItemSpec": "wwwroot\\images\\LogoNavBar.png"
     },
     {
+      "Identity": "C:\\Users\\grant\\OneDrive\\Desktop\\UNI\\Year 4\\Honours Project\\ProRota\\wwwroot\\js\\companyScripts.js",
+      "SourceId": "ProRota",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\grant\\OneDrive\\Desktop\\UNI\\Year 4\\Honours Project\\ProRota\\wwwroot\\",
+      "BasePath": "_content/ProRota",
+      "RelativePath": "js/companyScripts.js",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\js\\companyScripts.js"
+    },
+    {
       "Identity": "C:\\Users\\grant\\OneDrive\\Desktop\\UNI\\Year 4\\Honours Project\\ProRota\\wwwroot\\js\\createRotaConfigurationScripts.js",
       "SourceId": "ProRota",
       "SourceType": "Discovered",
@@ -1459,6 +1478,25 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\js\\siteConfigurationScripts.js"
+    },
+    {
+      "Identity": "C:\\Users\\grant\\OneDrive\\Desktop\\UNI\\Year 4\\Honours Project\\ProRota\\wwwroot\\js\\siteScripts.js",
+      "SourceId": "ProRota",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\grant\\OneDrive\\Desktop\\UNI\\Year 4\\Honours Project\\ProRota\\wwwroot\\",
+      "BasePath": "_content/ProRota",
+      "RelativePath": "js/siteScripts.js",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\js\\siteScripts.js"
     },
     {
       "Identity": "C:\\Users\\grant\\OneDrive\\Desktop\\UNI\\Year 4\\Honours Project\\ProRota\\wwwroot\\js\\tableScripts.js",

@@ -53,6 +53,15 @@ namespace ProRota.Areas.Identity.Pages.Account
                 return new JsonResult(new { success = false, message = "User not found." });
             }
 
+            var roles = await _userManager.GetRolesAsync(user);
+            var roleName = roles.SingleOrDefault();
+
+            //if a manager/admin/owner has revoked the invite
+            if(roleName == "Deactivated" || roleName == null)
+            {
+                return Content("Your invitation has expired or been dactivated. If this is wrong, please contact the sender of your invite email.");
+            }
+
             var decodedCode = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
             var result = await _userManager.ConfirmEmailAsync(user, decodedCode);
 

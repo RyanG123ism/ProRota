@@ -41,6 +41,10 @@
       "PackagePath": "staticwebassets\\images\\example_rota.png"
     },
     {
+      "Id": "C:\\Users\\grant\\OneDrive\\Desktop\\UNI\\Year 4\\Honours Project\\ProRota\\wwwroot\\js\\companyScripts.js",
+      "PackagePath": "staticwebassets\\js\\companyScripts.js"
+    },
+    {
       "Id": "C:\\Users\\grant\\OneDrive\\Desktop\\UNI\\Year 4\\Honours Project\\ProRota\\wwwroot\\js\\createRotaConfigurationScripts.js",
       "PackagePath": "staticwebassets\\js\\createRotaConfigurationScripts.js"
     },
@@ -59,6 +63,10 @@
     {
       "Id": "C:\\Users\\grant\\OneDrive\\Desktop\\UNI\\Year 4\\Honours Project\\ProRota\\wwwroot\\js\\siteConfigurationScripts.js",
       "PackagePath": "staticwebassets\\js\\siteConfigurationScripts.js"
+    },
+    {
+      "Id": "C:\\Users\\grant\\OneDrive\\Desktop\\UNI\\Year 4\\Honours Project\\ProRota\\wwwroot\\js\\siteScripts.js",
+      "PackagePath": "staticwebassets\\js\\siteScripts.js"
     },
     {
       "Id": "C:\\Users\\grant\\OneDrive\\Desktop\\UNI\\Year 4\\Honours Project\\ProRota\\wwwroot\\js\\tableScripts.js",

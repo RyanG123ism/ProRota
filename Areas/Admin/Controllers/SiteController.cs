@@ -56,5 +56,45 @@ namespace ProRota.Areas.Admin.Controllers
 
             return RedirectToAction("Index", "Home");
         }
+
+        [HttpPost]
+        public async Task<IActionResult> EditSiteName(string siteName, int id)
+        {
+            if (id == 0)
+            {
+                throw new Exception("Cannot find site with ID");
+            }
+
+            if (siteName.IsNullOrEmpty())
+            {
+                throw new Exception("Error passing siteName to controller");
+            }
+
+            var site = _context.Sites.Where(s => s.Id == id).FirstOrDefault();
+
+            if(site == null)
+            {
+                throw new Exception("Error: Could not find the site object");
+            }
+            //getting company Id
+            var companyId = await _companyService.GetCompanyIdFromSessionOrUser();
+
+            //looking for existing sites within the company 
+            var existingSiteName = _context.Sites.Where(s => s.CompanyId == companyId && s.SiteName == siteName).FirstOrDefault() ?? null;
+
+            if (existingSiteName != null)
+            {
+                ViewBag.Error = $"Error: {siteName} already exists. Choose another name";
+                return RedirectToAction("Index", "Home");
+            }
+
+            //assigning new name
+            site.SiteName = siteName;
+
+            _context.Sites.Update(site);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Index", "Home", new {area = "Management"});
+        }
     }
 }

@@ -11,39 +11,27 @@ namespace ProRota.Services
         private UserManager<ApplicationUser> _userManager;
         private readonly ISiteService _siteService;
         private readonly IHttpContextAccessor _httpContextAccessor;//accessing httpContext properties of controller base
+        private readonly ICompanyService _companyService;
 
-        public TimeOffRequestService(ApplicationDbContext context, UserManager<ApplicationUser> userManager, ISiteService siteService, IHttpContextAccessor httpContextAccessor)
+        public TimeOffRequestService(ApplicationDbContext context, UserManager<ApplicationUser> userManager, ISiteService siteService, IHttpContextAccessor httpContextAccessor, ICompanyService companyService)
         {
             _context = context;
             _userManager = userManager;
             _siteService = siteService;
             _httpContextAccessor = httpContextAccessor;
-            
+            _companyService = companyService;
         }
 
-        public IEnumerable<TimeOffRequest> GetAllTimeOffRequests()
-        {
-            //Get all the requests
-            var requests = _context.TimeOffRequests.OrderByDescending(t => t.Date).Include(t => t.ApplicationUser).ToList();
-
-            //Refresh the list if any changes are made during runtime
-            foreach (var item in requests)
-            {
-                _context.Entry(item).Reload();
-            }
-
-            //Returns list of users
-            return requests;
-        }
-
-        public IEnumerable<TimeOffRequest> GetAllTimeOffRequestsBySite()
+        public async Task<IEnumerable<TimeOffRequest>> GetAllTimeOffRequestsBySite()
         {
             //gets the current siteId
             var siteId = _siteService.GetSiteIdFromSessionOrUser();
 
             //Get all the time off requests from users that belong to the appropriate site
-            var requests = _context.TimeOffRequests.OrderByDescending(t => t.Date).Include(t => t.ApplicationUser)
-                .Where(t => t.ApplicationUser.SiteId == siteId);
+            var requests = await _context.TimeOffRequests.Include(t => t.ApplicationUser)
+                .Where(t => t.ApplicationUser.SiteId == siteId).ToListAsync();
+
+            var orderedRequests = requests.OrderByDescending(t => t.Date);
 
             //Refresh the list if any changes are made during runtime
             foreach (var item in requests)
@@ -52,7 +40,7 @@ namespace ProRota.Services
             }
 
             //Returns list of users
-            return requests;
+            return orderedRequests;
         }
 
         public async Task<TimeOffRequest?> ValidateTimeOffRequest(int id)

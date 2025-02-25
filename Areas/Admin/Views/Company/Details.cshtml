@@ -11,7 +11,9 @@
 <div class="container mt-5">
     <div class="card shadow-lg p-4">
         <div class="card-body text-center">
-            <h2 class="card-title">@Model.CompanyName</h2>
+            <h2 class="card-title">
+                <a href="javascript:void(0);" onclick="showEditCompanyNamePopUp();">@Model.CompanyName</a>
+            </h2>
             <hr />
 
             <div class="row">
@@ -77,6 +79,35 @@
 
             <div class="mt-4">
                 <a href="@Url.Action("Index", "Home")" class="btn btn-secondary"><i class="fas fa-home"></i> Back to Home</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden pop-up for editing the company name -->
+<div class="modal fade" id="EditCompanyNamePopUp" tabindex="-1" aria-labelledby="EditCompanyNameModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="EditCompanyNameModalLabel">Edit Company Name</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="EditCompanyNameForm" asp-controller="Company" asp-action="EditCompanyName" method="post">
+                    <input type="hidden" id="companyId" name="id" value="@Model.Id" />
+
+                    <!-- Company Name Input -->
+                    <div class="mb-3">
+                        <label for="companyName" class="form-label">Company Name</label>
+                        <input type="text" class="form-control" id="companyName" name="companyName" value="@Model.CompanyName" required />
+                        <div class="invalid-feedback">Please enter a valid company name.</div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

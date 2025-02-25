@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - ProRota</title>
 
+    @* signalR *@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
 
 
@@ -59,7 +60,10 @@
     <script src="~/js/tableScripts.js" asp-append-version="true"></script>
     <script src="~/js/userDashboardScripts.js" asp-append-version="true"></script>
     <script src="~/js/signalRScripts.js" asp-append-version="true"></script>
+    <script src="~/js/companyScripts.js" asp-append-version="true"></script>
+    <script src="~/js/siteScripts.js" asp-append-version="true"></script>
 
+    @* Listener throughout all pages that implement _layout - easy way to pass messages to the view with popups *@
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             // Error Message Handling

@@ -29,22 +29,12 @@ namespace ProRota.Areas.Management.Controllers
             _timeOffRequestService = timeOffRequestService;
         }
 
-        public IActionResult Index(bool isAdmin = false)
+        public async Task<IActionResult> Index()
         {
             IEnumerable<TimeOffRequest> requests;
 
-            if (isAdmin)
-            {
-                //checks for existing admin siteId session
-                var adminSession = HttpContext.Session.GetInt32("UsersCurrentSite");
-
-                //if session exists then only users from that site will be fetched
-                requests = adminSession != null ? _timeOffRequestService.GetAllTimeOffRequestsBySite() : _timeOffRequestService.GetAllTimeOffRequests();
-                return View("ViewAllUsers", requests);
-            }
-
             //retrieves all time off requests by site - this is for all roles below admin
-            requests = _timeOffRequestService.GetAllTimeOffRequestsBySite();
+            requests = await _timeOffRequestService.GetAllTimeOffRequestsBySite();
 
             //sends tomorrows date to view
             ViewBag.Tomorrow = DateTime.Now.AddDays(1).Date;

@@ -51,11 +51,11 @@
         </div>
 
         <!-- Count of the users -->
-        <h3 class="font-weight-bold text-center" style="padding-top: 10px;">@Model.Count() USERS</h3>
+        <h3 class="font-weight-bold text-center" style="padding-top: 10px;">@Model.Count() Employees</h3>
 
         @if (Model == null || !Model.Any())
         {
-            <p>@ViewBag.ErrorMessage </p>
+            <p> No employees of this site currently</p>
         }
         else
         {
@@ -107,6 +107,61 @@
 
                                 | @Html.ActionLink("Details", "Details", new { id = user.Id }) |
                                 @Html.ActionLink("Deactivate", "DeactivateUser", new { id = user.Id })
+                            </td>
+                        </tr>
+
+                    }
+                </table>
+            </div>
+        }
+
+
+
+        <h3 class="font-weight-bold text-center" style="padding-top: 10px;">@ViewBag.InvitedUsers.Count Pending Invites</h3>
+
+        @if (ViewBag.InvitedUsers == null || ViewBag.InvitedUsers.Count == 0)
+        {
+            <p> No Pending Invites</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <tr>
+                        <th>Email</th>
+                        <th>FirstName</th>
+                        <th>LastName</th>
+                        <th>Roles</th>
+                        <th>Actions</th>
+                    </tr>
+
+                    @foreach (var user in ViewBag.InvitedUsers)
+                    {
+                        <tr>
+                            <td>
+                                @user.Email
+                            </td>
+                            <td>
+                                @user.FirstName
+                            </td>
+                            <td>
+                                @user.LastName
+                            </td>
+
+                            <!-- Display roles for the user -->
+                            <td>
+                                @{
+                                    var roles = await UserManager.GetRolesAsync(user);
+                                    @foreach (var role in roles)
+                                    {
+                                        @role <br />
+                                    }
+                                }
+                            </td>
+
+                            <td>
+                                @Html.ActionLink("Deactivate", "DeactivateUser", new { id = user.Id }) | 
+                                @Html.ActionLink("Resend Invite", "ResendInvite", new { id = user.Id })
                             </td>
                         </tr>
 

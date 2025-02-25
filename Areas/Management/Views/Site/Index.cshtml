@@ -9,7 +9,15 @@
     <div class="card-body text-center">
         
         <div>
-            <h4>@Model.Company.CompanyName @Model.SiteName Details</h4>
+            @if(User.IsInRole("Admin") || User.IsInRole("Owner"))
+            {
+                <h4>@Model.Company.CompanyName <a href="javascript:void(0);" onclick="showEditSiteNamePopUp();">@Model.SiteName</a> Details</h4>
+            }
+            else
+            {
+               <h4>@Model.Company.CompanyName @Model.SiteName Details</h4> 
+            }
+            
             <hr />
             <dl class="row">
                 <div class="card shadow-sm mb-4">
@@ -303,6 +311,35 @@
                         <button type="submit" class="btn btn-danger w-100">Close Restaurant</button>
                     </form>
                 </div>           
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden pop-up for editing the company name -->
+<div class="modal fade" id="EditSiteNamePopUp" tabindex="-1" aria-labelledby="EditSiteNameModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="EditSiteNameModalLabel">Edit Site Name</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="EditSiteNameForm" asp-controller="Site" asp-action="EditSiteName" asp-area="Admin" method="post">
+                    <input type="hidden" id="siteId" name="id" value="@Model.Id" />
+
+                    <!-- Site Name Input -->
+                    <div class="mb-3">
+                        <label for="siteName" class="form-label">Site Name</label>
+                        <input type="text" class="form-control" id="siteName" name="siteName" value="@Model.SiteName" required />
+                        <div class="invalid-feedback">Please enter a valid site name.</div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

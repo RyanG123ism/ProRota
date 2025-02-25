@@ -53,7 +53,7 @@ namespace ProRota.Areas.Management.Controllers
             //querying all users of the site
             //formatting data into a dictionary of the ViewRotaViewModel
             var rota = await _context.ApplicationUsers
-                .Where(u => u.SiteId == siteId)
+                .Where(u => u.SiteId == siteId && u.EmailConfirmed == true)
                 .Select(u => new ViewRotaViewModel
                 {
                     Id = u.Id,
@@ -246,7 +246,7 @@ namespace ProRota.Areas.Management.Controllers
             var assignedUserIds = new HashSet<string>(viewModel.Keys);
 
             //users that didnt get assigned any shifts
-            var unasignedUsers = await _context.ApplicationUsers.Where(u => u.SiteId == site.Id && !assignedUserIds.Contains(u.Id)).Include(u => u.TimeOffRequests.Where(t => t.IsApproved == ApprovedStatus.Approved)).ToListAsync() ?? null;
+            var unasignedUsers = await _context.ApplicationUsers.Where(u => u.SiteId == site.Id && u.EmailConfirmed == true && !assignedUserIds.Contains(u.Id)).Include(u => u.TimeOffRequests.Where(t => t.IsApproved == ApprovedStatus.Approved)).ToListAsync() ?? null;
             
 
             if (unasignedUsers != null || unasignedUsers.Count > 0 ) 

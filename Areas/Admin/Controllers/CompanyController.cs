@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using ProRota.Areas.Admin.Models.ViewModels;
 using ProRota.Data;
 using ProRota.Models;
@@ -126,6 +127,44 @@ namespace ProRota.Areas.Admin.Controllers
             ViewBag.TotalEmployees = siteEmployeeCounts.Values.Sum(); // Total employees across all sites
 
             return View(company);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditCompanyName(string companyName, int id)
+        {
+            if (id == 0)
+            {
+                throw new Exception("Cannot find site with ID");
+            }
+
+            if (companyName.IsNullOrEmpty())
+            {
+                throw new Exception("Error passing siteName to controller");
+            }
+
+            var company = _context.Companies.Where(c => c.Id == id).FirstOrDefault();
+
+            if (company == null)
+            {
+                throw new Exception("Error: Could not find the site object");
+            }
+
+            //looking for company with that name already  
+            var existingCompanyName = _context.Companies.Where(c => c.CompanyName == companyName).FirstOrDefault() ?? null;
+
+            if (existingCompanyName != null)
+            {
+                ViewBag.Error = $"Error: {companyName} already exists. Choose another name";
+                return RedirectToAction("Index", "Home");
+            }
+
+            //assigning new name
+            company.CompanyName = companyName;
+
+            _context.Companies.Update(company);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Index", "Home");
         }
 
     }

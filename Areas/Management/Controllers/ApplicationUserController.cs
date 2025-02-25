@@ -59,6 +59,11 @@ namespace ProRota.Areas.Management.Controllers
             //Calls the ViewAllUsers method to retrieve the list of users
             users = await ViewAllUsersBySite();
 
+            if (TempData["PopUp"] != null)
+            {
+                ViewBag.Success = TempData["PopUp"];
+            }
+
             return View("ViewAllUsers", users);
        
         }
@@ -76,8 +81,16 @@ namespace ProRota.Areas.Management.Controllers
             var users = await _context.Companies
                 .Where(c => c.Id == companyId)
                 .SelectMany(c => c.Sites)
-                .SelectMany(s => s.ApplicationUsers)
+                .SelectMany(s => s.ApplicationUsers.Where(u => u.EmailConfirmed == true))
                 .ToListAsync();
+
+            var invitedUsers = _context.Companies
+                .Where(c => c.Id == companyId)
+                .SelectMany(c => c.Sites)
+                .SelectMany(s => s.ApplicationUsers.Where(u => u.EmailConfirmed == false))
+                .ToListAsync();
+
+            ViewBag.InvitedUsers = invitedUsers; //user that havent confirmed their account yet
 
             if (TempData["PopUp"] != null)
             {
@@ -94,7 +107,11 @@ namespace ProRota.Areas.Management.Controllers
             var siteId = _siteService.GetSiteIdFromSessionOrUser();
 
             //Get all the users
-            var users = await _context.ApplicationUsers.Where(u => u.SiteId == siteId).ToListAsync();
+            var users = await _context.ApplicationUsers.Where(u => u.SiteId == siteId && u.EmailConfirmed == true).ToListAsync();
+            var invitedUsers = await _context.ApplicationUsers.Where(u => u.SiteId == siteId && u.EmailConfirmed == false).ToListAsync();
+
+            //user that havent confirmed their account yet
+            ViewBag.InvitedUsers = invitedUsers; 
 
             //Pass all the roles to the view so that you can search users by role
             ViewBag.Roles = await _context.Roles.ToListAsync();
@@ -127,7 +144,7 @@ namespace ProRota.Areas.Management.Controllers
                 lName = names[1];
 
                 //Retrieve users with matching first names
-                var usersFirstNames = _context.ApplicationUsers.Where(u => u.SiteId == siteId).Where(u => u.FirstName.Equals(fName)).ToList();
+                var usersFirstNames = _context.ApplicationUsers.Where(u => u.SiteId == siteId && u.EmailConfirmed == true).Where(u => u.FirstName.Equals(fName)).ToList();
 
                 List<ApplicationUser> results = new List<ApplicationUser>();
 
@@ -147,9 +164,9 @@ namespace ProRota.Areas.Management.Controllers
                 lName = null;
 
                 //Retrieve users with matching first names
-                var usersFirstNames = _context.ApplicationUsers.Where(u => u.SiteId == siteId).Where(u => u.FirstName.Equals(fName)).ToList();
+                var usersFirstNames = _context.ApplicationUsers.Where(u => u.SiteId == siteId && u.EmailConfirmed == true).Where(u => u.FirstName.Equals(fName)).ToList();
                 //Retrieve users with matching last names
-                var usersLastNames = _context.ApplicationUsers.Where(u => u.SiteId == siteId).Where(u => u.LastName.Equals(fName)).ToList();
+                var usersLastNames = _context.ApplicationUsers.Where(u => u.SiteId == siteId && u.EmailConfirmed == true).Where(u => u.LastName.Equals(fName)).ToList();
 
                 //Joins the list of first names and last name search results together
                 var results = usersFirstNames.Concat(usersLastNames);
@@ -169,7 +186,7 @@ namespace ProRota.Areas.Management.Controllers
 
             //Get users in the specified role then filters to the specific site
             var usersInRole = await _userManager.GetUsersInRoleAsync(roleName);
-            var usersInRoleBySite = usersInRole.Where(u => u.SiteId == siteId).ToList();
+            var usersInRoleBySite = usersInRole.Where(u => u.SiteId == siteId && u.EmailConfirmed == true).ToList();
 
             //Passing users in the specified role to the view
             ViewBag.Roles = await _context.Roles.ToListAsync(); // Ensure this operation is awaited
@@ -231,8 +248,32 @@ namespace ProRota.Areas.Management.Controllers
                 var existingUser = await _userManager.FindByEmailAsync(model.Email);
                 if (existingUser != null)
                 {
-                    ModelState.AddModelError(string.Empty, "Email is already in use.");
-                    return View(model);
+                    //If the existing user was a previosuly deactivated user - then just edit their account rather than creating a new user
+                    if(await _userManager.IsInRoleAsync(existingUser, "Deactivated"))
+                    {
+
+                        existingUser.FirstName = model.FirstName;
+                        existingUser.LastName = model.LastName;
+                        existingUser.Email = model.Email;
+                        existingUser.Salary = model.Salary;
+                        existingUser.ContractualHours = model.ContractualHours;
+                        existingUser.Notes =model.Notes;
+
+                        await _userManager.RemoveFromRoleAsync(existingUser, "Deactivated");
+                        await _userManager.AddToRoleAsync(existingUser, model.Role);
+
+                        await _userManager.UpdateAsync(existingUser);
+                        await _context.SaveChangesAsync();
+
+                        TempData["PopUp"] = $"{existingUser.FirstName} {existingUser.LastName}'s account has been reinstated. You can now resend their invite email";
+
+                    }
+                    else
+                    {
+                        ModelState.AddModelError(string.Empty, "Email is already in use.");
+                    }
+                    
+                    return RedirectToAction("Index");
                 }
 
                 //check for existing role within this site
@@ -451,6 +492,40 @@ namespace ProRota.Areas.Management.Controllers
             ViewBag.UserRole = roles.FirstOrDefault();
 
             return View(user);
+        }
+
+        public async Task<IActionResult> ResendInvite(string id)
+        {
+            //get user info
+            var user = await _userManager.FindByIdAsync(id);
+            var site = _context.Sites.Where(s => s.Id == user.SiteId).SingleOrDefault();
+            var roles = await _userManager.GetRolesAsync(user);
+            var roleName = roles.SingleOrDefault();
+
+            //if user is deactivated then return to index
+            if(roleName == "Deactivated")
+            {
+                TempData["PopUp"] = $"{user.FirstName} {user.LastName} is currently deactivated and sending an invite will not work - if you would like to bring this user back, use the 'Create User' button and use the same email address.";
+                return RedirectToAction("Index", "ApplicationUser");
+            }
+
+            //send email invite here
+            //generate email conformation token
+            var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+
+            var callbackUrl = Url.Page(
+                "/Account/ConfirmEmail",
+                pageHandler: "ConfirmEmail",
+                values: new { area = "Identity", userId = user.Id, code = code, invited = true },
+            protocol: Request.Scheme);
+
+            var emailBody = _emailSender.CreateInviteEmailBody(user, roleName, site.SiteName, callbackUrl);
+
+            await _emailSender.SendEmailAsync(user.Email, "You're Invited to Join ProRota!", emailBody);
+
+            TempData["PopUp"] = $"Invitation Re-sent to {user.FirstName}!";
+            return RedirectToAction("Index", "ApplicationUser");
         }
 
         public async Task<ActionResult> DeactivateUser(string id)
