@@ -4,8 +4,10 @@
 
 using System;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -13,6 +15,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
 using ProRota.Hubs;
 using ProRota.Models;
 using ProRota.Services;
@@ -25,12 +28,13 @@ namespace ProRota.Areas.Identity.Pages.Account
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IExtendedEmailSender _emailSenderService;
         private readonly IHubContext<EmailConfirmationHub> _hubContext;
-
-        public ConfirmEmailModel(UserManager<ApplicationUser> userManager, IExtendedEmailSender emailSenderService, IHubContext<EmailConfirmationHub> hubContext)
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        public ConfirmEmailModel(UserManager<ApplicationUser> userManager, IExtendedEmailSender emailSenderService, IHubContext<EmailConfirmationHub> hubContext, SignInManager<ApplicationUser> signInManager)
         {
             _userManager = userManager;
             _emailSenderService = emailSenderService;
             _hubContext = hubContext;
+            _signInManager = signInManager;
         }
 
         /// <summary>
@@ -40,7 +44,7 @@ namespace ProRota.Areas.Identity.Pages.Account
         [TempData]
         public string StatusMessage { get; set; }
 
-        public async Task<IActionResult> OnGetAsync(string userId, string code, bool? invited)
+        public async Task<IActionResult> OnGetAsync(string userId, string code, bool? invited, int? companyId)
         {
             if (userId == null || code == null)
             {
@@ -72,12 +76,21 @@ namespace ProRota.Areas.Identity.Pages.Account
                 var emailBody = _emailSenderService.CreateWelcomeEmailBody(user);
                 await _emailSenderService.SendEmailAsync(user.Email, "Welcome to ProRota!", emailBody);
 
+                //adding site and company id as claims when the user confirms their email
+                await _userManager.AddClaimAsync(user, new Claim("SiteId", user.SiteId.ToString() ?? ""));//this will be null for the owner
+                await _userManager.AddClaimAsync(user, new Claim("CompanyId", companyId.ToString() ?? ""));
+
+                //sign in user to refresh authentication cookie and add claims
+                var userPrincipal = await _signInManager.CreateUserPrincipalAsync(user);
+                await HttpContext.SignInAsync(IdentityConstants.ApplicationScheme, userPrincipal);
+
                 if (invited == true)//invite email (an employee)
                 {
                     return RedirectToAction("Index", "Home", new {area = ""});
                 }
                 else //normal account holder 
                 {
+                    
                     //delays 5 seconds so siganl R can establish a connection with the user first
                     string? connectionId = null;
                     for (int i = 0; i < 5; i++)

@@ -16,13 +16,16 @@
     <link rel="stylesheet" href="~/ProRota.styles.css" asp-append-version="true" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
-    
-
 
 </head>
 <body style="background-color: #fffdee;">
     <header>
+        @* Notifications Message *@
+        <div id="newsNotification">
+            <span id="newsMessage"></span>
+            <a href="/Home/Index">View Feed</a>
+        </div>
+
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
@@ -40,6 +43,12 @@
                 </div>
             </div>
         </nav>
+
+        @*News Feed Notification *@
+        <div id="newsNotification" class="hidden">
+            <p>📢 There's been an update to your feed! <a href="/Home/Index">Click here to check it out</a></p>
+        </div>
+
     </header>
     <div class="container">
         <main role="main" class="pb-3">
@@ -52,6 +61,7 @@
             &copy; 2024 - ProRota - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/createRotaConfigurationScripts.js" asp-append-version="true"></script>
@@ -62,32 +72,8 @@
     <script src="~/js/signalRScripts.js" asp-append-version="true"></script>
     <script src="~/js/companyScripts.js" asp-append-version="true"></script>
     <script src="~/js/siteScripts.js" asp-append-version="true"></script>
+    <script src="~/js/signalR-newsfeed-.js" asp-append-version="true"></script>
 
-    @* Listener throughout all pages that implement _layout - easy way to pass messages to the view with popups *@
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            // Error Message Handling
-            var errorMessage = '@HttpUtility.JavaScriptStringEncode(ViewBag.Error ?? "")';
-            if (errorMessage && errorMessage.trim() !== '') {
-                console.log('❌ PopUp Error:', errorMessage);
-                popUpMessageError(errorMessage);
-            }
-
-            // Success Message Handling
-            var successMessage = '@HttpUtility.JavaScriptStringEncode(ViewBag.Success ?? "")';
-            if (successMessage && successMessage.trim() !== '') {
-                console.log('✅ PopUp Success:', successMessage);
-                popUpMessageSuccess(successMessage);
-            }
-
-            // General Alert Message Handling
-            var alertMessage = '@HttpUtility.JavaScriptStringEncode(ViewBag.Alert ?? "")';
-            if (alertMessage && alertMessage.trim() !== '') {
-                console.log('⚠️ PopUp Alert:', alertMessage);
-                popUpMessageAlert(alertMessage);
-            }
-        });
-    </script>
     
     @await RenderSectionAsync("Scripts", required: false)
 

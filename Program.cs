@@ -62,7 +62,9 @@ builder.Services.AddScoped<ITimeOffRequestService, TimeOffRequestService>();
 builder.Services.AddScoped<ICompanyService, CompanyService>();
 builder.Services.AddScoped<StripePaymentService>(); // stripe service
 builder.Services.AddSingleton<IExtendedEmailSender, EmailSenderService>(); //email service
+builder.Services.AddScoped<INewsFeedService, NewsFeedService>();
 builder.Services.AddSingleton<EmailConfirmationHub>();
+builder.Services.AddSingleton<NewsFeedHub>();
 builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
@@ -126,5 +128,6 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 app.MapRazorPages();
 app.MapHub<EmailConfirmationHub>("/emailConfirmationHub");
+app.MapHub<NewsFeedHub>("/newsFeedHub");
 
 app.Run();

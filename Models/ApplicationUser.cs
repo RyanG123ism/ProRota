@@ -40,6 +40,8 @@ namespace ProRota.Models
 
         public ICollection<TimeOffRequest> TimeOffRequests { get; set; } = new List<TimeOffRequest>();
 
-        
+        public virtual ICollection<NewsFeedItem> NewsFeedItems { get; set; } = new List<NewsFeedItem>();
+
+
     }
 }

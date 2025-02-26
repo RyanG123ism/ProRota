@@ -62,5 +62,7 @@ namespace ProRota.Areas.Management.Models
         [Required(ErrorMessage = "Role Selection is required")]
         [Display(Name = "Role")]
         public string Role { get; set; }
+
+        //public int? SiteId { get; set; }
     }
 }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProRota.Data;
 
@@ -11,9 +12,11 @@ using ProRota.Data;
 namespace ProRota.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250226112144_addingNewsFeedItemTableAndRelationships")]
+    partial class addingNewsFeedItemTableAndRelationships
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -285,12 +288,6 @@ namespace ProRota.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ApplicationUserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int?>("CompanyId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("CreatedByUserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
@@ -298,24 +295,12 @@ namespace ProRota.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("SiteId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TargetType")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ApplicationUserId");
-
-                    b.HasIndex("CompanyId");
-
-                    b.HasIndex("CreatedByUserId");
-
-                    b.HasIndex("SiteId");
 
                     b.ToTable("NewsFeedItems");
                 });
@@ -610,29 +595,10 @@ namespace ProRota.Migrations
                     b.HasOne("ProRota.Models.ApplicationUser", "ApplicationUser")
                         .WithMany("NewsFeedItems")
                         .HasForeignKey("ApplicationUserId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("ProRota.Models.Company", "Company")
-                        .WithMany()
-                        .HasForeignKey("CompanyId");
-
-                    b.HasOne("ProRota.Models.ApplicationUser", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ProRota.Models.Site", "Site")
-                        .WithMany()
-                        .HasForeignKey("SiteId");
-
                     b.Navigation("ApplicationUser");
-
-                    b.Navigation("Company");
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("Site");
                 });
 
             modelBuilder.Entity("ProRota.Models.RoleConfiguration", b =>

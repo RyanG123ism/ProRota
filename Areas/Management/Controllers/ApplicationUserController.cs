@@ -248,8 +248,8 @@ namespace ProRota.Areas.Management.Controllers
                 var existingUser = await _userManager.FindByEmailAsync(model.Email);
                 if (existingUser != null)
                 {
-                    //If the existing user was a previosuly deactivated user - then just edit their account rather than creating a new user
-                    if(await _userManager.IsInRoleAsync(existingUser, "Deactivated"))
+                    //If the existing user was a previosuly deactivated user, or has an account but it isn't linked to a company - then just edit their account rather than creating a new user
+                    if(await _userManager.IsInRoleAsync(existingUser, "Deactivated") || await _userManager.IsInRoleAsync(existingUser, "Partial_User_Unpaid"))
                     {
 
                         existingUser.FirstName = model.FirstName;
@@ -264,6 +264,27 @@ namespace ProRota.Areas.Management.Controllers
 
                         await _userManager.UpdateAsync(existingUser);
                         await _context.SaveChangesAsync();
+
+                        // Get the existing claims for the user
+                        var claims = await _userManager.GetClaimsAsync(existingUser);
+
+                        // Find the existing SiteId claim
+                        var siteClaim = claims.FirstOrDefault(c => c.Type == "SiteId");
+
+                        if (siteClaim != null && int.TryParse(siteClaim.Value, out int siteClaimId))
+                        {
+                            if (siteClaimId != siteId) // Only update if SiteId has changed
+                            {
+                                // Remove old SiteId claim (pass Claim object, not string)
+                                await _userManager.RemoveClaimAsync(existingUser, siteClaim);
+
+                                // Add new SiteId claim
+                                await _userManager.AddClaimAsync(existingUser, new Claim("SiteId", siteId.ToString()));
+                            }
+                        }
+
+                        // Update the user model
+                        existingUser.SiteId = siteId;
 
                         TempData["PopUp"] = $"{existingUser.FirstName} {existingUser.LastName}'s account has been reinstated. You can now resend their invite email";
 
@@ -319,9 +340,10 @@ namespace ProRota.Areas.Management.Controllers
 
                 if (result.Succeeded)
                 {
+                    //add to role
                     var userId = await _userManager.GetUserIdAsync(user);
                     await _userManager.AddToRoleAsync(user, model.Role);
-
+                    
                     //send email invite here
                     //generate email conformation token
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -330,7 +352,7 @@ namespace ProRota.Areas.Management.Controllers
                     var callbackUrl = Url.Page(
                         "/Account/ConfirmEmail",
                         pageHandler: "ConfirmEmail",
-                        values: new { area = "Identity", userId = userId, code = code, invited = true},
+                        values: new { area = "Identity", userId = userId, code = code, invited = true, companyId = site.CompanyId},
                     protocol: Request.Scheme);
 
                     var emailBody = _emailSender.CreateInviteEmailBody(user, model.Role, site.SiteName, callbackUrl);

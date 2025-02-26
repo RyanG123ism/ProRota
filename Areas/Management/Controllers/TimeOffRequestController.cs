@@ -3,9 +3,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Protocol.Plugins;
 using ProRota.Data;
 using ProRota.Models;
 using ProRota.Services;
+using System.Security.Claims;
 
 namespace ProRota.Areas.Management.Controllers
 {
@@ -19,14 +21,16 @@ namespace ProRota.Areas.Management.Controllers
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly ISiteService _siteService;
         private readonly ITimeOffRequestService _timeOffRequestService;
+        private readonly INewsFeedService _newsFeedService;
 
-        public TimeOffRequestController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, ISiteService siteService, ITimeOffRequestService timeOffRequestService)
+        public TimeOffRequestController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, ISiteService siteService, ITimeOffRequestService timeOffRequestService, INewsFeedService newsFeedService)
         {
             _context = context;
             _userManager = userManager;
             _roleManager = roleManager;
             _siteService = siteService;
             _timeOffRequestService = timeOffRequestService;
+            _newsFeedService = newsFeedService;
         }
 
         public async Task<IActionResult> Index()
@@ -94,6 +98,10 @@ namespace ProRota.Areas.Management.Controllers
             //saves changes
             await _context.SaveChangesAsync();
 
+            //create post and notify user
+            await _newsFeedService.createAndPostNewsFeedItem(
+                $"Your time-off Request for {request.Date.Date} has been reverted back to pending", user.Id);
+
             //passing conf message through temp data to the next action
             TempData["ConformationMessage"] = $"{user.FirstName}'s Time-Off Request has been Reverted";
 
@@ -138,7 +146,11 @@ namespace ProRota.Areas.Management.Controllers
             {
                 TempData["ConformationMessage"] = $"{user.FirstName}'s Time-Off Request has been Approved";
             }
-           
+
+            //create post and notify user
+            await _newsFeedService.createAndPostNewsFeedItem(
+                $"Your time-off Request for {request.Date.Date} has been approved!", user.Id);
+
             //returns to the time off request index
             return RedirectToAction("Index");
         }
@@ -163,6 +175,10 @@ namespace ProRota.Areas.Management.Controllers
 
             //saves changes
             await _context.SaveChangesAsync();
+
+            //create post and notify user
+            await _newsFeedService.createAndPostNewsFeedItem(
+                $"Your time-off Request for {request.Date.Date} has been Declined", user.Id);
 
             TempData["ConformationMessage"] = $"{user.FirstName}'s Time-Off Request has been Denied";
 

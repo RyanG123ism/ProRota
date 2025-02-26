@@ -20,6 +20,7 @@ using System.Security.Claims;
 using ProRota.Data;
 using ProRota.Services;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace ProRota.Areas.Identity.Pages.Account
 {
@@ -125,7 +126,15 @@ namespace ProRota.Areas.Identity.Pages.Account
                 var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
                 if (result.Succeeded)
                 {
+                    //for formatting correct views
                     TempData["InitialLogin"] = true;
+
+                    //getting the user ID and siteID and storing inside claims
+                    var user = await _userManager.FindByEmailAsync(Input.Email);
+                    if(user != null)
+                    {
+                        await _signInManager.SignInAsync(user, isPersistent: Input.RememberMe);
+                    }
 
                     _logger.LogInformation("User logged in.");
 
