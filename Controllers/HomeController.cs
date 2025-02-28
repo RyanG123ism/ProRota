@@ -65,7 +65,7 @@ namespace ProRota.Controllers
             return View();
         }
 
-        public IActionResult Home()
+        public async Task<IActionResult> Home()
         {
             var User = HttpContext.User;
             //get user to pass into model
@@ -86,13 +86,14 @@ namespace ProRota.Controllers
 
                 if(companyParse && siteClaim)
                 {
-                    var newsFeed = _context.NewsFeedItems
+                    var newsFeed = await _context.NewsFeedItems
                         .Where(n =>
                                 (n.TargetType == NewsFeedTargetType.User && n.ApplicationUserId == userId) ||
                                 (n.TargetType == NewsFeedTargetType.Site && n.SiteId == siteId) ||
                                 (n.TargetType == NewsFeedTargetType.Company && n.CompanyId == companyId))
                             .OrderByDescending(n => n.Timestamp)
-                            .ToList();
+                            .Include(n => n.CreatedByUser)//include author
+                            .ToListAsync();
 
                     return View(newsFeed);
                 }

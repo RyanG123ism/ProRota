@@ -120,60 +120,38 @@ namespace ProRota.Areas.Management.Controllers
             return users;
         }
 
-        public ActionResult SearchForUser(string fullName)
+        public async Task<ActionResult> SearchForUser(string fullName)
         {
-
             var siteId = _siteService.GetSiteIdFromSessionOrUser();
 
-            //Check if the fullName parameter is null or empty
-            if (string.IsNullOrEmpty(fullName))
+            // If the fullName is empty, return an error view
+            if (string.IsNullOrWhiteSpace(fullName))
             {
-                return View("SearchUserError"); //If fullName is null or empty, return a view indicating an error
+                return View("SearchUserError");
             }
 
-            //Passing all the roles to the view so that you can search users by role
+            // Pass all roles to the view for filtering
             ViewBag.Roles = _context.Roles.ToList();
-            string fName;
-            string lName;
 
-            //If the search term contains a space - then we know its 2 names the user is searching for
-            if (fullName.Contains(" "))
-            {
-                var names = fullName.Split(' ');
-                fName = names[0];
-                lName = names[1];
+            // Split fullName to separate first and last name
+            var names = fullName.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            string firstName = names[0];
+            string lastName = names.Length > 1 ? names[1] : null;
 
-                //Retrieve users with matching first names
-                var usersFirstNames = _context.ApplicationUsers.Where(u => u.SiteId == siteId && u.EmailConfirmed == true).Where(u => u.FirstName.Equals(fName)).ToList();
+            // Search users based on name criteria
+            var users = _context.ApplicationUsers
+                .Where(u => u.SiteId == siteId && u.EmailConfirmed)
+                .Where(u =>
+                    u.FirstName.Equals(firstName) ||
+                    (lastName != null && u.LastName.Equals(lastName)) ||
+                    u.LastName.Equals(firstName)) // Allow searching by either first or last name
+                .ToList();
 
-                List<ApplicationUser> results = new List<ApplicationUser>();
+            //sending invited users to view as well
+            var invitedUsers = await _context.ApplicationUsers.Where(u => u.SiteId == siteId && u.EmailConfirmed == false).ToListAsync();
+            ViewBag.InvitedUsers = invitedUsers;
 
-                //Iterate through users with matching first names and filter by last name
-                foreach (var item in usersFirstNames)
-                {
-                    if (item.LastName.Equals(lName))
-                    {
-                        results.Add(item);
-                    }
-                }
-                return View("ViewAllUsers", results); //Return the ViewAllUsers view with filtered results
-            }
-            else//Searching for first names AND last names seperately
-            {
-                fName = fullName;
-                lName = null;
-
-                //Retrieve users with matching first names
-                var usersFirstNames = _context.ApplicationUsers.Where(u => u.SiteId == siteId && u.EmailConfirmed == true).Where(u => u.FirstName.Equals(fName)).ToList();
-                //Retrieve users with matching last names
-                var usersLastNames = _context.ApplicationUsers.Where(u => u.SiteId == siteId && u.EmailConfirmed == true).Where(u => u.LastName.Equals(fName)).ToList();
-
-                //Joins the list of first names and last name search results together
-                var results = usersFirstNames.Concat(usersLastNames);
-
-                return View("ViewAllUsers", results); //Return the ViewAllUsers view with filtered results
-            }
-
+            return View("ViewAllUsers", users);
         }
 
         public async Task<ActionResult> ViewAllUsersByRole(string id)

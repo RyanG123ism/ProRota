@@ -1,6 +1,60 @@
-﻿html {
-  font-size: 14px;
+﻿/* Ensure full-page layout */
+html, body {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    font-size: 14px;
 }
+
+/* Maintain existing background and font settings */
+body {
+    flex-grow: 1; /* Allows content to expand */
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', sans-serif;
+    /* BACKGROUND IMAGE FORMATTING */
+    background-image: url('/images/Background.png');
+    background-size: cover; /* Ensures the image covers the entire screen */
+    background-position: top; /* Displays the image top down */
+    background-repeat: no-repeat; /* Prevents tiling */
+    background-attachment: scroll; /* Makes the background scroll with the content */
+}
+
+/* Wrapper ensures footer stays at the bottom */
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* Ensures the wrapper takes full viewport height */
+}
+
+/* Main content expands to push footer down */
+.main-content {
+    flex-grow: 1;
+}
+
+/* Footer styling */
+.footer {
+    background-color: rgba(0, 0, 0, 0.8); /* Matches your glassmorphism design */
+    color: white;
+    padding: 15px 0;
+    text-align: center;
+    border-top: 1px solid white;
+}
+
+/* Less opaque placeholder text */
+::placeholder {
+    color: rgba(0, 0, 0, 0.6) !important; /* Black text with 60% opacity */
+}
+
+/* Fix for older versions of Edge/IE */
+:-ms-input-placeholder {
+    color: rgba(0, 0, 0, 0.6) !important;
+}
+
+::-ms-input-placeholder {
+    color: rgba(0, 0, 0, 0.6) !important;
+}
+
 
 @media (min-width: 768px) {
   html {
@@ -17,22 +71,9 @@ html {
   min-height: 100%;
 }
 
-.text-content {
+.eontent {
     display: flex;
     color: white;
-}
-
-body {
-    margin-bottom: 60px;
-    /* BACKGROUND IMAGE FORMATTING */
-    background-image: url('/images/Background.png');
-    background-size: cover; /* Ensures the image covers the entire screen */
-    background-position: top; /* displays the image top down */
-    background-repeat: no-repeat; /* Prevents tiling */
-    background-attachment: scroll; /* Makes the background scroll with the content */
-    margin: 0; /* Removes default margins */
-    padding: 0; /* Removes default padding */
-    font-family: 'Poppins', sans-serif; /* Optional: set default font */
 }
 
 /* Transparent Navbar Styling */
@@ -342,33 +383,108 @@ body.modal-open {
     }
 }
 
+.news-feed-icon {
+    filter: brightness(0) invert(1); /* Converts emoji to white */
+    font-size: 1.2em; /* Adjust size if needed */
+}
+
+
+/* Custom Scrollbar */
+.timeline-container {
+    max-height: 400px; /* Keeps news feed contained */
+    overflow-y: auto;
+    padding: 10px; /* Adds spacing but no box background */
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: rgba(255, 255, 255, 0.3) transparent; /* Firefox */
+}
+
+    /* WebKit Browsers (Chrome, Edge, Safari) */
+    .timeline-container::-webkit-scrollbar {
+        width: 8px; /* Slim scrollbar */
+    }
+
+    .timeline-container::-webkit-scrollbar-track {
+        background: transparent; /* No visible track */
+        border-radius: 10px;
+    }
+
+    .timeline-container::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.3); /* Semi-transparent thumb */
+        border-radius: 10px; /* Rounded top and bottom */
+        transition: background 0.3s ease;
+    }
+
+        .timeline-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.6); /* Slightly more visible on hover */
+        }
+
+}
+
+/* Floating Timeline Items */
 .timeline {
     position: relative;
-    padding-left: 30px;
-    border-left: 3px solid #807C96;
+    padding-left: 0; /* Removed left margin */
 }
 
+/* Each News Feed Item */
 .timeline-item {
     position: relative;
-    margin-bottom: 30px;
-    padding-left: 20px;
+    margin-bottom: 15px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.1); /* Semi-transparent floating effect */
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Floating shadow effect */
+    backdrop-filter: blur(5px); /* Glassmorphism effect */
 }
 
+/* Timeline Header */
+.timeline-header {
+    display: flex;
+    justify-content: space-between; /* Pushes date left & user right */
+    align-items: center;
+    width: 100%;
+    margin-bottom: 8px;
+}
+
+/* Date Styling (keeps existing styling) */
 .timeline-date {
     font-size: 0.9rem;
     font-weight: bold;
     color: #9FBA60;
 }
 
+/* User Styling (Aligns text to the right) */
+.timeline-user {
+    font-size: 0.85rem;
+    font-weight: normal;
+    color: #6c757d; /* Slightly muted color */
+    text-align: right;
+    white-space: nowrap; /* Prevents wrapping */
+}
+
+}
+
+/* Post Content */
 .timeline-content {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid white;
-    padding: 10px 15px;
-    border-radius: 5px;
     color: white;
+    overflow-wrap: break-word;
 }
 
     .timeline-content h5 {
         margin-bottom: 5px;
         color: #FFF;
+    }
+
+
+
+.form-control, .form-select {
+    border: 1px solid #ddd;
+    padding: 10px;
+    transition: all 0.3s ease-in-out;
+}
+
+    .form-control:focus, .form-select:focus {
+        border-color: #bbb;
+        box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
     }

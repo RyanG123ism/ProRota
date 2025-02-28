@@ -1,60 +1,106 @@
-﻿﻿@{
-    ViewData["Title"] = "Index";
+﻿@{
+    ViewData["Title"] = "Management Dashboard";
 }
 
 <div class="container mt-5">
     <div class="row justify-content-center">
-        <div class="col-md-10">
-            <div class="card shadow-sm p-3 mb-5">
+        <div class="col-lg-10">
+            <div class="card shadow-sm p-4">
                 <div class="card-header text-center">
                     <h1 class="display-4">Management Dashboard</h1>
                     <h3>@ViewBag.CompanyName @ViewBag.SiteName</h3>
                 </div>
-                <div class="card-body text-center">
-                    <!-- Center all text within the card body -->
-                    <!-- Active Links Section -->
-                    <h4 class="mb-3">Manage your Operations</h4>
-                    <ul class="list-group mb-4">
-                        <a asp-area="Management" asp-controller="ApplicationUser" asp-action="Index" class="list-group-item list-group-item-action text-center">
-                            <i class="fas fa-users mr-2"></i> Manage Users
-                        </a>
-                        <a asp-area="Management" asp-controller="Rota" asp-action="Index" class="list-group-item list-group-item-action text-center">
-                            <i class="fas fa-users mr-2"></i> Manage Weekly Rotas
-                        </a>
-                        <a asp-area="Management" asp-controller="TimeOffRequest" asp-action="Index" class="list-group-item list-group-item-action text-center">
-                            <i class="fas fa-users mr-2"></i> Manage Holiday Requests
-                        </a>
-                    </ul>
+                <div class="card-body">
+                    <div class="row justify-content-center">
 
-                    <h4 class="mb-3">Configure your Site</h4>
-                    <ul class="list-group mb-4">
-                        <a asp-area="Management" asp-controller="Site" asp-action="Index" class="list-group-item list-group-item-action text-center">
-                            <i class="fas fa-users mr-2"></i> Site Configuration
-                        </a>
-                    </ul>
+                        <!-- User Management -->
+                        <div class="col-md-5 col-lg-3 mb-4">
+                            <div class="card text-center shadow-sm p-3 d-flex flex-column align-items-center h-100">
+                                <img src="~/images/user_Managment1.png" alt="User Management Icon" class="img-fluid" style="max-height: 100px; object-fit: contain;">
+                                <h4 class="mt-3">User Management</h4>
+                                <ul class="list-group mt-auto w-100" style="min-height: 90px;">
+                                    <li class="list-group-item list-group-item-secondary text-center">
+                                        <a asp-area="Management" asp-controller="ApplicationUser" asp-action="Index">
+                                            <i class="fas fa-user-cog mr-2"></i> Manage Users
+                                        </a>
+                                    </li>
+                                    <li class="list-group-item list-group-item-secondary text-center">
+                                        <a asp-area="Management" asp-controller="TimeOffRequest" asp-action="Index">
+                                            <i class="fas fa-calendar-check mr-2"></i> Manage Holiday Requests
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
 
-                    <h4 class="mb-3">Site Analytics</h4>
-                    <ul class="list-group mb-4">
-                        <a asp-area="Management" asp-controller="ApplicationUser" asp-action="Index" class="list-group-item list-group-item-action text-center">
-                            <i class="fas fa-users mr-2"></i> See How Your Site is Performing
-                        </a>
-                    </ul>
+                        <!-- Schedule Management -->
+                        <div class="col-md-5 col-lg-3 mb-4">
+                            <div class="card text-center shadow-sm p-3 d-flex flex-column align-items-center h-100">
+                                <img src="~/images/schedule1.png" alt="Schedule Icon" class="img-fluid" style="max-height: 100px; object-fit: contain;">
+                                <h4 class="mt-3">Schedule Management</h4>
+                                <ul class="list-group mt-auto w-100" style="min-height: 90px;">
+                                    <li class="list-group-item list-group-item-secondary text-center">
+                                        <a asp-area="Management" asp-controller="Rota" asp-action="Index">
+                                            <i class="fas fa-clock mr-2"></i> Manage Weekly Rotas
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Site Configuration -->
+                        <div class="col-md-5 col-lg-3 mb-4">
+                            <div class="card text-center shadow-sm p-3 d-flex flex-column align-items-center h-100">
+                                <img src="~/images/siteConfig1.png" alt="Site Configuration Icon" class="img-fluid" style="max-height: 100px; object-fit: contain;">
+                                <h4 class="mt-3">Site Configuration</h4>
+                                <ul class="list-group mt-auto w-100" style="min-height: 90px;">
+                                    <li class="list-group-item list-group-item-secondary text-center">
+                                        <a asp-area="Management" asp-controller="Site" asp-action="Index">
+                                            <i class="fas fa-tools mr-2"></i> Site Configuration
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Site Analytics -->
+                        <div class="col-md-5 col-lg-3 mb-4">
+                            <div class="card text-center shadow-sm p-3 d-flex flex-column align-items-center h-100">
+                                <img src="~/images/analytics1.png" alt="Analytics Icon" class="img-fluid" style="max-height: 100px; object-fit: contain;">
+                                <h4 class="mt-3">Site Analytics</h4>
+                                <ul class="list-group mt-auto w-100" style="min-height: 90px;">
+                                    <li class="list-group-item list-group-item-secondary text-center">
+                                        <a asp-area="Management" asp-controller="ApplicationUser" asp-action="Index">
+                                            <i class="fas fa-chart-line mr-2"></i> See How Your Site is Performing
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- Unused Links Section -->
-                    <h4 class="mb-3 text-muted">Unused Links</h4>
-                    <ul class="list-group">
-                        <li class="list-group-item list-group-item-secondary text-center">
-                            <i class="fas fa-cogs mr-2"></i> Feature 1 (Unused)
-                        </li>
-                        <li class="list-group-item list-group-item-secondary text-center">
-                            <i class="fas fa-chart-bar mr-2"></i> Feature 2 (Unused)
-                        </li>
-                        <li class="list-group-item list-group-item-secondary text-center">
-                            <i class="fas fa-tasks mr-2"></i> Feature 3 (Unused)
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+                    <h4 class="mt-5 text-muted text-center">Unused Links</h4>
+                    <div class="row justify-content-center">
+                        <div class="col-md-8">
+                            <div class="card text-center shadow-sm p-3">
+                                <ul class="list-group">
+                                    <li class="list-group-item list-group-item-secondary">
+                                        <i class="fas fa-cogs mr-2"></i> Feature 1 (Unused)
+                                    </li>
+                                    <li class="list-group-item list-group-item-secondary">
+                                        <i class="fas fa-chart-bar mr-2"></i> Feature 2 (Unused)
+                                    </li>
+                                    <li class="list-group-item list-group-item-secondary">
+                                        <i class="fas fa-tasks mr-2"></i> Feature 3 (Unused)
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                </div> <!-- End of Card Body -->
+            </div> <!-- End of Main Card -->
+        </div> <!-- End of Col -->
+    </div> <!-- End of Row -->
+</div> <!-- End of Container -->

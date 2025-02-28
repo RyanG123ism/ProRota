@@ -1,4 +1,12 @@
 ﻿@model List<ProRota.Models.NewsFeedItem>
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    var user = await UserManager.GetUserAsync(User);
+    var roles = await UserManager.GetRolesAsync(user);
+    bool isManagerOrAdmin = roles.Contains("Owner") || roles.Contains("Admin") || roles.Contains("General Manager");
+}
 
 <div class="container mt-5" style="color:white">
     <div class="text-center">
@@ -7,35 +15,66 @@
         <p class="lead">Stay updated with the latest changes and notifications.</p>
     </div>
 
+    <!-- News Feed Timeline - Scrollable Floating Posts -->
     <div class="row justify-content-center mt-4">
         <div class="col-lg-8">
-            <div class="timeline">
-                @if (Model != null && Model.Any())
-                {
-                    @foreach (var item in Model)
+            <div class="timeline-container">
+                <div class="timeline" id="newsFeedContainer">
+
+                    <!-- Integrated News Feed Post Form -->
+                    <div class="timeline-item post-input">
+                        <div class="timeline-content">
+                            <form id="newsFeedForm" asp-action="CreateNewsFeedItem" asp-controller="NewsFeed" asp-route-siteId="@user.SiteId" method="post">
+                                <!-- Add name attribute to match method parameter -->
+                                <textarea id="newsMessage" name="newsMessage" class="form-control" placeholder="What's on your mind?" rows="3" required></textarea>
+
+                                @if (isManagerOrAdmin)
+                                {
+                                    <div class="form-check mt-2">
+                                        <!-- Add name attribute to checkbox -->
+                                        <input type="checkbox" class="form-check-input" id="companyWideCheckbox" name="companyWideCheckbox" value="true">
+                                        <label class="form-check-label" for="companyWideCheckbox">Broadcast company-wide</label>
+                                    </div>
+                                }
+
+                                <button type="submit" class="btn btn-primary mt-2">Post</button>
+                            </form>
+
+                        </div>
+                    </div>
+
+                    <!-- News Feed Items -->
+                    @if (Model != null && Model.Any())
                     {
-                        <div class="timeline-item">
-                            <div class="timeline-date">@item.Timestamp.ToString("MMM dd, yyyy")</div>
-                            <div class="timeline-content">
-                                <h5>@GetNewsFeedIcon(item.TargetType) @GetNewsFeedTitle(item)</h5>
-                                <p>@item.Message</p>
+                        @foreach (var item in Model)
+                        {
+                            <div class="timeline-item">
+                                <div class="timeline-header">
+                                    <div class="timeline-date">@item.Timestamp.ToString("MMM dd, yyyy")</div>
+                                    <div class="timeline-user">Posted by @item.CreatedByUser.FirstName @item.CreatedByUser.LastName</div>
+                                </div>
+                                <div class="timeline-content">
+                                    <h5><span class="news-feed-icon">@GetNewsFeedIcon(item.TargetType)</span>@GetNewsFeedTitle(item)</h5>
+                                    <p>@item.Message</p>
+                                </div>
                             </div>
+
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center mt-4">
+                            <p>No recent updates.</p>
                         </div>
                     }
-                }
-                else
-                {
-                    <div class="text-center mt-4">
-                        <p>No recent updates.</p>
-                    </div>
-                }
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Call to Action -->
     <div class="text-center mt-5">
-        <a href="/notifications" class="btn btn-primary">View All Updates</a>
+        <a href="/Home" class="btn btn-primary">Refresh Your Feed</a>
     </div>
 </div>
 
@@ -62,4 +101,3 @@
         };
     }
 }
-

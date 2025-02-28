@@ -15,12 +15,14 @@ namespace ProRota.Areas.Management.Controllers
         private ApplicationDbContext _context;
         private UserManager<ApplicationUser> _userManager;
         private readonly ISiteService _siteService;
+        private readonly INewsFeedService _newsFeedService;
 
-        public SiteController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, ISiteService siteService)
+        public SiteController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, ISiteService siteService, INewsFeedService newsFeedService)
         {
             _context = context;
             _userManager = userManager;
             _siteService = siteService;
+            _newsFeedService = newsFeedService;
         }
 
         public IActionResult Index()
@@ -167,6 +169,10 @@ namespace ProRota.Areas.Management.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, "Failed to save changes to the database.");
             };
 
+            //create post and notify user
+            await _newsFeedService.createAndPostNewsFeedItem(
+                $"Trading days/hours have been changed. Make sure to double check your shifts!", site.Id);
+
             TempData["popUpMessage"] = "Trading Hours Updated!";
             return RedirectToAction("Index");
         }
@@ -221,6 +227,10 @@ namespace ProRota.Areas.Management.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "Failed to save changes to the database.");
             };
+
+            //create post and notify site users
+            await _newsFeedService.createAndPostNewsFeedItem(
+                $"Trading days/hours have been changed. Make sure to double check your shifts!", site.Id);
 
             TempData["popUpMessage"] = "Trading Hours Updated!";
             return RedirectToAction("Index");

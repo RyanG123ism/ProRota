@@ -9,40 +9,58 @@
 }
 
 <div class="container mt-5">
-    <div class="card shadow-lg p-4">
+    <div class="card shadow-lg p-4" style="max-width: 800px; margin: auto;">
         <div class="card-body text-center">
             <h2 class="card-title">
-                <a href="javascript:void(0);" onclick="showEditCompanyNamePopUp();">@Model.CompanyName</a>
+                <a href="javascript:void(0);" onclick="showEditCompanyNamePopUp();" class="text-decoration-none">
+                    @Model.CompanyName
+                </a>
             </h2>
             <hr />
 
-            <div class="row">
+            <!-- Company Details -->
+            <div class="row text-center">
                 <div class="col-md-6">
-                    <h5>Owner:</h5>
+                    <h5><i class="fas fa-user-tie me-2"></i> Owner:</h5>
                     <p class="text-muted">
                         @(Model.ApplicationUser != null ? Model.ApplicationUser.FirstName + " " + Model.ApplicationUser.LastName : "Not Assigned")
                     </p>
                 </div>
 
                 <div class="col-md-6">
-                    <h5>Total Sites:</h5>
+                    <h5><i class="fas fa-calendar-alt me-2"></i> Established:</h5>
+                    <p class="text-muted">January 15, 2015</p> <!-- Placeholder -->
+                </div>
+
+                <div class="col-md-6 mt-3">
+                    <h5><i class="fas fa-map-marker-alt me-2"></i> Headquarters:</h5>
+                    <p class="text-muted">London, UK</p> <!-- Placeholder -->
+                </div>
+
+                <div class="col-md-6 mt-3">
+                    <h5><i class="fas fa-users me-2"></i> Total Employees:</h5>
+                    <p class="text-muted">@ViewBag.TotalEmployees</p>
+                </div>
+
+                <div class="col-md-6 mt-3">
+                    <h5><i class="fas fa-building me-2"></i> Total Sites:</h5>
                     <p class="text-muted">@ViewBag.SitesCount</p>
                 </div>
 
                 <div class="col-md-6 mt-3">
-                    <h5>Total Employees:</h5>
-                    <p class="text-muted">@ViewBag.TotalEmployees</p>
+                    <h5><i class="fas fa-handshake me-2"></i> Industry:</h5>
+                    <p class="text-muted">Technology & Services</p> <!-- Placeholder -->
                 </div>
             </div>
 
             <hr />
 
+            <!-- Sites Section -->
             <h4 class="mt-4">Sites</h4>
             @if (Model.Sites.Any())
             {
                 <div class="d-flex justify-content-center">
-                    <!-- Centers the accordion -->
-                    <div class="accordion mt-3 text-center" id="siteAccordion" style="max-width: 600px; width: 100%;">
+                    <div class="accordion mt-3" id="siteAccordion" style="max-width: 700px; width: 100%;">
                         @foreach (var site in Model.Sites)
                         {
                             // ✅ Get employee count safely
@@ -53,15 +71,17 @@
                             var headingId = $"heading-{site.Id}";
 
                             <div class="accordion-item">
-                                <h2 class="accordion-header" id="@headingId">
-                                    <button class="accordion-button collapsed btn-primary text-white w-100" type="button" data-bs-toggle="collapse" data-bs-target="#@collapseId" aria-expanded="false" aria-controls="@collapseId">
+                                <h2 class="accordion-header text-center" id="@headingId">
+                                    <button class="accordion-button collapsed btn-primary text-white w-100 text-center"
+                                            type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#@collapseId" aria-expanded="false" aria-controls="@collapseId">
                                         <i class="fas fa-building me-2"></i> @site.SiteName
                                     </button>
                                 </h2>
                                 <div id="@collapseId" class="accordion-collapse collapse" aria-labelledby="@headingId" data-bs-parent="#siteAccordion">
                                     <div class="accordion-body text-center">
                                         <strong>Total Employees:</strong>
-                                        <span class="text-success fw-bold">Total Employees: @siteEmployeeCount</span>
+                                        <span class="text-success fw-bold">Number of Employees: @siteEmployeeCount</span>
                                     </div>
                                 </div>
                             </div>
@@ -71,11 +91,8 @@
             }
             else
             {
-                <div class="text-center">
-                    <p class="text-muted">No sites found for this company.</p>
-                </div>
+                <p class="text-muted mt-3">No sites found for this company.</p>
             }
-
 
             <div class="mt-4">
                 <a href="@Url.Action("Index", "Home")" class="btn btn-secondary"><i class="fas fa-home"></i> Back to Home</a>

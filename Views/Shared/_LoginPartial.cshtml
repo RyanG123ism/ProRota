@@ -9,33 +9,33 @@
         <div class="user-dropdown">
             <img src="/images/AccountLogo.png" alt="User Profile" class="user-profile-img">
             <div class="user-dropdown-menu">
-                <a asp-area="Identity" asp-page="/Account/Manage/Index">My Profile</a>
+                <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index">My Profile</a>
                         @if(User.Identity.IsAuthenticated)
                         {
                             @if (User.IsInRole("Admin") || User.IsInRole("Owner"))
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" style="color:black" asp-area="Admin" asp-controller="Home" asp-action="Index">Admin/Owner Dashboard</a>
+                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Home" asp-action="Index">Admin Dashboard</a>
                                 </li>
 
                             }
                             else if (User.IsInRole("General Manager") || User.IsInRole("Assistant Manager") || User.IsInRole("Operations Manager") || User.IsInRole("Head Chef") || User.IsInRole("Executive Chef"))
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" style="color:black" asp-area="Management" asp-controller="Home" asp-action="Index">Management Dashboard</a>
+                                    <a class="dropdown-item" asp-area="Management" asp-controller="Home" asp-action="Index">Management Dashboard</a>
                                 </li>
                             }
                             else if (User.IsInRole("Partial_User_Paid") || User.IsInRole("Partial_User_Unpaid"))
                             {
                                 //display nothing
                             }
-                            else
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" style="color:black" asp-area="" asp-controller="UserDashboard" asp-action="Index">Your User Dashboard</a>
-                                </li>
-                            }
-                        }
+
+                            <li class="nav-item">
+                                <a class="dropdown-item" asp-area="" asp-controller="UserDashboard" asp-action="Index"> Your Dashboard</a>
+                            </li>
+
+                }
+
                 <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post">
                     <button type="submit" class="dropdown-item">Logout</button>
                 </form>

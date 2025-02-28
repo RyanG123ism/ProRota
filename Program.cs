@@ -93,10 +93,10 @@ dbContext.Database.EnsureDeleted();
 dbContext.Database.Migrate();
 
 // Create a new DatabaseInitialiser
-var databaseInitialiser = new DbInitialiser(serviceProvider);
+//var databaseInitialiser = new DbInitialiser(serviceProvider);//COMMENT THIS OUT WHEN APP GOES LIVE
 
 // Seed the database
-await databaseInitialiser.Seed();
+//await databaseInitialiser.Seed();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

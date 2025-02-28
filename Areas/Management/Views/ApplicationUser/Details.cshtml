@@ -2,84 +2,62 @@
 @using Microsoft.AspNetCore.Identity;
 @using System.Security.Claims;
 
+@{
+    ViewData["Title"] = "User Details";
+}
 
-<div class="card shadow-sm p-3 mb-5">
-    <div class="card-header text-center">
-        <h1 class="display-4">User Management</h1>
-        <h3>User Details</h3>
-    </div>
-    <div class="card-body text-center">
-        <div class="container">
-            <div>
-                <dl class="row">
+<div class="container d-flex justify-content-center align-items-center vh-100">
+    <div class="card shadow-sm p-4 w-50">
+        <div class="card-header text-center">
+            <h1 class="display-5">User Management</h1>
+            <h3>User Details</h3>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-4 text-end fw-bold">Email:</dt>
+                <dd class="col-sm-8">@Model.Email</dd>
 
-                    <dt class="col-sm-3">Email:</dt>
-                    <dd class="col-sm-9">@Model.Email</dd>
+                <dt class="col-sm-4 text-end fw-bold">First Name:</dt>
+                <dd class="col-sm-8">@Model.FirstName</dd>
 
-                    <dt class="col-sm-3">First Name:</dt>
-                    <dd class="col-sm-9">@Model.FirstName</dd>
+                <dt class="col-sm-4 text-end fw-bold">Last Name:</dt>
+                <dd class="col-sm-8">@Model.LastName</dd>
 
-                    <dt class="col-sm-3">Last Name:</dt>
-                    <dd class="col-sm-9">@Model.LastName</dd>
+                <dt class="col-sm-4 text-end fw-bold">Salary:</dt>
+                <dd class="col-sm-8">@Model.Salary</dd>
 
-                    <dt class="col-sm-3">Salary:</dt>
-                    <dd class="col-sm-9">@Model.Salary</dd>
+                <dt class="col-sm-4 text-end fw-bold">Contractual Hours:</dt>
+                <dd class="col-sm-8">@Model.ContractualHours</dd>
 
-                    <dt class="col-sm-3">Contractual Hours:</dt>
-                    <dd class="col-sm-9">@Model.ContractualHours</dd>
+                <dt class="col-sm-4 text-end fw-bold">Employee Notes:</dt>
+                <dd class="col-sm-8">
+                    @(Model.Notes != null ? Model.Notes : "N/A")
+                </dd>
 
-                    <dt class="col-sm-3">Employee Notes:</dt>
-                    <dd class="col-sm-9">
-                        @if (Model.Notes != null)
-                        {
-                            <span>@Model.Notes</span>
-                        }
-                        else
-                        {
-                            <span>N/A</span>
-                        }
-                    </dd>
+                <dt class="col-sm-4 text-end fw-bold">Role:</dt>
+                <dd class="col-sm-8">
+                    @(ViewBag.UserRole != null ? ViewBag.UserRole : "No role assigned")
+                </dd>
 
-                    <dt class="col-sm-3">Role:</dt>
-                    <dd class="col-sm-9">
-                        @if (ViewBag.UserRole != null)
-                        {
-                            <span>@ViewBag.UserRole</span>
-                        }
-                        else
-                        {
-                            <span>No role assigned</span>
-                        }
-                    </dd>
+                <dt class="col-sm-4 text-end fw-bold">Pending Shifts:</dt>
+                <dd class="col-sm-8 text-muted">Placeholder: In the future, shifts will be displayed here.</dd>
 
-                    <!-- Placeholder for displaying shifts -->
-                    <dt class="col-sm-3">Pending Shifts:</dt>
-                    <dd class="col-sm-9">
-                        <span>Placeholder: In the future, shifts will be displayed here.</span>
-                    </dd>
+                <dt class="col-sm-4 text-end fw-bold">Time-Off Requests:</dt>
+                <dd class="col-sm-8 text-muted">Placeholder: In the future, time-off requests will be displayed here.</dd>
+            </dl>
 
-                    <!-- Placeholder for displaying time-off requests -->
-                    <dt class="col-sm-3">Time-Off Requests:</dt>
-                    <dd class="col-sm-9">
-                        <span>Placeholder: In the future, time-off requests will be displayed here.</span>
-                    </dd>
+            <div class="text-center mt-4">
+                @if (User.FindFirstValue(ClaimTypes.NameIdentifier) == Model.Id)
+                {
+                    @Html.ActionLink("Edit", "EditUser", new { id = Model.Id, area = "ADDAREAHERE" }, new { @class = "btn btn-primary" })
+                }
+                else
+                {
+                    @Html.ActionLink("Edit", "EditApplicationUser", new { id = Model.Id }, new { @class = "btn btn-primary" })
+                }
 
-                    @if (User.FindFirstValue(ClaimTypes.NameIdentifier.ToString()) == Model.Id)
-                    {
-                        @* if the Id is the same as the logged in user - take to their own accoutns edit page *@
-                        @Html.ActionLink("Edit", "EditUser", new { id = Model.Id, area = "ADDAREAHERE" })
-                    }
-                    else
-                    {
-                        @Html.ActionLink("Edit", "EditApplicationUser", new { id = Model.Id })
-                    }
-                </dl>
+                @Html.ActionLink("Back to User List", "Index", "ApplicationUser", null, new { @class = "btn btn-secondary ml-2" })
             </div>
-
-            <div>
-                @Html.ActionLink("Back to User List", "Index", "ApplicationUser", null, new { @class = "btn btn-secondary" })
-            </div>
-
         </div>
     </div>
 </div>

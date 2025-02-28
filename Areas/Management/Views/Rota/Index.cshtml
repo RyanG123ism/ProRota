@@ -2,69 +2,63 @@
 @using ProRota.Models
 
 @{
-    //categories that represent all the key values within the parent dictionary
+    ViewData["Title"] = "Rota Management";
     var categories = new List<string> { "Unpublished Rotas", "Current Week", "Published Rotas" };
 }
 
-<div class="card shadow-sm p-3 mb-5">
-    <div class="card-header text-center">
-        <h1 class="display-4">Rota Management</h1>
-        <h3>Weekly Rotas</h3>
-    </div>
-    <div class="card-body text-center">
-
-        <div class="text-center">
-            <a asp-area="Management" asp-controller="Rota" asp-action="CreateNewRota" class="btn btn-primary btn-sm">Create New Rota</a>
+<div class="container mt-4">
+    <div class="card shadow-sm p-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="text-center w-100">
+                <h1 class="display-5">Rota Management</h1>
+                <h3>Weekly Rotas</h3>
+            </div>
         </div>
-        <div class="container">
-            
-            @foreach (var category in categories)
-            {
-                if (Model.ContainsKey(category) && Model[category].Any())
+
+        <div class="card-body">
+            <div class="text-center mb-3">
+                <a asp-area="Management" asp-controller="Rota" asp-action="CreateNewRota" class="btn btn-primary">Create New Rota</a>
+                <a asp-area="Management" asp-controller="Dashboard" asp-action="Index" class="btn btn-secondary">Back to Dashboard</a>
+            </div>
+
+            <div class="container">
+                @foreach (var category in categories)
                 {
-                    <div class="card mb-4">
-                        <div class="card-header text-center">
-                            <h2>@category</h2>
-                        </div>
-                        <div class="card-body">
-                            <table class="table table-bordered table-striped table-hover">
-                                <thead class="table-dark">
-                                    <tr>
-                                        <th>Week Ending</th>
-                                        <th>Total Shifts</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var entry in Model[category])
-                                    {
+                    if (Model.ContainsKey(category) && Model[category].Any())
+                    {
+                        <div class="card mb-4">
+                            <div class="card-header text-center">
+                                <h2 class="text-white">@category</h2>
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-hover text-center">
+                                    <thead>
                                         <tr>
-                                            <td>@entry.Key</td> <!-- Week Ending Date -->
-                                            <td>@entry.Value.Count</td> <!-- Count of shifts -->
-                                            <td>
-                                                <div>
-                                                    @Html.ActionLink("View", "ViewWeeklyRota", new { weekEnding = entry.Key })
-                                                </div>
-                                            </td>
+                                            <th>Week Ending</th>
+                                            <th>Total Shifts</th>
+                                            <th>Actions</th>
                                         </tr>
-                                    }
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var entry in Model[category])
+                                        {
+                                            <tr>
+                                                <td>@entry.Key</td> <!-- Week Ending Date -->
+                                                <td>@entry.Value.Count</td> <!-- Count of shifts -->
+                                                <td>
+                                                    <a asp-action="ViewWeeklyRota" asp-route-weekEnding="@entry.Key" class="btn btn-primary btn-sm">
+                                                        View Rota
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
-                    </div>
+                    }
                 }
-            }
-            
+            </div>
         </div>
     </div>
 </div>
-
-
-
-
-
-
-
-
-
-

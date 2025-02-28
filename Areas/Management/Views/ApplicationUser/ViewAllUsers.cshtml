@@ -15,28 +15,25 @@
         <h3>User Management</h3>
     </div>
     <div class="card-body">
-        <!-- Search form -->
+        <!-- Search for user by full name -->
         <form method="get" action="@Url.Action("SearchForUser", "ApplicationUser")">
-            <div style="margin-bottom: 10px;">
-                <!-- Add margin-bottom for spacing -->
-                <input type="text" name="fullName" placeholder="Enter full name">
-                <button type="submit">Search</button>
+            <div class="input-group mb-3">
+                <input type="text" name="fullName" class="form-control rounded-pill" placeholder="Enter full name">
+                <button type="submit" class="btn btn-secondary rounded-pill px-4">🔍 Search</button>
             </div>
         </form>
 
-        <!-- Drop Down list for searching by roles -->
+        <!-- Search by Role Dropdown -->
         @using (Html.BeginForm("ViewAllUsersByRole", "ApplicationUser", FormMethod.Get))
         {
-            <div style="margin-top: 10px;">
-                <!-- Add margin-top for spacing -->
-                <select name="id" id="roleId">
+            <div class="input-group mt-3">
+                <select name="id" id="roleId" class="form-select rounded-pill">
                     @foreach (var role in ViewBag.Roles)
                     {
                         <option value="@role.Id">@role.Name</option>
-
                     }
                 </select>
-                <button type="submit">Search</button>
+                <button type="submit" class="btn btn-secondary rounded-pill px-4">🔍 Search</button>
             </div>
         }
 

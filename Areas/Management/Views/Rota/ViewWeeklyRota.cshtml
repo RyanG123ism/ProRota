@@ -2,137 +2,107 @@
 @using ProRota.Areas.Management.ViewModels
 
 @{
-    ViewData["Title"] = "ViewWeeklyRota";
+    ViewData["Title"] = "View Weekly Rota";
     var weekStartingDate = (DateTime)ViewBag.WeekStartingDate;
 }
 
-<div class="card shadow-sm p-3 mb-5">
-    <div class="card-header text-center">
-        <h1 class="display-4">Rota Management</h1>
-        <h3>Week Commencing - <b>@weekStartingDate.ToString("dd/MM/yyyy")</b></h3>
-    </div>
-    <div class="card-body text-center">
-        @{
-            if (ViewBag.Today > ViewBag.WeekEndingDate)
-            {
-                //old rota - no functionality
-                <div class="text-center">
-                    <a asp-area="Management" asp-controller="Rota" asp-action="Index" class="btn btn-secondary btn-sm">Back to List</a>
-                </div>
-            }
-            else if (ViewBag.Today >= ViewBag.WeekStartingDate && ViewBag.Today < ViewBag.WeekEndingDate)
-            {
-                <a asp-area="Management" asp-controller="Rota" asp-action="Index" class="btn btn-secondary btn-sm">Back to List</a>
+<div class="container mt-4">
+    <div class="card shadow-sm p-4">
+        <div class="card-header text-center">
+            <h1 class="display-5">Rota Management</h1>
+            <h3>Week Commencing - <b>@weekStartingDate.ToString("dd/MM/yyyy")</b></h3>
+        </div>
+        <div class="card-body text-center">
+            <div class="d-flex flex-wrap justify-content-center gap-2 mb-4">
+                <a href="#" class="btn btn-secondary" id="backToListButton">Back to List</a>
 
-                //current week - unpublished shifts
-                if (ViewBag.UnpublishedShifts)
+                @if (ViewBag.Today <= ViewBag.WeekEndingDate)
                 {
-                    <div class="text-center">
-                        <form asp-area="Management" asp-controller="Rota" asp-action="SaveRota" method="post">
-                            <input type="hidden" name="serializedModel" value='@Json.Serialize(Model)' />
-                            <input type="hidden" name="publishStatus" value="true" />
-                            <button type="submit" class="btn btn-secondary btn-sm">Publish Rota</button>
-                        </form>
-                    </div>
-                }
-                else //current week - published shifts
-                {
-                    //edit button?
-                }
-            }
-            else if (ViewBag.Today < ViewBag.WeekStartingDate)
-            {
-                //future week - unpublished rota
-                if (ViewBag.UnpublishedShifts)
-                {
-                    
-                    <div class="text-center">
-                        <a asp-area="Management" asp-controller="Rota" asp-action="Index" class="btn btn-secondary btn-sm">Back to List</a>
-                        <form asp-area="Management" asp-controller="Rota" asp-action="SaveRota" method="post">
-                            <input type="hidden" name="serializedModel" value='@Json.Serialize(Model)' />
-                            <input type="hidden" name="publishStatus" value="true" />
-                            <button type="submit" class="btn btn-secondary btn-sm">Publish Rota</button>
-                        </form>
-                        @if (ViewBag.InitialCreate)
-                        {
-                            <a asp-area="Management" asp-controller="Rota" asp-action="Index" class="btn btn-secondary btn-sm">Back to List</a>
-                            <form asp-area="Management" asp-controller="Rota" asp-action="SaveRota" method="post">
-                                <input type="hidden" name="serializedModel" value='@Json.Serialize(Model)' />
-                                <input type="hidden" name="publishStatus" value="false" />
-                                <button type="submit" class="btn btn-secondary btn-sm">Save Shifts and Exit</button>
-                            </form>
-                        }
-                    </div>
-                }
-                else
-                {
-                    //future week - published rota
-                    <a asp-area="Management" asp-controller="Rota" asp-action="Index" class="btn btn-secondary btn-sm">Back to List</a>
-                    <form asp-area="Management" asp-controller="Rota" asp-action="UnPublishRota" method="post">
-                        <input type="hidden" name="serializedModel" value='@Json.Serialize(Model)' />
-                        <button type="submit" class="btn btn-secondary btn-sm">UnPublish</button>
-                    </form>
-                    <form asp-area="Management" asp-controller="Rota" asp-action="DeleteRota" method="post">
-                        <input type="hidden" name="serializedModel" value='@Json.Serialize(Model)' />
-                        <button type="submit" class="btn btn-secondary btn-sm">Delete Rota</button>
-                    </form>
-                }
-            }               
-        }
-
-        
-
-        <div class="table-responsive">
-            <table id="weeklyRotaTable" class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>Employee</th>
-                        <th>Monday</th>
-                        <th>Tuesday</th>
-                        <th>Wednesday</th>
-                        <th>Thursday</th>
-                        <th>Friday</th>
-                        <th>Saturday</th>
-                        <th>Sunday</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var kvp in Model) // Loop through the dictionary
+                    @if (ViewBag.UnpublishedShifts)
                     {
-                        var employeeId = kvp.Key;
-                        var employeeData = kvp.Value; // Extract the value (assumed to be a DTO or dynamic object)
-                        var shifts = employeeData.Shifts as List<Shift>;
-                        var timeOffRequests = employeeData.TimeOffRequests as List<TimeOffRequest>;
-                        var employeeName = employeeData.FirstName + " " + employeeData.LastName; // Assuming name is part of the DTO
-
-                        <tr>
-                            <td>@employeeName</td>
-
-                            @for (int i = 0; i < 7; i++)
-                            {
-                                var currentDate = weekStartingDate.AddDays(i);
-                                var shift = shifts?.FirstOrDefault(s => s.StartDateTime.HasValue && s.StartDateTime.Value.Date == currentDate.Date);
-                                var timeOffRequest = timeOffRequests?.FirstOrDefault(t => t.Date.Date == currentDate.Date);
-
-                                <td>
-                                    @if (shift != null)
-                                    {
-                                        <span>@shift.StartDateTime.Value.ToString("HH:mm") - @shift.EndDateTime.Value.ToString("HH:mm")</span>
-                                    }
-                                    else if (timeOffRequest != null)
-                                    {
-                                        <span>HOLIDAY</span>
-                                    }
-                                    else
-                                    {
-                                        <span>OFF</span>
-                                    }
-                                </td>
-                            }
-                        </tr>
+                        <form asp-area="Management" asp-controller="Rota" asp-action="SaveRota" method="post">
+                            <input type="hidden" name="serializedModel" value='@Json.Serialize(Model)' />
+                            <input type="hidden" name="publishStatus" value="true" />
+                            <button type="submit" class="btn btn-primary">Publish Rota</button>
+                        </form>
                     }
-                </tbody>
-            </table>
+
+                    @if (ViewBag.InitialCreate)
+                    {
+                        <form asp-area="Management" asp-controller="Rota" asp-action="SaveRota" method="post">
+                            <input type="hidden" name="serializedModel" value='@Json.Serialize(Model)' />
+                            <input type="hidden" name="publishStatus" value="false" />
+                            <button type="submit" class="btn btn-success">Save Shifts and Exit</button>
+                        </form>
+                    }
+
+                    @if (!ViewBag.UnpublishedShifts)
+                    {
+                        <form asp-area="Management" asp-controller="Rota" asp-action="UnPublishRota" method="post">
+                            <input type="hidden" name="serializedModel" value='@Json.Serialize(Model)' />
+                            <button type="submit" class="btn btn-primary">Unpublish</button>
+                        </form>
+
+                        <form asp-area="Management" asp-controller="Rota" asp-action="DeleteRota" method="post">
+                            <input type="hidden" name="serializedModel" value='@Json.Serialize(Model)' />
+                            <button type="submit" class="btn btn-danger">Delete Rota</button>
+                        </form>
+                    }
+                }
+            </div>
+
+            <!-- Weekly Rota Table -->
+            <div class="table-responsive">
+                <table id="weeklyRotaTable" class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Monday</th>
+                            <th>Tuesday</th>
+                            <th>Wednesday</th>
+                            <th>Thursday</th>
+                            <th>Friday</th>
+                            <th>Saturday</th>
+                            <th>Sunday</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var kvp in Model)
+                        {
+                            var employeeData = kvp.Value;
+                            var shifts = employeeData.Shifts as List<Shift>;
+                            var timeOffRequests = employeeData.TimeOffRequests as List<TimeOffRequest>;
+                            var employeeName = $"{employeeData.FirstName} {employeeData.LastName}";
+
+                            <tr>
+                                <td>@employeeName</td>
+
+                                @for (int i = 0; i < 7; i++)
+                                {
+                                    var currentDate = weekStartingDate.AddDays(i);
+                                    var shift = shifts?.FirstOrDefault(s => s.StartDateTime?.Date == currentDate.Date);
+                                    var timeOffRequest = timeOffRequests?.FirstOrDefault(t => t.Date.Date == currentDate.Date);
+
+                                    <td>
+                                        @if (shift != null)
+                                        {
+                                            <span>@shift.StartDateTime.Value.ToString("HH:mm") - @shift.EndDateTime.Value.ToString("HH:mm")</span>
+                                        }
+                                        else if (timeOffRequest != null)
+                                        {
+                                            <span class="text-warning">HOLIDAY</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">OFF</span>
+                                        }
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -140,12 +110,23 @@
 @if (ViewBag.Editable == true)
 {
     <script>
-        @* Add scripts here for editing shift times, drag/drop functionality *@
+        // Add scripts here for editing shift times, drag/drop functionality
     </script>
 }
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        highlightTableCellsforWeeklyRota(); // Call the specific function
+        highlightTableCellsforWeeklyRota();
+    });
+
+    document.getElementById("backToListButton").addEventListener("click", function (event) {
+        event.preventDefault(); // Prevents immediate navigation
+
+        let confirmExit = confirm("Warning: Your rota will not be saved if you leave this page. Are you sure you want to continue?");
+
+        if (confirmExit) {
+            window.location.href = '@Url.Action("Index", "Rota", new { area = "Management" })';
+        }
     });
 </script>
+

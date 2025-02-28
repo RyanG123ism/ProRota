@@ -29,12 +29,15 @@ namespace ProRota.Areas.Identity.Pages.Account
         private readonly IExtendedEmailSender _emailSenderService;
         private readonly IHubContext<EmailConfirmationHub> _hubContext;
         private readonly SignInManager<ApplicationUser> _signInManager;
-        public ConfirmEmailModel(UserManager<ApplicationUser> userManager, IExtendedEmailSender emailSenderService, IHubContext<EmailConfirmationHub> hubContext, SignInManager<ApplicationUser> signInManager)
+        private readonly INewsFeedService _newsFeedService;
+
+        public ConfirmEmailModel(UserManager<ApplicationUser> userManager, IExtendedEmailSender emailSenderService, IHubContext<EmailConfirmationHub> hubContext, SignInManager<ApplicationUser> signInManager, INewsFeedService newsFeedService)
         {
             _userManager = userManager;
             _emailSenderService = emailSenderService;
             _hubContext = hubContext;
             _signInManager = signInManager;
+            _newsFeedService = newsFeedService;
         }
 
         /// <summary>
@@ -83,6 +86,7 @@ namespace ProRota.Areas.Identity.Pages.Account
                 //sign in user to refresh authentication cookie and add claims
                 var userPrincipal = await _signInManager.CreateUserPrincipalAsync(user);
                 await HttpContext.SignInAsync(IdentityConstants.ApplicationScheme, userPrincipal);
+
 
                 if (invited == true)//invite email (an employee)
                 {

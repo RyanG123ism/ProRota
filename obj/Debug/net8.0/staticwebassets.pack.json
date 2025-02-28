@@ -37,8 +37,24 @@
       "PackagePath": "staticwebassets\\images\\Logo_Transparent.png"
     },
     {
+      "Id": "C:\\Users\\grant\\OneDrive\\Desktop\\UNI\\Year 4\\Honours Project\\ProRota\\wwwroot\\images\\analytics1.PNG",
+      "PackagePath": "staticwebassets\\images\\analytics1.PNG"
+    },
+    {
       "Id": "C:\\Users\\grant\\OneDrive\\Desktop\\UNI\\Year 4\\Honours Project\\ProRota\\wwwroot\\images\\example_rota.png",
       "PackagePath": "staticwebassets\\images\\example_rota.png"
+    },
+    {
+      "Id": "C:\\Users\\grant\\OneDrive\\Desktop\\UNI\\Year 4\\Honours Project\\ProRota\\wwwroot\\images\\schedule1.PNG",
+      "PackagePath": "staticwebassets\\images\\schedule1.PNG"
+    },
+    {
+      "Id": "C:\\Users\\grant\\OneDrive\\Desktop\\UNI\\Year 4\\Honours Project\\ProRota\\wwwroot\\images\\siteConfig1.PNG",
+      "PackagePath": "staticwebassets\\images\\siteConfig1.PNG"
+    },
+    {
+      "Id": "C:\\Users\\grant\\OneDrive\\Desktop\\UNI\\Year 4\\Honours Project\\ProRota\\wwwroot\\images\\user_Managment1.PNG",
+      "PackagePath": "staticwebassets\\images\\user_Managment1.PNG"
     },
     {
       "Id": "C:\\Users\\grant\\OneDrive\\Desktop\\UNI\\Year 4\\Honours Project\\ProRota\\wwwroot\\js\\companyScripts.js",

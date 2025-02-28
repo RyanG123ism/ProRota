@@ -25,14 +25,16 @@ namespace ProRota.Areas.Management.Controllers
         private readonly ISiteService _siteService;
         private readonly IRotaService _rotaService;
         private readonly IAlgorithmService _algorithmService;
+        private readonly INewsFeedService _newsFeedService;
 
-        public RotaController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, ISiteService siteService, IRotaService rotaService, IAlgorithmService algorithmService)
+        public RotaController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, ISiteService siteService, IRotaService rotaService, IAlgorithmService algorithmService, INewsFeedService newsFeedService)
         {
             _context = context;
             _userManager = userManager;
             _siteService = siteService;
             _rotaService = rotaService;
             _algorithmService = algorithmService;
+            _newsFeedService = newsFeedService;
         }
 
         public async Task<IActionResult> Index()
@@ -321,6 +323,13 @@ namespace ProRota.Areas.Management.Controllers
             {
                 ViewBag.Error = "Error: Could not save new shifts to DB";
                 return View(model);
+            }
+
+            if(publishStatus == true)
+            {
+                //create post and notify site
+                await _newsFeedService.createAndPostNewsFeedItem(
+                    $"Trading days/hours have been changed. Make sure to double check your shifts!", siteId);
             }
 
             return RedirectToAction("Index");

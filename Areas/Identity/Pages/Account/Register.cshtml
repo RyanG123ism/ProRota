@@ -20,41 +20,39 @@
 
                 <!-- First Name -->
                 <div class="form-floating mb-3 text-center">
-                    <input asp-for="Input.FirstName" class="form-control text-center" autocomplete="given-name" aria-required="true" placeholder="First Name here" />
-                    <label asp-for="Input.FirstName" class="form-label w-100 text-center">First Name</label>
+                    <input asp-for="Input.FirstName" class="form-control text-center" autocomplete="given-name"
+                           aria-required="true" placeholder="Enter your first name" />
                     <span asp-validation-for="Input.FirstName" class="text-danger"></span>
                 </div>
 
                 <!-- Last Name -->
                 <div class="form-floating mb-3 text-center">
-                    <input asp-for="Input.LastName" class="form-control text-center" autocomplete="family-name" aria-required="true" placeholder="Last Name here" />
-                    <label asp-for="Input.LastName" class="form-label w-100 text-center">Last Name</label>
+                    <input asp-for="Input.LastName" class="form-control text-center" autocomplete="family-name"
+                           aria-required="true" placeholder="Enter your last name" />
                     <span asp-validation-for="Input.LastName" class="text-danger"></span>
                 </div>
 
-                <!-- Validation Summary -->
-                <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
-
                 <!-- Email -->
                 <div class="form-floating mb-3 text-center">
-                    <input asp-for="Input.Email" class="form-control text-center" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                    <label asp-for="Input.Email" class="form-label w-100 text-center">Email</label>
+                    <input asp-for="Input.Email" class="form-control text-center" autocomplete="username"
+                           aria-required="true" placeholder="Enter your email" />
                     <span asp-validation-for="Input.Email" class="text-danger"></span>
                 </div>
 
                 <!-- Password -->
                 <div class="form-floating mb-3 text-center">
-                    <input asp-for="Input.Password" class="form-control text-center" autocomplete="new-password" aria-required="true" placeholder="password" />
-                    <label asp-for="Input.Password" class="form-label w-100 text-center">Password</label>
+                    <input asp-for="Input.Password" class="form-control text-center" autocomplete="new-password"
+                           aria-required="true" placeholder="Enter your password" />
                     <span asp-validation-for="Input.Password" class="text-danger"></span>
                 </div>
 
                 <!-- Confirm Password -->
                 <div class="form-floating mb-3 text-center">
-                    <input asp-for="Input.ConfirmPassword" class="form-control text-center" autocomplete="new-password" aria-required="true" placeholder="Confirm Password" />
-                    <label asp-for="Input.ConfirmPassword" class="form-label w-100 text-center">Confirm Password</label>
+                    <input asp-for="Input.ConfirmPassword" class="form-control text-center" autocomplete="new-password"
+                           aria-required="true" placeholder="Confirm your password" />
                     <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
                 </div>
+
 
                 <!-- Submit Button -->
                 <div class="d-grid">

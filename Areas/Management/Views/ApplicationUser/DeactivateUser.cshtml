@@ -1,8 +1,24 @@
 ﻿@model ApplicationUser
 
-<h1>Deactivate User</h1>
-<p>Are you sure you want to deactivate user: @Model.UserName?</p>
+@{
+    ViewData["Title"] = "Deactivate User";
+}
 
-<form asp-action="ConfirmDeactivateUser" asp-route-id="@Model.Id" method="post">
-    <button type="submit">Confirm Deactivation</button>
-</form>
+<div class=" d-flex justify-content-center align-items-center vh-100">
+    <div class="card shadow-sm p-4 w-50 text-center">
+        <div class="card-header">
+            <h1 class="display-5 text-danger">Deactivate User</h1>
+        </div>
+        <div class="card-body">
+            <p class="lead">Are you sure you want to deactivate the user:</p>
+            <h3 class="text-primary">@Model.UserName</h3>
+
+            <form asp-action="ConfirmDeactivateUser" asp-route-id="@Model.Id" method="post">
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-danger">Confirm Deactivation</button>
+                    @Html.ActionLink("Cancel", "Index", "ApplicationUser", null, new { @class = "btn btn-secondary ml-2" })
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

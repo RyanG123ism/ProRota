@@ -1,102 +1,100 @@
 ﻿@using ProRota.Areas.Management.Models
 @model CreateApplicationUserViewModel
+
 @{
-    ViewData["Title"] = "CreateApplicationUser";
+    ViewData["Title"] = "Create User";
 }
 
-<div class="card shadow-sm p-3 mb-5">
-    <div class="card-header text-center">
-        <h1 class="display-4">User Management</h1>
-        <h3>Create a User</h3>
-    </div>
-    <div class="card-body">
-        <!-- Display ModelState errors -->
-        @if (!ViewData.ModelState.IsValid)
-        {
-            <div class="alert alert-danger">
-                <ul>
-                    @foreach (var modelState in ViewData.ModelState.Values)
-                    {
-                        foreach (var error in modelState.Errors)
+<div class=" d-flex justify-content-center align-items-center vh-100">
+    <div class="card shadow-sm p-4 w-50">
+        <div class="card-header text-center">
+            <h1 class="display-5">User Management</h1>
+            <h3>Create a New User</h3>
+        </div>
+        <div class="card-body">
+            <!-- Display ModelState errors -->
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger">
+                    <ul>
+                        @foreach (var modelState in ViewData.ModelState.Values)
                         {
-                            <li>@error.ErrorMessage</li>
+                            foreach (var error in modelState.Errors)
+                            {
+                                <li>@error.ErrorMessage</li>
+                            }
                         }
-                    }
-                </ul>
-            </div>
-        }
+                    </ul>
+                </div>
+            }
 
-        @using (Html.BeginForm("CreateApplicationUser", "ApplicationUser", FormMethod.Post, new { enctype = "multipart/form-data" }))
-        {
-            @Html.AntiForgeryToken()
+            @using (Html.BeginForm("CreateApplicationUser", "ApplicationUser", FormMethod.Post, new { enctype = "multipart/form-data" }))
+            {
+                @Html.AntiForgeryToken()
 
-            <div class="container">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Email)
+                    @Html.TextBoxFor(model => model.Email, new { @class = "form-control", placeholder = "Enter email" })
+                    @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Password)
+                    @Html.PasswordFor(model => model.Password, new { @class = "form-control", placeholder = "Enter password" })
+                    @Html.ValidationMessageFor(model => model.Password, "", new { @class = "text-danger" })
+                </div>
+
                 <div class="row">
                     <div class="col-md-6">
-                        <div class="form-group mb-3">
-                            @Html.LabelFor(model => model.Email, htmlAttributes: new { @class = "control-label" })
-                            @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "form-control", placeholder = "Enter email" } })
-                            @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
-                        </div>
-
-                        <div class="form-group mb-3">
-                            @Html.LabelFor(model => model.Password, htmlAttributes: new { @class = "control-label" })
-                            @Html.PasswordFor(model => model.Password, new { @class = "form-control", placeholder = "Enter password" })
-                            @Html.ValidationMessageFor(model => model.Password, "", new { @class = "text-danger" })
-                        </div>
-
-                        <div class="form-group mb-3">
-                            @Html.LabelFor(model => model.FirstName, htmlAttributes: new { @class = "control-label" })
-                            @Html.EditorFor(model => model.FirstName, new { htmlAttributes = new { @class = "form-control", placeholder = "Enter first name" } })
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.FirstName)
+                            @Html.TextBoxFor(model => model.FirstName, new { @class = "form-control", placeholder = "First name" })
                             @Html.ValidationMessageFor(model => model.FirstName, "", new { @class = "text-danger" })
                         </div>
-
-                        <div class="form-group mb-3">
-                            @Html.LabelFor(model => model.LastName, htmlAttributes: new { @class = "control-label" })
-                            @Html.EditorFor(model => model.LastName, new { htmlAttributes = new { @class = "form-control", placeholder = "Enter last name" } })
-                            @Html.ValidationMessageFor(model => model.LastName, "", new { @class = "text-danger" })
-                        </div>
-
-                        <div class="form-group mb-3">
-                            @Html.LabelFor(model => model.Salary, htmlAttributes: new { @class = "control-label" })
-                            @Html.EditorFor(model => model.Salary, new { htmlAttributes = new { @class = "form-control", placeholder = "Enter Salary" } })
-                            @Html.ValidationMessageFor(model => model.Salary, "", new { @class = "text-danger" })
-                        </div>
-
-                        <div class="form-group mb-3">
-                            @Html.LabelFor(model => model.ContractualHours, htmlAttributes: new { @class = "control-label" })
-                            @Html.EditorFor(model => model.ContractualHours, new { htmlAttributes = new { @class = "form-control", placeholder = "Enter Contractual Hours" } })
-                            @Html.ValidationMessageFor(model => model.ContractualHours, "", new { @class = "text-danger" })
-                        </div>
-
-                        <div class="form-group mb-3">
-                            @Html.LabelFor(model => model.Notes, htmlAttributes: new { @class = "control-label" })
-                            @Html.EditorFor(model => model.Notes, new { htmlAttributes = new { @class = "form-control", placeholder = "Enter any Notes here" } })
-                            @Html.ValidationMessageFor(model => model.Notes, "", new { @class = "text-danger" })
-                        </div>
-
-
+                    </div>
+                    <div class="col-md-6">
                         <div class="form-group">
-                            @Html.LabelFor(model => model.Role, htmlAttributes: new { @class = "control-label" })
-                            <div class="col-md-10">
-                                @Html.DropDownListFor(model => model.Role, new SelectList(Model.Roles, "Value", "Text"), "-- Select Role --", new { @class = "form-control mb-3" })
-                                @Html.ValidationMessageFor(model => model.Role, "", new { @class = "text-danger" })
-                            </div>
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <button type="submit" value="Create" class="btn btn-dark">Create</button>
+                            @Html.LabelFor(model => model.LastName)
+                            @Html.TextBoxFor(model => model.LastName, new { @class = "form-control", placeholder = "Last name" })
+                            @Html.ValidationMessageFor(model => model.LastName, "", new { @class = "text-danger" })
                         </div>
                     </div>
                 </div>
-            </div>
-        }
 
-        <div>
-            @Html.ActionLink("Back to User List", "Index", "ApplicationUser", null, new { @class = "btn btn-secondary" })
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.Salary)
+                            @Html.TextBoxFor(model => model.Salary, new { @class = "form-control", placeholder = "Salary" })
+                            @Html.ValidationMessageFor(model => model.Salary, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.ContractualHours)
+                            @Html.TextBoxFor(model => model.ContractualHours, new { @class = "form-control", placeholder = "Contractual Hours" })
+                            @Html.ValidationMessageFor(model => model.ContractualHours, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Notes)
+                    @Html.TextAreaFor(model => model.Notes, new { @class = "form-control", placeholder = "Additional Notes", rows = "3" })
+                    @Html.ValidationMessageFor(model => model.Notes, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Role)
+                    @Html.DropDownListFor(model => model.Role, new SelectList(Model.Roles, "Value", "Text"), "-- Select Role --", new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.Role, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-primary">Create User</button>
+                    @Html.ActionLink("Back to User List", "Index", "ApplicationUser", null, new { @class = "btn btn-secondary ml-2" })
+                </div>
+            }
         </div>
-
     </div>
 </div>
-
-
