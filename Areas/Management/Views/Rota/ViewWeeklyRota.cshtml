@@ -74,9 +74,12 @@
                             var employeeData = kvp.Value;
                             var shifts = employeeData.Shifts as List<Shift>;
                             var timeOffRequests = employeeData.TimeOffRequests as List<TimeOffRequest>;
+                            var employeeId = kvp.Key;
                             var employeeName = $"{employeeData.FirstName} {employeeData.LastName}";
 
-                            <tr>
+                            <tr data-user-id="@employeeId" data-firstname="@employeeData.FirstName" 
+                                data-lastname="@employeeData.LastName" data-role="@employeeData.Role">
+            
                                 <td><strong>@employeeName</strong></td>
                                 <td>@employeeData.RoleCategory</td>
                                 <td>@employeeData.Role</td>
@@ -87,14 +90,14 @@
                                     var shift = shifts?.FirstOrDefault(s => s.StartDateTime?.Date == currentDate.Date);
                                     var timeOffRequest = timeOffRequests?.FirstOrDefault(t => t.Date.Date == currentDate.Date);
 
-                                    <td>
-                                        @if (shift != null)
-                                        {
-                                            <span>@shift.StartDateTime.Value.ToString("HH:mm") - @shift.EndDateTime.Value.ToString("HH:mm")</span>
-                                        }
-                                        else if (timeOffRequest != null)
+                                    <td class="shift-cell" data-date="@currentDate.ToString("yyyy-MM-dd")">
+                                        @if (timeOffRequest != null)
                                         {
                                             <span class="text-warning">HOLIDAY</span>
+                                        }
+                                        else if (shift != null)
+                                        {
+                                            <span class="shift-time">@shift.StartDateTime.Value.ToString("HH:mm") - @shift.EndDateTime.Value.ToString("HH:mm")</span>
                                         }
                                         else
                                         {
@@ -105,11 +108,49 @@
                             </tr>
                         }
                     </tbody>
+
                 </table>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Shift Modal -->
+<div id="shiftModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Manage Shift</h5>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="modalUserId">
+                <input type="hidden" id="modalShiftDate">
+
+                <p><strong>Employee:</strong> <span id="modalEmployeeName"></span></p>
+                <p><strong>Role:</strong> <span id="modalRole"></span></p>
+                <p><strong>Day:</strong> <span id="modalDay"></span></p>
+                <p><strong>Date:</strong> <span id="modalFullDate"></span></p>
+
+                <div class="form-group">
+                    <label>Start Time</label>
+                    <input type="time" id="shiftStartTime" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>End Time</label>
+                    <input type="time" id="shiftEndTime" class="form-control">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="addShiftButton" class="btn btn-success">Add Shift</button>
+                <button id="editShiftButton" class="btn btn-primary" disabled>Edit Shift</button>
+                <button id="deleteShiftButton" class="btn btn-danger">Delete Shift</button>
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 
 @if (ViewBag.Editable == true)
 {
