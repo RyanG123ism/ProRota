@@ -46,48 +46,96 @@ namespace ProRota.Areas.Management.Controllers
 
         public async Task<ActionResult> ViewWeeklyRota(string weekEnding)
         {
-            //checks wether siteID is of user or the admins session (if admin is logged in)
+            //Get Site Configuration
             var siteId = _siteService.GetSiteIdFromSessionOrUser();
+            var site = await _context.Sites
+                .Where(s => s.Id == siteId)
+                .Include(s => s.SiteConfiguration)
+                .SingleOrDefaultAsync();
 
+            if (site?.SiteConfiguration == null)
+            {
+                return BadRequest("Site configuration not found.");
+            }
+
+            //Load RoleConfigurations for the SiteConfiguration
+            var roleConfigs = await _context.RoleConfigurations
+                .Where(rc => rc.SiteConfigurationId == site.SiteConfiguration.Id)
+                .Include(rc => rc.RoleCategory)
+                    .ThenInclude(rc => rc.Roles) // Load all ApplicationRoles inside RoleCategory
+                .ToListAsync();
+
+            //Create a dictionary mapping ApplicationRole.Name -> RoleCategory.Name
+            var roleLookup = new Dictionary<string, string>();
+
+            foreach (var roleConfig in roleConfigs)
+            {
+                if (roleConfig.RoleCategory?.Roles != null)
+                {
+                    foreach (var role in roleConfig.RoleCategory.Roles)
+                    {
+                        roleLookup[role.Name] = roleConfig.RoleCategory.Name; // Map Role Name -> Role Category
+                    }
+                }
+            }
+
+            //Fetch Users & Their Identity Roles
+            var users = await _context.ApplicationUsers
+                .Where(u => u.SiteId == siteId && u.EmailConfirmed)
+                .Include(u => u.Shifts) // Fix: Ensure Shifts are loaded
+                .Include(u => u.TimeOffRequests) // Fix: Ensure TimeOffRequests are loaded
+                .ToListAsync();
+
+            //Fetch User Roles from Identity Tables
+            var userRoles = await _context.UserRoles
+                .Join(_context.Roles, ur => ur.RoleId, r => r.Id, (ur, r) => new { ur.UserId, RoleName = r.Name })
+                .Where(ur => users.Select(u => u.Id).Contains(ur.UserId)) //Only fetch roles for relevant users
+                .ToDictionaryAsync(ur => ur.UserId, ur => ur.RoleName);
+
+            //Parse the week-ending date
             var weekEndingDate = DateTime.Parse(weekEnding);
-            var weekStartingDate = weekEndingDate.AddDays(-7); // Week start date from the end date
+            var weekStartingDate = weekEndingDate.AddDays(-7); //Get the week start date
 
-            //querying all users of the site
-            //formatting data into a dictionary of the ViewRotaViewModel
-            var rota = await _context.ApplicationUsers
-                .Where(u => u.SiteId == siteId && u.EmailConfirmed == true)
+            //Map Users to View Model
+            var rota = users
                 .Select(u => new ViewRotaViewModel
                 {
                     Id = u.Id,
                     FirstName = u.FirstName,
                     LastName = u.LastName,
+
+                    // Match User Role to RoleConfig Dictionary
+                    Role = userRoles.ContainsKey(u.Id) ? userRoles[u.Id] : "No Role",
+                    RoleCategory = userRoles.ContainsKey(u.Id) && roleLookup.ContainsKey(userRoles[u.Id])
+                                    ? roleLookup[userRoles[u.Id]]
+                                    : "No Category",
+
+                    // Fetch shifts for the selected week
                     Shifts = u.Shifts.Where(s => s.SiteId == siteId &&
                                                  s.StartDateTime >= weekStartingDate &&
                                                  s.StartDateTime <= weekEndingDate &&
-                                                 s.IsPublished == true).ToList(),
+                                                 s.IsPublished).ToList(),
+
+                    // Fetch time-off requests for the selected week
                     TimeOffRequests = u.TimeOffRequests.Where(t => t.Date >= weekStartingDate &&
                                                                    t.Date <= weekEndingDate &&
                                                                    t.IsApproved == ApprovedStatus.Approved).ToList()
                 })
-                .ToDictionaryAsync(u => u.Id);
+                .OrderBy(u => u.RoleCategory) // ✅ Order by Role Category
+                .ThenBy(u => u.Role) // (Optional) Order by Role within the category
+                .ToDictionary(u => u.Id);
 
-            //passing starting and ending and today date to view to help format dates
+
+            //Pass week-related data to the view
             ViewBag.WeekStartingDate = weekStartingDate;
             ViewBag.WeekEndingDate = weekEndingDate;
             ViewBag.Today = DateTime.Today;
 
-            //passing true to view only if the rota is of this week or in the future
-            if (weekEndingDate >= DateTime.Now)
-            {
-                ViewBag.Editable = true;
-            }
+            //Allow edits only for this week or future weeks
+            ViewBag.Editable = weekEndingDate >= DateTime.Now;
 
-            //passing the publish status of the rota to the view
-            bool UnpublishedShifts = rota.Values.Any(r => r.Shifts.Any(s => !s.IsPublished));
-            ViewBag.UnpublishedShifts = UnpublishedShifts;
-
-            
-
+            //Check if any shifts are unpublished
+            ViewBag.UnpublishedShifts = rota.Values.Any(r => r.Shifts.Any(s => !s.IsPublished));
 
             return View(rota);
         }
@@ -238,7 +286,7 @@ namespace ProRota.Areas.Management.Controllers
                     g => new ViewRotaViewModel
                     {
                         Id = g.Key,
-                        FirstName = g.First().Value.First().ApplicationUser?.FirstName ?? "Unknown", // Get first shift's user
+                        FirstName = g.First().Value.First().ApplicationUser?.FirstName ?? "Unknown",
                         LastName = g.First().Value.First().ApplicationUser?.LastName ?? "Unknown",
                         Shifts = g.SelectMany(x => x.Value).ToList(), // Flatten all shifts into a single list
                         TimeOffRequests = timeOffRequests.ContainsKey(g.Key) ? timeOffRequests[g.Key] : new List<TimeOffRequest>()

@@ -8,6 +8,8 @@ namespace ProRota.Areas.Management.ViewModels
         public string Id { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        public string Role { get; set; }
+        public string RoleCategory { get; set; }
         public List<Shift> Shifts { get; set; } = new List<Shift>();
         public List<TimeOffRequest> TimeOffRequests { get; set; } = new List<TimeOffRequest>();
     }

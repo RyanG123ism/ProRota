@@ -54,6 +54,10 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true; // Required for GDPR compliance
 });
 
+// Ensure the app listens on the correct port
+//var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+//builder.WebHost.UseUrls($"http://+:{port}");
+
 //adding service classes and interfaces
 builder.Services.AddScoped<ISiteService, SiteService>();
 builder.Services.AddScoped<IRotaService, RotaService>();
@@ -92,11 +96,20 @@ dbContext.Database.EnsureDeleted();
 // Apply migrations
 dbContext.Database.Migrate();
 
+//try
+//{
+//    dbContext.Database.Migrate();
+//}
+//catch (Exception ex)
+//{
+//    Console.WriteLine($"Database migration failed: {ex.Message}");
+//}
+
 // Create a new DatabaseInitialiser
-//var databaseInitialiser = new DbInitialiser(serviceProvider);//COMMENT THIS OUT WHEN APP GOES LIVE
+var databaseInitialiser = new DbInitialiser(serviceProvider);//COMMENT THIS OUT WHEN APP GOES LIVE
 
 // Seed the database
-//await databaseInitialiser.Seed();
+await databaseInitialiser.Seed();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

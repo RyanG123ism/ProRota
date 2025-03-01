@@ -27,7 +27,7 @@
                         </form>
                     }
 
-                    @if (ViewBag.InitialCreate)
+                    @if (ViewBag.InitialCreate != null)
                     {
                         <form asp-area="Management" asp-controller="Rota" asp-action="SaveRota" method="post">
                             <input type="hidden" name="serializedModel" value='@Json.Serialize(Model)' />
@@ -57,6 +57,8 @@
                     <thead>
                         <tr>
                             <th>Employee</th>
+                            <th>Role Category</th>
+                            <th>Role</th>
                             <th>Monday</th>
                             <th>Tuesday</th>
                             <th>Wednesday</th>
@@ -75,7 +77,9 @@
                             var employeeName = $"{employeeData.FirstName} {employeeData.LastName}";
 
                             <tr>
-                                <td>@employeeName</td>
+                                <td><strong>@employeeName</strong></td>
+                                <td>@employeeData.RoleCategory</td>
+                                <td>@employeeData.Role</td>
 
                                 @for (int i = 0; i < 7; i++)
                                 {
@@ -129,4 +133,3 @@
         }
     });
 </script>
-
