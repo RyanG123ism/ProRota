@@ -94,7 +94,7 @@ namespace ProRota.Areas.Management.Controllers
 
             //Parse the week-ending date
             var weekEndingDate = DateTime.Parse(weekEnding);
-            var weekStartingDate = weekEndingDate.AddDays(-7); //Get the week start date
+            var weekStartingDate = weekEndingDate.AddDays(-6); //Get the week start date
 
             //Map Users to View Model
             var rota = users
@@ -125,14 +125,16 @@ namespace ProRota.Areas.Management.Controllers
                 .ThenBy(u => u.Role) // (Optional) Order by Role within the category
                 .ToDictionary(u => u.Id);
 
+            //store serialized rota in session
+            HttpContext.Session.SetString("SerializedModel", JsonConvert.SerializeObject(rota, new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            }));
 
             //Pass week-related data to the view
-            ViewBag.WeekStartingDate = weekStartingDate;
             ViewBag.WeekEndingDate = weekEndingDate;
+            ViewBag.WeekStartingDate = weekStartingDate;
             ViewBag.Today = DateTime.Today;
-
-            //Allow edits only for this week or future weeks
-            ViewBag.Editable = weekEndingDate >= DateTime.Now;
 
             //Check if any shifts are unpublished
             ViewBag.UnpublishedShifts = rota.Values.Any(r => r.Shifts.Any(s => !s.IsPublished));
@@ -384,7 +386,177 @@ namespace ProRota.Areas.Management.Controllers
 
         }
 
-        
+        [HttpPost]
+        public async Task<IActionResult> EditRotaView(bool publishStatus, string weekEnding)
+        {
+            var serializedModel = HttpContext.Session.GetString("SerializedModel");
+
+            if (string.IsNullOrEmpty(serializedModel))
+            {
+                TempData["PopUp"] = "Error: Rota Data missing from JSON";
+                return RedirectToAction("Index");
+            }
+
+            var model = JsonConvert.DeserializeObject<Dictionary<string, ViewRotaViewModel>>(serializedModel);
+            if (model == null)
+            {
+                throw new Exception("Error deserializing JSON data");
+            }
+
+            var weekEndingDate = !string.IsNullOrEmpty(weekEnding) ? DateTime.Parse(weekEnding) : DateTime.Today;
+
+            ViewBag.WeekEndingDate = weekEndingDate;
+            ViewBag.WeekStartingDate = weekEndingDate.AddDays(-6);
+
+            ViewBag.Today = DateTime.Today;
+            ViewBag.UnpublishedShifts = publishStatus ? false : true;
+
+            return View("EditRota", model);
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditRota([FromBody] Dictionary<string, Dictionary<string, ShiftUpdateModel>> editedShifts)
+        {
+            if (editedShifts == null || editedShifts.Count == 0)
+            {
+                return BadRequest("No shifts to update.");
+            }
+
+            var siteId = _siteService.GetSiteIdFromSessionOrUser();
+
+            List<string> affectedUserIds = editedShifts.Keys.ToList();
+            var shiftDates = editedShifts.Values
+                .SelectMany(s => s.Keys)
+                .Distinct()
+                .Select(DateTime.Parse)
+                .ToList();
+
+            // Fetch existing shifts only for affected users & dates
+            var existingShifts = await _context.Shifts
+                .Where(s => affectedUserIds.Contains(s.ApplicationUserId) &&
+                            s.StartDateTime.HasValue &&
+                            shiftDates.Contains(s.StartDateTime.Value.Date) &&
+                            s.SiteId == siteId)
+                .ToListAsync();
+
+            List<Shift> shiftsToAdd = new List<Shift>();
+            List<Shift> shiftsToUpdate = new List<Shift>();
+            List<Shift> shiftsToDelete = new List<Shift>();
+
+            foreach (var userEntry in editedShifts)
+            {
+                string userId = userEntry.Key;
+
+                foreach (var shiftEntry in userEntry.Value)
+                {
+                    DateTime shiftDate = DateTime.Parse(shiftEntry.Key);
+                    ShiftUpdateModel newShiftData = shiftEntry.Value;
+
+                    var existingShift = existingShifts.FirstOrDefault(s =>
+                        s.ApplicationUserId == userId &&
+                        s.StartDateTime.HasValue &&
+                        s.StartDateTime.Value.Date == shiftDate);
+
+                    if (newShiftData.StartTime == null || newShiftData.EndTime == null)
+                    {
+                        if (existingShift != null)
+                        {
+                            shiftsToDelete.Add(existingShift);
+                        }
+                    }
+                    else
+                    {
+                        DateTime newStart = shiftDate.Date.Add(TimeSpan.Parse(newShiftData.StartTime));
+                        DateTime newEnd = shiftDate.Date.Add(TimeSpan.Parse(newShiftData.EndTime));
+
+                        if (existingShift == null)
+                        {
+                            shiftsToAdd.Add(new Shift
+                            {
+                                ApplicationUserId = userId,
+                                SiteId = siteId,
+                                StartDateTime = newStart,
+                                EndDateTime = newEnd,
+                                IsPublished = false
+                            });
+                        }
+                        else if (existingShift.StartDateTime.Value != newStart || existingShift.EndDateTime.Value != newEnd)
+                        {
+                            existingShift.StartDateTime = newStart;
+                            existingShift.EndDateTime = newEnd;
+                            shiftsToUpdate.Add(existingShift);
+                        }
+                    }
+                }
+            }
+
+            if (shiftsToDelete.Any()) _context.Shifts.RemoveRange(shiftsToDelete);
+            if (shiftsToAdd.Any()) await _context.Shifts.AddRangeAsync(shiftsToAdd);
+            await _context.SaveChangesAsync();
+
+            if (shiftsToUpdate.Any())
+            {
+                _context.Shifts.UpdateRange(shiftsToUpdate);
+                await _context.SaveChangesAsync();
+            }
+
+            // ✅ Fetch Updated Users and Append to View Model
+            return await ReloadOnlyAffectedUsers(affectedUserIds, siteId);
+        }
+
+        private async Task<IActionResult> ReloadOnlyAffectedUsers(List<string> affectedUserIds, int siteId)
+        {
+            var users = await _context.ApplicationUsers
+                .Where(u => affectedUserIds.Contains(u.Id))
+                .ToListAsync();
+
+            var userRoles = await _context.UserRoles
+                .Join(_context.Roles, ur => ur.RoleId, r => r.Id, (ur, r) => new { ur.UserId, RoleName = r.Name })
+                .Where(ur => affectedUserIds.Contains(ur.UserId))
+                .ToDictionaryAsync(ur => ur.UserId, ur => ur.RoleName);
+
+            DateTime weekEndingDate = DateTime.Today.AddDays(7 - (int)DateTime.Today.DayOfWeek);
+            DateTime weekStartingDate = weekEndingDate.AddDays(-6);
+
+            var rota = users
+                .Select(u => new ViewRotaViewModel
+                {
+                    Id = u.Id,
+                    FirstName = u.FirstName,
+                    LastName = u.LastName,
+                    Role = userRoles.ContainsKey(u.Id) ? userRoles[u.Id] : "No Role",
+                    RoleCategory = "Category here", // You may adjust based on how role categories are stored
+                    Shifts = _context.Shifts
+                        .Where(s => s.ApplicationUserId == u.Id &&
+                                    s.SiteId == siteId &&
+                                    s.StartDateTime.HasValue &&
+                                    s.StartDateTime.Value >= weekStartingDate &&
+                                    s.StartDateTime.Value <= weekEndingDate &&
+                                    s.IsPublished)
+                        .ToList(),
+                    TimeOffRequests = _context.TimeOffRequests
+                        .Where(t => t.ApplicationUserId == u.Id &&
+                                    t.Date >= weekStartingDate &&
+                                    t.Date <= weekEndingDate &&
+                                    t.IsApproved == ApprovedStatus.Approved)
+                        .ToList()
+                })
+                .ToDictionary(u => u.Id);
+
+            ViewBag.WeekStartingDate = weekStartingDate;
+            ViewBag.WeekEndingDate = weekEndingDate;
+            ViewBag.Today = DateTime.Today;
+            ViewBag.Editable = weekEndingDate >= DateTime.Now;
+            ViewBag.UnpublishedShifts = rota.Values.Any(r => r.Shifts.Any(s => !s.IsPublished));
+
+            return View("ViewWeeklyRota", rota);
+        }
+
+
+
+
 
     }
 }

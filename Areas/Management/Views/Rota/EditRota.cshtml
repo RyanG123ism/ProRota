@@ -1,67 +1,34 @@
 ﻿@model Dictionary<string, ViewRotaViewModel>
-@using Newtonsoft.Json
 @using ProRota.Areas.Management.ViewModels
+@using Newtonsoft.Json
 
 @{
     ViewData["Title"] = "View Weekly Rota";
     var weekEndingDate = ViewBag.WeekEndingDate != null ? (DateTime)ViewBag.WeekEndingDate : DateTime.Today;
     var weekStartingDate = ViewBag.WeekStartingDate != null ? (DateTime)ViewBag.WeekStartingDate : DateTime.Today;
-
 }
 
 <div class="container mt-4">
     <div class="card shadow-sm p-4">
         <div class="card-header text-center">
             <h1 class="display-5">Rota Management</h1>
-            <h3>Week Ending - <b>@weekEndingDate.ToString("dd/MM/yyyy")</b></h3>
+            <h3>Week Commencing - <b>@weekStartingDate.ToString("dd/MM/yyyy")</b></h3>
         </div>
         <div class="card-body text-center">
             <div class="d-flex flex-wrap justify-content-center gap-2 mb-4">
                 <a href="#" class="btn btn-secondary" id="backToListButton">Back to List</a>
-                
 
-                @if (ViewBag.Today <= ViewBag.WeekEndingDate)
-                {
-                    @if (ViewBag.UnpublishedShifts)
-                    {
-                        <form asp-area="Management" asp-controller="Rota" asp-action="SaveRota" method="post">
-                            <input type="hidden" name="serializedModel" value='@Json.Serialize(Model)' />
-                            <input type="hidden" name="publishStatus" value="true" />
-                            <button type="submit" class="btn btn-primary">Publish Rota</button>
-                        </form>
+                    <form asp-area="Management" asp-controller="Rota" asp-action="EditRota" method="post">
+                            @* <input type="hidden" name="publishStatus" value="true" /> *@ 
+                            <button type="button" class="btn btn-primary" onclick="saveAllShifts()">Save Changes</button>
 
-                        <form asp-area="Management" asp-controller="Rota" asp-action="EditRotaView" method="post">
-                            @* <input type="hidden" name="serializedModel" value='@Json.Serialize(Model)' /> *@
-                            <input type="hidden" name="publishStatus" value="false" />
+                    </form> 
+                    
+                    <form asp-area="Management" asp-controller="Rota" asp-action="ViewWeeklyRota">
                             <input type="hidden" name="weekEnding" value="@weekEndingDate" />
-                            <button type="submit" class="btn btn-success">Edit</button>
-                        </form>
-                    }
-
-                    @if (ViewBag.InitialCreate != null)
-                    {
-                        <form asp-area="Management" asp-controller="Rota" asp-action="SaveRota" method="post">
-                            <input type="hidden" name="serializedModel" value='@Json.Serialize(Model)' />
-                            <input type="hidden" name="publishStatus" value="false" />
-                            <button type="submit" class="btn btn-success">Save Shifts and Exit</button>
-                        </form>
-                    }
-
-                    @if (!ViewBag.UnpublishedShifts)
-                    {
-                        <form asp-area="Management" asp-controller="Rota" asp-action="UnPublishRota" method="post">
-                            <input type="hidden" name="serializedModel" value='@Json.Serialize(Model)' />
-                            <button type="submit" class="btn btn-primary">Unpublish</button>
-                        </form>
-
-                                <form asp-area="Management" asp-controller="Rota" asp-action="EditRotaView" method="post">
-                            <input type="hidden" name="serializedModel" value='@Json.Serialize(Model)' />
-                            <input type="hidden" name="publishStatus" value="true" />
-                            <input type="hidden" name="weekEnding" value="@weekEndingDate" />
-                            <button type="submit" class="btn btn-success">Edit</button>
-                        </form>
-                    }
-                }
+                            <button type="submit" class="btn btn-primary">Exit</button>               
+                    </form> 
+                    
             </div>
 
             <!-- Weekly Rota Table -->
@@ -90,12 +57,12 @@
                             var employeeId = kvp.Key;
                             var employeeName = $"{employeeData.FirstName} {employeeData.LastName}";
 
-                            <tr data-user-id="@employeeId" data-firstname="@employeeData.FirstName" 
-                                data-lastname="@employeeData.LastName" data-role="@employeeData.Role">
-            
-                                <td><strong>@employeeName</strong></td>
-                                <td>@employeeData.RoleCategory</td>
-                                <td>@employeeData.Role</td>
+                                <tr data-user-id="@employeeId" data-firstname="@employeeData.FirstName" 
+                                    data-lastname="@employeeData.LastName" data-role="@employeeData.Role">
+
+                                    <td><strong>@employeeName</strong></td>
+                                    <td>@employeeData.RoleCategory</td>
+                                    <td>@employeeData.Role</td>
 
                                 @for (int i = 0; i < 7; i++)
                                 {
@@ -103,27 +70,61 @@
                                     var shift = (shifts ?? new List<Shift>()).FirstOrDefault(s => s.StartDateTime.HasValue && s.StartDateTime.Value.Date == currentDate.Date);
                                     var timeOffRequest = (timeOffRequests ?? new List<TimeOffRequest>()).FirstOrDefault(t => t.Date.Date == currentDate.Date);
 
-
-                                    <td class="shift-cell" data-date="@currentDate.ToString("yyyy-MM-dd")">
+                                            <td class="shift-cell" data-date="@currentDate.ToString("yyyy-MM-dd")">
                                         @if (timeOffRequest != null)
                                         {
-                                            <span class="text-warning">HOLIDAY</span>
+                                                        <span class="text-warning">HOLIDAY</span>
                                         }
                                         else if (shift != null)
                                         {
-                                            <span class="shift-time">@shift.StartDateTime.Value.ToString("HH:mm") - @shift.EndDateTime.Value.ToString("HH:mm")</span>
+                                                        <span class="shift-time">@shift.StartDateTime.Value.ToString("HH:mm") - @shift.EndDateTime.Value.ToString("HH:mm")</span>
                                         }
                                         else
                                         {
-                                            <span class="text-muted">OFF</span>
+                                                        <span class="text-muted">OFF</span>
                                         }
-                                    </td>
+                                            </td>
                                 }
-                            </tr>
+                                </tr>
                         }
                     </tbody>
 
                 </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Shift Modal -->
+<div id="shiftModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Manage Shift</h5>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="modalUserId">
+                <input type="hidden" id="modalShiftDate">
+
+                <p><strong>Employee:</strong> <span id="modalEmployeeName"></span></p>
+                <p><strong>Role:</strong> <span id="modalRole"></span></p>
+                <p><strong>Day:</strong> <span id="modalDay"></span></p>
+                <p><strong>Date:</strong> <span id="modalFullDate"></span></p>
+
+                <div class="form-group">
+                    <label>Start Time</label>
+                    <input type="time" id="shiftStartTime" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>End Time</label>
+                    <input type="time" id="shiftEndTime" class="form-control">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="addShiftButton" class="btn btn-success">Add Shift</button>
+                <button id="editShiftButton" class="btn btn-primary" disabled>Edit Shift</button>
+                <button id="deleteShiftButton" class="btn btn-danger">Delete Shift</button>
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
             </div>
         </div>
     </div>

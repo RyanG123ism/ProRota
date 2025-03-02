@@ -103,19 +103,23 @@ function updateTableCell(userId, shiftDate, startTime, endTime) {
     }
 }
 
-// ✅ Send updated shifts to the backend
 function saveAllShifts() {
-    fetch('/Rota/SaveUpdatedShifts', {
+    let token = document.querySelector("input[name='__RequestVerificationToken']")?.value; // Get CSRF Token
+
+    fetch('/Management/Rota/EditRota', { // Ensure correct route
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+            'Content-Type': 'application/json',
+            'RequestVerificationToken': token // Send CSRF Token
+        },
         body: JSON.stringify(editedShifts)
     }).then(response => response.json())
-        .then(data => console.log("Shifts updated:", data))
+        .then(data => {
+            console.log("Shifts updated:", data);
+            location.reload(); // Reload page to reflect new shifts
+        })
         .catch(error => console.error("Error:", error));
 }
-
-
-
 
 
 

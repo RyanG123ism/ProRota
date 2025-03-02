@@ -254,6 +254,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = QXJlYXNcTWFuYWdlbWVudFxWaWV3c1xSb3RhXENyZWF0ZU5ld1JvdGEuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/grant/OneDrive/Desktop/UNI/Year 4/Honours Project/ProRota/Areas/Management/Views/Rota/EditRota.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcTWFuYWdlbWVudFxWaWV3c1xSb3RhXEVkaXRSb3RhLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/grant/OneDrive/Desktop/UNI/Year 4/Honours Project/ProRota/Areas/Management/Views/Rota/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = QXJlYXNcTWFuYWdlbWVudFxWaWV3c1xSb3RhXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
