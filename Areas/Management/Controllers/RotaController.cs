@@ -113,8 +113,8 @@ namespace ProRota.Areas.Management.Controllers
                     // Fetch shifts for the selected week
                     Shifts = u.Shifts.Where(s => s.SiteId == siteId &&
                                                  s.StartDateTime >= weekStartingDate &&
-                                                 s.StartDateTime <= weekEndingDate &&
-                                                 s.IsPublished).ToList(),
+                                                 s.StartDateTime <= weekEndingDate.AddHours(23.00)) //adding hours to catch all shifts on the sunday
+                                                  .ToList(),
 
                     // Fetch time-off requests for the selected week
                     TimeOffRequests = u.TimeOffRequests.Where(t => t.Date >= weekStartingDate &&
@@ -124,6 +124,14 @@ namespace ProRota.Areas.Management.Controllers
                 .OrderBy(u => u.RoleCategory) // ✅ Order by Role Category
                 .ThenBy(u => u.Role) // (Optional) Order by Role within the category
                 .ToDictionary(u => u.Id);
+
+            var rotaSession = HttpContext.Session.GetString("SerializedModel");
+
+            if(rotaSession != null)
+            {
+                //delete existing session if exists
+                HttpContext.Session.Remove("SerializedModel");
+            }
 
             //store serialized rota in session
             HttpContext.Session.SetString("SerializedModel", JsonConvert.SerializeObject(rota, new JsonSerializerSettings
@@ -338,20 +346,36 @@ namespace ProRota.Areas.Management.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> SaveRota(string serializedModel, bool publishStatus)
+        public async Task<IActionResult> SaveRota(string? serializedModel, bool publishStatus)
         {
-            //if no data is passed in
-            if (string.IsNullOrEmpty(serializedModel))
+            var model = new Dictionary<string, ViewRotaViewModel>();
+
+
+            if (serializedModel != null)
+            {            
+                //attempt to extract model from JSON
+                model = JsonConvert.DeserializeObject<Dictionary<string, ViewRotaViewModel>>(serializedModel);
+            }
+            else
             {
-                TempData["PopUp"] = "Error: Rota Data missing from JSON";
-                return RedirectToAction("Index");
+                //attempt to get the rota from the session
+                var rotaSession = HttpContext.Session.GetString("SerializedModel");
+                if (rotaSession == null)
+                {
+                    throw new Exception("Cannot find rota from sesison");
+                }
+                //extract the serialized model
+                model = JsonConvert.DeserializeObject<Dictionary<string, ViewRotaViewModel>>(rotaSession);
             }
 
-            //extract the serialized model
-            var model = JsonConvert.DeserializeObject<Dictionary<string, ViewRotaViewModel>>(serializedModel);
             var siteId = _siteService.GetSiteIdFromSessionOrUser();
 
-            if(model.IsNullOrEmpty())
+            var userIds = model.Keys.ToList();
+            var existingShifts = await _context.Shifts
+                .Where(s => userIds.Contains(s.ApplicationUserId) && s.SiteId == siteId)
+                .ToListAsync();
+
+            if (model.IsNullOrEmpty())
             {
                 TempData["PopUp"] = "Error: Could not extract rota data from form";
                 return RedirectToAction("Index");
@@ -361,10 +385,28 @@ namespace ProRota.Areas.Management.Controllers
             {
                 foreach (var shift in model[userId].Shifts)
                 {
-                    shift.ApplicationUserId = userId;
-                    shift.SiteId = siteId;
-                    shift.IsPublished = publishStatus;//changing published status
-                    _context.Shifts.Add(shift);//adding to db
+                    var existingShift = existingShifts.FirstOrDefault(s =>
+                        s.ApplicationUserId == userId &&
+                        s.StartDateTime == shift.StartDateTime &&
+                        s.EndDateTime == shift.EndDateTime &&
+                        s.SiteId == siteId);
+
+                    if (existingShift == null)
+                    {
+                        // If the shift doesn't exist, add it as a new shift
+                        shift.ApplicationUserId = userId;
+                        shift.SiteId = siteId;
+                        shift.IsPublished = publishStatus;
+                        _context.Shifts.Add(shift);
+                    }
+                    else
+                    {
+                        // If the shift already exists, update it instead
+                        existingShift.StartDateTime = shift.StartDateTime;
+                        existingShift.EndDateTime = shift.EndDateTime;
+                        existingShift.IsPublished = publishStatus;
+                        _context.Shifts.Update(existingShift);
+                    }
                 }
             }
 
@@ -417,23 +459,29 @@ namespace ProRota.Areas.Management.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditRota([FromBody] Dictionary<string, Dictionary<string, ShiftUpdateModel>> editedShifts)
+        public async Task<IActionResult> EditRota(bool publishStatus, string weekEndingDate, string editedShifts)
         {
-            if (editedShifts == null || editedShifts.Count == 0)
+            if (string.IsNullOrEmpty(editedShifts))
             {
-                return BadRequest("No shifts to update.");
+                TempData["Error"] = "No shifts to update.";
+                return RedirectToAction("Index");
             }
 
             var siteId = _siteService.GetSiteIdFromSessionOrUser();
+            var editedShiftsDict = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, ShiftUpdateModel>>>(editedShifts);
 
-            List<string> affectedUserIds = editedShifts.Keys.ToList();
-            var shiftDates = editedShifts.Values
+
+            //list of userID's of users that have had their shifts edited
+            List<string> affectedUserIds = editedShiftsDict.Keys.ToList();
+
+            //list of all shift dates from the editedShifts dictionary
+            var shiftDates = editedShiftsDict.Values
                 .SelectMany(s => s.Keys)
                 .Distinct()
                 .Select(DateTime.Parse)
                 .ToList();
 
-            // Fetch existing shifts only for affected users & dates
+            //queries the db for shifts that match the usersId and shift dates
             var existingShifts = await _context.Shifts
                 .Where(s => affectedUserIds.Contains(s.ApplicationUserId) &&
                             s.StartDateTime.HasValue &&
@@ -441,26 +489,33 @@ namespace ProRota.Areas.Management.Controllers
                             s.SiteId == siteId)
                 .ToListAsync();
 
+            //placeholders for shifts to add, update, and delete
             List<Shift> shiftsToAdd = new List<Shift>();
             List<Shift> shiftsToUpdate = new List<Shift>();
             List<Shift> shiftsToDelete = new List<Shift>();
 
-            foreach (var userEntry in editedShifts)
+            //loops through each users edited shifts
+            foreach (var userEntry in editedShiftsDict)
             {
-                string userId = userEntry.Key;
+                string userId = userEntry.Key;//gets the user Id
 
+                //loop through each shift 
                 foreach (var shiftEntry in userEntry.Value)
                 {
+                    //get the new date and times for the shift
                     DateTime shiftDate = DateTime.Parse(shiftEntry.Key);
                     ShiftUpdateModel newShiftData = shiftEntry.Value;
 
+                    //look for an existing shift
                     var existingShift = existingShifts.FirstOrDefault(s =>
                         s.ApplicationUserId == userId &&
                         s.StartDateTime.HasValue &&
                         s.StartDateTime.Value.Date == shiftDate);
 
+                    //if times are null - the shift was removed during editing
                     if (newShiftData.StartTime == null || newShiftData.EndTime == null)
                     {
+                        //add to DELETE list
                         if (existingShift != null)
                         {
                             shiftsToDelete.Add(existingShift);
@@ -468,9 +523,11 @@ namespace ProRota.Areas.Management.Controllers
                     }
                     else
                     {
+                        //get the start / end times
                         DateTime newStart = shiftDate.Date.Add(TimeSpan.Parse(newShiftData.StartTime));
                         DateTime newEnd = shiftDate.Date.Add(TimeSpan.Parse(newShiftData.EndTime));
 
+                        //if no current shift exists then add to the ADD list 
                         if (existingShift == null)
                         {
                             shiftsToAdd.Add(new Shift
@@ -479,11 +536,12 @@ namespace ProRota.Areas.Management.Controllers
                                 SiteId = siteId,
                                 StartDateTime = newStart,
                                 EndDateTime = newEnd,
-                                IsPublished = false
+                                IsPublished = publishStatus // assigning publish status (from view)
                             });
                         }
                         else if (existingShift.StartDateTime.Value != newStart || existingShift.EndDateTime.Value != newEnd)
                         {
+                            //if shift exists then add to UPDATE list
                             existingShift.StartDateTime = newStart;
                             existingShift.EndDateTime = newEnd;
                             shiftsToUpdate.Add(existingShift);
@@ -491,6 +549,8 @@ namespace ProRota.Areas.Management.Controllers
                     }
                 }
             }
+
+            //update the changes to the DB 
 
             if (shiftsToDelete.Any()) _context.Shifts.RemoveRange(shiftsToDelete);
             if (shiftsToAdd.Any()) await _context.Shifts.AddRangeAsync(shiftsToAdd);
@@ -502,9 +562,80 @@ namespace ProRota.Areas.Management.Controllers
                 await _context.SaveChangesAsync();
             }
 
-            // ✅ Fetch Updated Users and Append to View Model
-            return await ReloadOnlyAffectedUsers(affectedUserIds, siteId);
+            //return to the view rota page
+            return RedirectToAction("ViewWeeklyRota", new { weekEnding = weekEndingDate });
+
         }
+
+        [HttpPost]
+        public async Task<IActionResult> UnpublishRota(string? serializedModel)
+        {
+            var siteId = _siteService.GetSiteIdFromSessionOrUser();
+            var model = new Dictionary<string, ViewRotaViewModel>();
+
+            if (serializedModel != null)
+            {
+                //attempt to extract model from JSON
+                model = JsonConvert.DeserializeObject<Dictionary<string, ViewRotaViewModel>>(serializedModel);
+            }
+            else
+            {
+                //attempt to get the rota from the session
+                var rotaSession = HttpContext.Session.GetString("SerializedModel");
+                if (rotaSession == null)
+                {
+                    throw new Exception("Cannot find rota from session");
+                }
+                //extract the serialized model
+                model = JsonConvert.DeserializeObject<Dictionary<string, ViewRotaViewModel>>(rotaSession);
+            }
+
+            if (model == null || !model.Any())
+            {
+                TempData["PopUp"] = "Error: Could not extract rota data from form";
+                return RedirectToAction("Index");
+            }
+
+            //get all existing shifts for the users in the rota
+            var userIds = model.Keys.ToList();
+            var existingShifts = await _context.Shifts
+                .Where(s => userIds.Contains(s.ApplicationUserId) && s.SiteId == siteId)
+                .ToListAsync();
+
+            List<Shift> shiftsToUpdate = new List<Shift>();
+
+            foreach (var userId in model.Keys)
+            {
+                foreach (var shift in model[userId].Shifts)
+                {
+                    // Find existing shift in the DB
+                    var existingShift = existingShifts.FirstOrDefault(s =>
+                        s.ApplicationUserId == userId &&
+                        s.StartDateTime == shift.StartDateTime &&
+                        s.EndDateTime == shift.EndDateTime &&
+                        s.SiteId == siteId);
+
+                    if (existingShift != null)
+                    {
+                        existingShift.IsPublished = false; // Unpublish shift
+                        shiftsToUpdate.Add(existingShift);
+                    }
+                }
+            }
+
+            if (shiftsToUpdate.Any())
+            {
+                _context.Shifts.UpdateRange(shiftsToUpdate);
+                await _context.SaveChangesAsync();
+            }
+
+            // Notify the site about the change
+            await _newsFeedService.createAndPostNewsFeedItem(
+                $"The rota has been unpublished. Please review your shifts.", siteId);
+
+            return RedirectToAction("Index");
+        }
+
 
         private async Task<IActionResult> ReloadOnlyAffectedUsers(List<string> affectedUserIds, int siteId)
         {

@@ -15,15 +15,20 @@
             <h3>Week Commencing - <b>@weekStartingDate.ToString("dd/MM/yyyy")</b></h3>
         </div>
         <div class="card-body text-center">
+            <p> @ViewBag.UnpublishedShifts</p>
             <div class="d-flex flex-wrap justify-content-center gap-2 mb-4">
                 <a href="#" class="btn btn-secondary" id="backToListButton">Back to List</a>
 
-                    <form asp-area="Management" asp-controller="Rota" asp-action="EditRota" method="post">
-                            @* <input type="hidden" name="publishStatus" value="true" /> *@ 
-                            <button type="button" class="btn btn-primary" onclick="saveAllShifts()">Save Changes</button>
 
-                    </form> 
-                    
+                <form id="saveRotaForm" asp-area="Management" asp-controller="Rota" asp-action="EditRota" method="post">
+                    @Html.AntiForgeryToken() <!-- CSRF Token -->
+                    <input type="hidden" name="publishStatus" id="publishStatusInput" value="@ViewBag.UnpublishedShifts" />
+                    <input type="hidden" name="weekEndingDate" id="weekEndingDateInput" value="@weekEndingDate.ToString("yyyy-MM-dd")" />
+                    <input type="hidden" name="editedShifts" id="editedShiftsInput" />
+                </form>
+
+                <button type="button" class="btn btn-primary" id="saveChanges">Save Changes</button>
+
                     <form asp-area="Management" asp-controller="Rota" asp-action="ViewWeeklyRota">
                             <input type="hidden" name="weekEnding" value="@weekEndingDate" />
                             <button type="submit" class="btn btn-primary">Exit</button>               
@@ -134,15 +139,31 @@
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         highlightTableCellsforWeeklyRota();
-    });
+        setupShiftClickListeners();
 
-    document.getElementById("backToListButton").addEventListener("click", function (event) {
-        event.preventDefault(); // Prevents immediate navigation
+        document.getElementById("saveChanges").addEventListener("click", function () {
+            let editedShiftsJson = JSON.stringify(editedShifts);
+            document.getElementById("editedShiftsInput").value = editedShiftsJson;
 
-        let confirmExit = confirm("Warning: Your rota will not be saved if you leave this page. Are you sure you want to continue?");
+            document.getElementById("saveRotaForm").submit(); // ✅ Submit the form like a normal POST request
+        });
 
-        if (confirmExit) {
-            window.location.href = '@Url.Action("Index", "Rota", new { area = "Management" })';
+        // ✅ Ensure the button exists before adding event listener
+        // let saveButton = document.getElementById("saveChanges");
+        // if (saveButton) {
+        //     saveButton.addEventListener("click", saveAllShifts);
+        // }
+
+        let backButton = document.getElementById("backToListButton");
+        if (backButton) {
+            backButton.addEventListener("click", function (event) {
+                event.preventDefault();
+
+                let confirmExit = confirm("Warning: Your rota will not be saved if you leave this page. Are you sure you want to continue?");
+                if (confirmExit) {
+                    window.location.href = '@Url.Action("Index", "Rota", new { area = "Management" })';
+                }
+            });
         }
     });
 </script>

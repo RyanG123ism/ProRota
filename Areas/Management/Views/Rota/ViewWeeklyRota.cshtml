@@ -24,18 +24,19 @@
                 {
                     @if (ViewBag.UnpublishedShifts)
                     {
-                        <form asp-area="Management" asp-controller="Rota" asp-action="SaveRota" method="post">
-                            <input type="hidden" name="serializedModel" value='@Json.Serialize(Model)' />
-                            <input type="hidden" name="publishStatus" value="true" />
-                            <button type="submit" class="btn btn-primary">Publish Rota</button>
-                        </form>
+                        @if (ViewBag.InitialCreate == null)
+                        {
+                            <form asp-area="Management" asp-controller="Rota" asp-action="EditRotaView" method="post">
+                                <input type="hidden" name="publishStatus" value="false" />
+                                <input type="hidden" name="weekEnding" value="@weekEndingDate" />
+                                <button type="submit" class="btn btn-success">Edit</button>
+                            </form>
 
-                        <form asp-area="Management" asp-controller="Rota" asp-action="EditRotaView" method="post">
-                            @* <input type="hidden" name="serializedModel" value='@Json.Serialize(Model)' /> *@
-                            <input type="hidden" name="publishStatus" value="false" />
-                            <input type="hidden" name="weekEnding" value="@weekEndingDate" />
-                            <button type="submit" class="btn btn-success">Edit</button>
-                        </form>
+                            <form asp-area="Management" asp-controller="Rota" asp-action="SaveRota" method="post">
+                                <input type="hidden" name="publishStatus" value="true" />
+                                <button type="submit" class="btn btn-primary">Publish Rota</button>
+                            </form>
+                        }                        
                     }
 
                     @if (ViewBag.InitialCreate != null)
@@ -49,13 +50,11 @@
 
                     @if (!ViewBag.UnpublishedShifts)
                     {
-                        <form asp-area="Management" asp-controller="Rota" asp-action="UnPublishRota" method="post">
-                            <input type="hidden" name="serializedModel" value='@Json.Serialize(Model)' />
+                        <form asp-area="Management" asp-controller="Rota" asp-action="UnpublishRota" method="post">
                             <button type="submit" class="btn btn-primary">Unpublish</button>
                         </form>
 
                                 <form asp-area="Management" asp-controller="Rota" asp-action="EditRotaView" method="post">
-                            <input type="hidden" name="serializedModel" value='@Json.Serialize(Model)' />
                             <input type="hidden" name="publishStatus" value="true" />
                             <input type="hidden" name="weekEnding" value="@weekEndingDate" />
                             <button type="submit" class="btn btn-success">Edit</button>

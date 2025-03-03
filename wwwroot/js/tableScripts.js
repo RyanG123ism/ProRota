@@ -1,8 +1,5 @@
-﻿let editedShifts = {}; // Dictionary to store new and updated shifts
-
-document.addEventListener("DOMContentLoaded", function () {
-    setupShiftClickListeners();
-});
+﻿
+let editedShifts = {}; // Dictionary to store new and updated shifts
 
 function setupShiftClickListeners() {
     document.querySelectorAll(".shift-cell").forEach(cell => {
@@ -79,9 +76,11 @@ document.getElementById("deleteShiftButton").addEventListener("click", function 
     let userId = document.getElementById("modalUserId").value;
     let shiftDate = document.getElementById("modalShiftDate").value;
 
-    if (editedShifts[userId] && editedShifts[userId][shiftDate]) {
-        delete editedShifts[userId][shiftDate];
+    if (!editedShifts[userId]) {
+        editedShifts[userId] = {};
     }
+
+    editedShifts[userId][shiftDate] = { startTime: null, endTime: null };
 
     updateTableCell(userId, shiftDate, null, null); // ✅ Update view to show "OFF"
 
@@ -102,25 +101,6 @@ function updateTableCell(userId, shiftDate, startTime, endTime) {
         cell.style.backgroundColor = "#d4edda"; // ✅ Light green for new shifts
     }
 }
-
-function saveAllShifts() {
-    let token = document.querySelector("input[name='__RequestVerificationToken']")?.value; // Get CSRF Token
-
-    fetch('/Management/Rota/EditRota', { // Ensure correct route
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'RequestVerificationToken': token // Send CSRF Token
-        },
-        body: JSON.stringify(editedShifts)
-    }).then(response => response.json())
-        .then(data => {
-            console.log("Shifts updated:", data);
-            location.reload(); // Reload page to reflect new shifts
-        })
-        .catch(error => console.error("Error:", error));
-}
-
 
 
 // Function to highlight table weekly rota cells based on their content
