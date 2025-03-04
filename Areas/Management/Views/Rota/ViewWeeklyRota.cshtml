@@ -78,6 +78,7 @@
                             <th>Friday</th>
                             <th>Saturday</th>
                             <th>Sunday</th>
+                            <th>Total Hours</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -89,9 +90,9 @@
                             var employeeId = kvp.Key;
                             var employeeName = $"{employeeData.FirstName} {employeeData.LastName}";
 
-                            <tr data-user-id="@employeeId" data-firstname="@employeeData.FirstName" 
+                            <tr data-user-id="@employeeId" data-firstname="@employeeData.FirstName"
                                 data-lastname="@employeeData.LastName" data-role="@employeeData.Role">
-            
+
                                 <td><strong>@employeeName</strong></td>
                                 <td>@employeeData.RoleCategory</td>
                                 <td>@employeeData.Role</td>
@@ -102,8 +103,10 @@
                                     var shift = (shifts ?? new List<Shift>()).FirstOrDefault(s => s.StartDateTime.HasValue && s.StartDateTime.Value.Date == currentDate.Date);
                                     var timeOffRequest = (timeOffRequests ?? new List<TimeOffRequest>()).FirstOrDefault(t => t.Date.Date == currentDate.Date);
 
+                                    <td class="shift-cell" data-date="@currentDate.ToString("yyyy-MM-dd")"
+                                        data-start-time="@(shift?.StartDateTime.HasValue == true ? shift.StartDateTime.Value.ToString("HH:mm") : "")"
+                                        data-end-time="@(shift?.EndDateTime.HasValue == true ? shift.EndDateTime.Value.ToString("HH:mm") : "")">
 
-                                    <td class="shift-cell" data-date="@currentDate.ToString("yyyy-MM-dd")">
                                         @if (timeOffRequest != null)
                                         {
                                             <span class="text-warning">HOLIDAY</span>
@@ -118,8 +121,12 @@
                                         }
                                     </td>
                                 }
+
+                                @* Total hours column *@
+                                <td class="total-hours">0</td>
                             </tr>
                         }
+
                     </tbody>
 
                 </table>
@@ -132,6 +139,7 @@
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         highlightTableCellsforWeeklyRota();
+        calculateTotalHours();
     });
 
     document.getElementById("backToListButton").addEventListener("click", function (event) {

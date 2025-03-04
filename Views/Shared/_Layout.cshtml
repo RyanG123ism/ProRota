@@ -75,6 +75,27 @@
     <script src="~/js/siteScripts.js" asp-append-version="true"></script>
     <script src="~/js/signalR-newsfeed-.js" asp-append-version="true"></script>
 
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let errorMessage = "@ViewBag.Error";
+            let successMessage = "@ViewBag.Success";
+            let alertMessage = "@ViewBag.Alert";
+
+            if (errorMessage && errorMessage !== "") {
+                popUpMessageError(errorMessage);
+            }
+
+            if (successMessage && successMessage !== "") {
+                popUpMessageSuccess(successMessage);
+            }
+
+            if (alertMessage && alertMessage !== "") {
+                popUpMessageAlert(alertMessage);
+            }
+        });
+    </script>
+
+
     
     @await RenderSectionAsync("Scripts", required: false)
 

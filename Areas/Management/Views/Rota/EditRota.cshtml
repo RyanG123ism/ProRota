@@ -15,10 +15,8 @@
             <h3>Week Commencing - <b>@weekStartingDate.ToString("dd/MM/yyyy")</b></h3>
         </div>
         <div class="card-body text-center">
-            <p> @ViewBag.UnpublishedShifts</p>
             <div class="d-flex flex-wrap justify-content-center gap-2 mb-4">
                 <a href="#" class="btn btn-secondary" id="backToListButton">Back to List</a>
-
 
                 <form id="saveRotaForm" asp-area="Management" asp-controller="Rota" asp-action="EditRota" method="post">
                     @Html.AntiForgeryToken() <!-- CSRF Token -->
@@ -51,6 +49,7 @@
                             <th>Friday</th>
                             <th>Saturday</th>
                             <th>Sunday</th>
+                            <th>Total Hours</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -62,12 +61,12 @@
                             var employeeId = kvp.Key;
                             var employeeName = $"{employeeData.FirstName} {employeeData.LastName}";
 
-                                <tr data-user-id="@employeeId" data-firstname="@employeeData.FirstName" 
-                                    data-lastname="@employeeData.LastName" data-role="@employeeData.Role">
+                            <tr data-user-id="@employeeId" data-firstname="@employeeData.FirstName"
+                                data-lastname="@employeeData.LastName" data-role="@employeeData.Role">
 
-                                    <td><strong>@employeeName</strong></td>
-                                    <td>@employeeData.RoleCategory</td>
-                                    <td>@employeeData.Role</td>
+                                <td><strong>@employeeName</strong></td>
+                                <td>@employeeData.RoleCategory</td>
+                                <td>@employeeData.Role</td>
 
                                 @for (int i = 0; i < 7; i++)
                                 {
@@ -75,23 +74,30 @@
                                     var shift = (shifts ?? new List<Shift>()).FirstOrDefault(s => s.StartDateTime.HasValue && s.StartDateTime.Value.Date == currentDate.Date);
                                     var timeOffRequest = (timeOffRequests ?? new List<TimeOffRequest>()).FirstOrDefault(t => t.Date.Date == currentDate.Date);
 
-                                            <td class="shift-cell" data-date="@currentDate.ToString("yyyy-MM-dd")">
+                                    <td class="shift-cell" data-date="@currentDate.ToString("yyyy-MM-dd")"
+                                        data-start-time="@(shift?.StartDateTime.HasValue == true ? shift.StartDateTime.Value.ToString("HH:mm") : "")"
+                                        data-end-time="@(shift?.EndDateTime.HasValue == true ? shift.EndDateTime.Value.ToString("HH:mm") : "")">
+
                                         @if (timeOffRequest != null)
                                         {
-                                                        <span class="text-warning">HOLIDAY</span>
+                                            <span class="text-warning">HOLIDAY</span>
                                         }
                                         else if (shift != null)
                                         {
-                                                        <span class="shift-time">@shift.StartDateTime.Value.ToString("HH:mm") - @shift.EndDateTime.Value.ToString("HH:mm")</span>
+                                            <span class="shift-time">@shift.StartDateTime.Value.ToString("HH:mm") - @shift.EndDateTime.Value.ToString("HH:mm")</span>
                                         }
                                         else
                                         {
-                                                        <span class="text-muted">OFF</span>
+                                            <span class="text-muted">OFF</span>
                                         }
-                                            </td>
+                                    </td>
                                 }
-                                </tr>
+
+                                @* Total hours column *@
+                                <td class="total-hours">0</td>
+                            </tr>
                         }
+
                     </tbody>
 
                 </table>
@@ -140,6 +146,7 @@
     document.addEventListener("DOMContentLoaded", function () {
         highlightTableCellsforWeeklyRota();
         setupShiftClickListeners();
+        calculateTotalHours();
 
         document.getElementById("saveChanges").addEventListener("click", function () {
             let editedShiftsJson = JSON.stringify(editedShifts);
@@ -147,12 +154,6 @@
 
             document.getElementById("saveRotaForm").submit(); // ✅ Submit the form like a normal POST request
         });
-
-        // ✅ Ensure the button exists before adding event listener
-        // let saveButton = document.getElementById("saveChanges");
-        // if (saveButton) {
-        //     saveButton.addEventListener("click", saveAllShifts);
-        // }
 
         let backButton = document.getElementById("backToListButton");
         if (backButton) {

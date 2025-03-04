@@ -26,8 +26,15 @@ namespace ProRota.Controllers
         public IActionResult Index()
         {
             var user = getUserInfo();
+
             ViewBag.HolidaysTaken = user.HolidaysPerYear - user.RemainingHolidays;
             ViewBag.Today = DateTime.Now.Date;
+
+            //picking up any pop ups
+            if (TempData["Error"] != null) ViewBag.Error = TempData["Error"];
+            if (TempData["Success"] != null) ViewBag.Error = TempData["Success"];
+            if (TempData["Alert"] != null) ViewBag.Error = TempData["Alert"];
+
             return View(user);
         }
 
@@ -36,15 +43,19 @@ namespace ProRota.Controllers
             //gets current users ID and then gets the user object
             var userId = _userManager.GetUserId(User);
             var user = _context.ApplicationUsers
-                .Where(u => u.Id == userId)                                     //MAKE SURE TO INCLUDE THIS 
-                .Include(u => u.Shifts.OrderByDescending(s => s.StartDateTime)/*.Where(s => s.StartDateTime >= DateTime.Now.Date)*/)
-                .Include(u => u.TimeOffRequests.OrderByDescending(t => t.Date))
+                .Where(u => u.Id == userId)                                     //MAKE SURE TO INCLUDE THIS once finished
+                .Include(u => u.Shifts)/*.Where(s => s.StartDateTime >= DateTime.Now.Date)*/
+                .Include(u => u.TimeOffRequests)
                 .Include(u => u.TimeOffRequests)
                 .FirstOrDefault();
 
             //reloads the current db instance to include shifts and requests added at runtime
             if (user != null)
             {
+                //order collection
+                user.Shifts = user.Shifts.OrderByDescending(s => s.StartDateTime).ToList();
+                user.TimeOffRequests = user.TimeOffRequests.OrderByDescending(t => t.Date).ToList();
+
                 _context.Entry(user).Collection(u => u.TimeOffRequests).Load();
                 _context.Entry(user).Collection(u => u.Shifts).Load();
 
@@ -63,6 +74,15 @@ namespace ProRota.Controllers
             if(userId == null)
             {
                 return NotFound();
+            }
+
+            //checks for existing time off request
+            var existingReq = await _context.TimeOffRequests.Where(tr => tr.ApplicationUserId == userId && tr.Date.Date == requestDate.Date).AnyAsync();
+
+            if(existingReq)
+            {
+                TempData["Error"] = "You Already have an existing Time off Request for this date. You cannot create another";
+                return RedirectToAction("Index");
             }
 
             //gets todays date

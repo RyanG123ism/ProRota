@@ -120,6 +120,9 @@ function highlightTableCellsforWeeklyRota() {
                     cell.style.backgroundColor = "lightyellow";
                 }
             }
+            if (index === 10) {
+                cell.style.backgroundColor = "#807C96"
+            }
         });
     });
 }
@@ -131,7 +134,7 @@ function highlightTableCellsforPendingShifts() {
     tableRows.forEach(row => {
         const cells = row.querySelectorAll("td");
 
-        cells.forEach((cell, index) => {
+        cells.forEach((cell, index) => {  
             // Skip the first column (index 0) which is the Employee column
             if (index !== 0) {
                 if (!cell.textContent.trim().includes("OFF")) {
@@ -143,4 +146,42 @@ function highlightTableCellsforPendingShifts() {
             }
         });
     });
+}
+
+function calculateTotalHours() {
+    document.querySelectorAll("#weeklyRotaTable tbody tr").forEach(row => {
+        let totalMinutes = 0;
+
+        row.querySelectorAll(".shift-cell").forEach(cell => {
+            let startTime = cell.getAttribute("data-start-time");
+            let endTime = cell.getAttribute("data-end-time");
+
+            console.log(`Shift Data: Start - ${startTime}, End - ${endTime}`); // Debugging
+
+            if (startTime && endTime) {
+                let start = parseTime(startTime);
+                let end = parseTime(endTime);
+
+                if (start !== null && end !== null) {
+                    let shiftDuration = end - start;
+                    if (shiftDuration < 0) shiftDuration += 24 * 60; // Handle overnight shifts
+                    totalMinutes += shiftDuration;
+                }
+            }
+        });
+
+        // Convert minutes to hours (rounded to 2 decimal places)
+        let totalHours = (totalMinutes / 60).toFixed(2);
+        row.querySelector(".total-hours").textContent = totalHours;
+    });
+}
+
+// Helper function to convert "HH:mm" string to total minutes
+function parseTime(timeStr) {
+    if (!timeStr || timeStr.trim() === "") return null;
+    let parts = timeStr.split(":");
+    if (parts.length !== 2) return null;
+    let hours = parseInt(parts[0], 10);
+    let minutes = parseInt(parts[1], 10);
+    return hours * 60 + minutes;
 }
