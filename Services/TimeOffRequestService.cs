@@ -11,15 +11,13 @@ namespace ProRota.Services
         private UserManager<ApplicationUser> _userManager;
         private readonly ISiteService _siteService;
         private readonly IHttpContextAccessor _httpContextAccessor;//accessing httpContext properties of controller base
-        private readonly ICompanyService _companyService;
 
-        public TimeOffRequestService(ApplicationDbContext context, UserManager<ApplicationUser> userManager, ISiteService siteService, IHttpContextAccessor httpContextAccessor, ICompanyService companyService)
+        public TimeOffRequestService(ApplicationDbContext context, UserManager<ApplicationUser> userManager, ISiteService siteService, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _userManager = userManager;
             _siteService = siteService;
             _httpContextAccessor = httpContextAccessor;
-            _companyService = companyService;
         }
 
         public async Task<IEnumerable<TimeOffRequest>> GetAllTimeOffRequestsBySite()

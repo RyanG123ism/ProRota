@@ -4,6 +4,8 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using ProRota.Models;
+using ProRota.Services;
+using System.Security.Claims;
 using static Azure.Core.HttpHeader;
 
 namespace ProRota.Data
@@ -27,6 +29,7 @@ namespace ProRota.Data
                 await SeedSiteRoles(_services);
                 await SeedCompany(_services);
                 await SeedUsers(_services);
+                await SeedClaims(_services);
                 await SeedShifts(_services);
                 await SeedTimeOffRequests(_services);
 
@@ -523,6 +526,46 @@ namespace ProRota.Data
             }
         }
 
+        public async Task SeedClaims(IServiceProvider services)
+        {
+            var dbContext = services.GetRequiredService<ApplicationDbContext>();
+            var claimsService = services.GetRequiredService<IClaimsService>();
+            var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+
+            // Fetch existing seeded users and sites
+            var users = await dbContext.ApplicationUsers.ToListAsync();
+            var sites = await dbContext.Sites.ToListAsync();
+
+            //assign a site to each user if they don’t have one
+            var faker = new Faker();
+            foreach (var user in users)
+            {
+                // Assign a SiteId if not already assigned
+                if (user.SiteId == 0)
+                {
+                    user.SiteId = faker.PickRandom(sites.Where(s => s.SiteName != "No Site")).Id;
+                }
+
+                // ✅ Ensure claims are added to the user
+                var existingClaims = await userManager.GetClaimsAsync(user);
+
+                // Add SiteId claim if it doesn't exist
+                if (!existingClaims.Any(c => c.Type == "SiteId"))
+                {
+                    await userManager.AddClaimAsync(user, new Claim("SiteId", user.SiteId.ToString()));
+                }
+
+                // Add CompanyId claim if it doesn't exist
+                if (!existingClaims.Any(c => c.Type == "CompanyId"))
+                {
+                    await userManager.AddClaimAsync(user, new Claim("CompanyId", "1")); // Defaulting CompanyId to 1
+                }
+            }
+
+            // Save changes to DB
+            await dbContext.SaveChangesAsync();
+        }
+
         public async Task SeedShifts(IServiceProvider services)
         {
             var dbContext = services.GetRequiredService<ApplicationDbContext>();
@@ -663,6 +706,7 @@ namespace ProRota.Data
         public async Task SeedCompany(IServiceProvider services)
         {
             var dbContext = services.GetRequiredService<ApplicationDbContext>();
+            var claimsService = services.GetRequiredService<IClaimsService>();
 
             var sites = dbContext.Sites.ToList();
 
@@ -671,20 +715,13 @@ namespace ProRota.Data
             //if company  isnt found
             if (!dbContext.Companies.Any(c => c.CompanyName == "Six by Nico"))
             {
-                var testCompany = new Company()
+                var company = new Company()
                 {
-                    CompanyName = "Test Company",
+                    CompanyName = "Six by Nico",
                     ApplicationUserId = userOwner.Id
                 };
 
-                var company = new Company()
-                {
-                    CompanyName = "Six by Nico"
-                };
-
                 await dbContext.Companies.AddAsync(company);
-                await dbContext.Companies.AddAsync(testCompany);
-
 
                 foreach (var site in sites)
                 {
@@ -702,7 +739,7 @@ namespace ProRota.Data
             var dbContext = services.GetRequiredService<ApplicationDbContext>();
             var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
 
-            var testUser = new ApplicationUser()
+            var user = new ApplicationUser()
             {
                 FirstName = "RyanOwner",
                 LastName = "GrantOwner",
@@ -721,11 +758,21 @@ namespace ProRota.Data
 
             };         
 
-            await userManager.CreateAsync(testUser, "sbn");
-            await userManager.AddToRoleAsync(testUser, "Owner");
+            await userManager.CreateAsync(user, "sbn");
+            await userManager.AddToRoleAsync(user, "Owner");
             await dbContext.SaveChangesAsync();
 
-            return testUser;
+            //add claims
+            var existingClaims = await userManager.GetClaimsAsync(user);
+
+            // Add CompanyId claim if it doesn't exist
+            if (!existingClaims.Any(c => c.Type == "CompanyId"))
+            {
+                await userManager.AddClaimAsync(user, new Claim("CompanyId", "1")); // Defaulting CompanyId to 1
+            }
+
+
+            return user;
         }
 
         public async Task SeedTimeOffRequests(IServiceProvider services)

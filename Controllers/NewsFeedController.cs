@@ -18,14 +18,21 @@ namespace ProRota.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateNewsFeedItem(int siteId, string newsMessage, bool companyWideCheckbox = false)
+        public async Task<IActionResult> CreateNewsFeedItem(int siteId, string newsMessage, bool isAdminOrOwner, bool companyWideCheckbox = false)
         {
-            if(siteId == 0)
+
+            if (siteId == 0)
             {
+                if (isAdminOrOwner)
+                {
+                    //company wide post if its an admin or owner posting it
+                    var post = await _newsFeedService.createAndPostNewsFeedItem(newsMessage);
+                }
+
                 throw new Exception("Can't find site Id to create new post");
             }
 
-            if(companyWideCheckbox == null)
+            if (companyWideCheckbox == null)
             {
                 throw new Exception("Company wide check box == null");
             }

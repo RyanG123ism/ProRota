@@ -22,16 +22,6 @@ namespace ProRota.Services
             _context = dbContext;
         }
 
-        public async Task<IActionResult> PostMessage(string message)
-        {
-            // Here you would save the news to the database (omitted for brevity)
-
-            // Notify all users
-            await _hubContext.Clients.All.SendAsync("ReceiveNewsUpdate", message);
-
-            return null;
-        }
-
         public async Task<IActionResult> createAndPostNewsFeedItem(string message)
         {
             if (message.IsNullOrEmpty())

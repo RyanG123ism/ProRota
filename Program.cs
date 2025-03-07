@@ -72,7 +72,7 @@ builder.Services.AddScoped<ISiteService, SiteService>();
 builder.Services.AddScoped<IRotaService, RotaService>();
 builder.Services.AddScoped<IAlgorithmService, AlgorithmService>();
 builder.Services.AddScoped<ITimeOffRequestService, TimeOffRequestService>();
-builder.Services.AddScoped<ICompanyService, CompanyService>();
+builder.Services.AddScoped<IClaimsService, ClaimsService>();
 builder.Services.AddScoped<StripePaymentService>(); // stripe service
 builder.Services.AddSingleton<IExtendedEmailSender, EmailSenderService>(); //email service
 builder.Services.AddScoped<INewsFeedService, NewsFeedService>();

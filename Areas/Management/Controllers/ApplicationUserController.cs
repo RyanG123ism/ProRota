@@ -26,15 +26,15 @@ namespace ProRota.Areas.Management.Controllers
         private UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly ISiteService _siteService;
-        private readonly ICompanyService _companyService;
+        private readonly IClaimsService _claimsService;
         private readonly IExtendedEmailSender _emailSender;
-        public ApplicationUserController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, ISiteService siteService, ICompanyService companyService, IExtendedEmailSender emailSender)
+        public ApplicationUserController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, ISiteService siteService, IClaimsService claimsService, IExtendedEmailSender emailSender)
         {
             _context = context;
             _userManager = userManager;
             _roleManager = roleManager;
             _siteService = siteService;
-            _companyService = companyService;
+            _claimsService = claimsService;
             _emailSender = emailSender;
         }
 
@@ -70,7 +70,7 @@ namespace ProRota.Areas.Management.Controllers
 
         public async Task<IEnumerable<ApplicationUser>> ViewAllUsersByCompany()
         {
-            var companyId = await _companyService.GetCompanyIdFromSessionOrUser();
+            var companyId = _claimsService.GetCompanyId();
 
             if (companyId == null)
             {

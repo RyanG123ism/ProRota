@@ -15,13 +15,13 @@ namespace ProRota.Areas.Management.Controllers
 
         private ApplicationDbContext _context;
         private UserManager<ApplicationUser> _userManager;
-        private ICompanyService _companyService;
+        private IClaimsService _claimsService;
 
-        public HomeController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, ICompanyService companyService /*RoleManager<IdentityRole> roleManager*/)
+        public HomeController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IClaimsService claimsService)
         {
             _context = context;
             _userManager = userManager;
-            _companyService = companyService;
+            _claimsService = claimsService;
 
         }
 
@@ -57,7 +57,7 @@ namespace ProRota.Areas.Management.Controllers
             }
 
             //get the company info and pass to view
-            var companyId = await _companyService.GetCompanyIdFromSessionOrUser();
+            var companyId = _claimsService.GetCompanyId();
 
             if (companyId == null)
             {

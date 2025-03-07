@@ -30,14 +30,16 @@ namespace ProRota.Areas.Identity.Pages.Account
         private readonly IHubContext<EmailConfirmationHub> _hubContext;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly INewsFeedService _newsFeedService;
+        private readonly IClaimsService _claimsService;
 
-        public ConfirmEmailModel(UserManager<ApplicationUser> userManager, IExtendedEmailSender emailSenderService, IHubContext<EmailConfirmationHub> hubContext, SignInManager<ApplicationUser> signInManager, INewsFeedService newsFeedService)
+        public ConfirmEmailModel(UserManager<ApplicationUser> userManager, IExtendedEmailSender emailSenderService, IHubContext<EmailConfirmationHub> hubContext, SignInManager<ApplicationUser> signInManager, INewsFeedService newsFeedService, IClaimsService claimsService)
         {
             _userManager = userManager;
             _emailSenderService = emailSenderService;
             _hubContext = hubContext;
             _signInManager = signInManager;
             _newsFeedService = newsFeedService;
+            _claimsService = claimsService;
         }
 
         /// <summary>
@@ -74,27 +76,30 @@ namespace ProRota.Areas.Identity.Pages.Account
 
             if (result.Succeeded)
             {
-
-                //Send a welcome email
-                var emailBody = _emailSenderService.CreateWelcomeEmailBody(user);
-                await _emailSenderService.SendEmailAsync(user.Email, "Welcome to ProRota!", emailBody);
-
-                //adding site and company id as claims when the user confirms their email
-                await _userManager.AddClaimAsync(user, new Claim("SiteId", user.SiteId.ToString() ?? ""));//this will be null for the owner
-                await _userManager.AddClaimAsync(user, new Claim("CompanyId", companyId.ToString() ?? ""));
-
-                //sign in user to refresh authentication cookie and add claims
-                var userPrincipal = await _signInManager.CreateUserPrincipalAsync(user);
-                await HttpContext.SignInAsync(IdentityConstants.ApplicationScheme, userPrincipal);
-
-
-                if (invited == true)//invite email (an employee)
+                //if the email conformation was an invite
+                if(invited == true)
                 {
-                    return RedirectToAction("Index", "Home", new {area = ""});
+                    //sign in user before modifying claims to ensure claims persist
+                    await _signInManager.SignInAsync(user, isPersistent: false);
+
+                    //assigning claims to the user
+                    await _claimsService.SetSiteId(user.Id);
+                    if (companyId != null) await _claimsService.SetCompanyId(user.Id, companyId ?? 0);
+
+                    //create a newfeed item to alert the site of newly joined user
+                    //await _newsFeedService.createAndPostNewsFeedItem($"{user.FirstName} has just joined. Give them a warm welcome!");
+
+                    // Refresh authentication cookie to include new claims
+                    await _signInManager.RefreshSignInAsync(user);
+
+                    //Send a welcome email
+                    var emailBody = _emailSenderService.CreateWelcomeEmailBody(user);
+                    await _emailSenderService.SendEmailAsync(user.Email, "Welcome to ProRota!", emailBody);
+
+                    return RedirectToAction("Home", "Home", new { area = "" });
                 }
                 else //normal account holder 
-                {
-                    
+                {                 
                     //delays 5 seconds so siganl R can establish a connection with the user first
                     string? connectionId = null;
                     for (int i = 0; i < 5; i++)
@@ -108,12 +113,16 @@ namespace ProRota.Areas.Identity.Pages.Account
                     }
                     if (!string.IsNullOrEmpty(connectionId))
                     {
+                        //Send a welcome email
+                        var emailBody = _emailSenderService.CreateWelcomeEmailBody(user);
+                        await _emailSenderService.SendEmailAsync(user.Email, "Welcome to ProRota!", emailBody);
+
                         await _hubContext.Clients.Client(connectionId).SendAsync("ReceiveConfirmation");
-                        Console.WriteLine($"📌 SignalR Alert Sent to Connection ID: {connectionId}");
+                        Console.WriteLine($"SignalR Alert Sent to Connection ID: {connectionId}");
                     }
                     else
                     {
-                        Console.WriteLine("⚠️ No SignalR connection found for this user.");
+                        Console.WriteLine("No SignalR connection found for this user.");
                     }
                 }
 

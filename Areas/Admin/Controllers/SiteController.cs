@@ -16,13 +16,13 @@ namespace ProRota.Areas.Admin.Controllers
     public class SiteController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly ICompanyService _companyService;
+        private readonly IClaimsService _claimsService;
 
 
-        public SiteController(ApplicationDbContext context, ICompanyService companyService)
+        public SiteController(ApplicationDbContext context, IClaimsService claimsService)
         {
             _context = context;
-            _companyService = companyService;
+            _claimsService = claimsService;
         }
 
         [HttpPost]
@@ -34,7 +34,7 @@ namespace ProRota.Areas.Admin.Controllers
             }
 
             //getting company Id
-            var companyId = await _companyService.GetCompanyIdFromSessionOrUser();
+            var companyId = _claimsService.GetCompanyId();
 
             //looking for existing sites within the company 
             var existingSite = _context.Sites.Where(s => s.CompanyId == companyId && s.SiteName == siteName).FirstOrDefault() ?? null;
@@ -77,7 +77,7 @@ namespace ProRota.Areas.Admin.Controllers
                 throw new Exception("Error: Could not find the site object");
             }
             //getting company Id
-            var companyId = await _companyService.GetCompanyIdFromSessionOrUser();
+            var companyId = _claimsService.GetCompanyId();
 
             //looking for existing sites within the company 
             var existingSiteName = _context.Sites.Where(s => s.CompanyId == companyId && s.SiteName == siteName).FirstOrDefault() ?? null;

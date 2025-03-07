@@ -6,6 +6,7 @@
     var user = await UserManager.GetUserAsync(User);
     var roles = await UserManager.GetRolesAsync(user);
     bool isManagerOrAdmin = roles.Contains("Owner") || roles.Contains("Admin") || roles.Contains("General Manager");
+    bool isAdminOrOwner = User.IsInRole("Admin") || User.IsInRole("Owner");
 }
 
 <div class="container mt-5" style="color:white">
@@ -27,6 +28,9 @@
                             <form id="newsFeedForm" asp-action="CreateNewsFeedItem" asp-controller="NewsFeed" asp-route-siteId="@user.SiteId" method="post">
                                 <!-- Add name attribute to match method parameter -->
                                 <textarea id="newsMessage" name="newsMessage" class="form-control" placeholder="What's on your mind?" rows="3" required></textarea>
+
+                                <!-- Pass isAdminOrOwner as a hidden field -->
+                                <input type="hidden" name="isAdminOrOwner" value="@isAdminOrOwner.ToString().ToLower()" />
 
                                 @if (isManagerOrAdmin)
                                 {

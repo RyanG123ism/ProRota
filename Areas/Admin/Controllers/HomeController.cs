@@ -15,27 +15,24 @@ namespace ProRota.Areas.Admin.Controllers
     {
 
         private ApplicationDbContext _context;
-        private readonly ICompanyService _companyService;
+        private readonly IClaimsService _claimsService;
 
-        public HomeController(ApplicationDbContext context, ICompanyService companySerice) 
+        public HomeController(ApplicationDbContext context, IClaimsService claimsService) 
         {
             _context = context;
-            _companyService = companySerice;
+            _claimsService = claimsService;
         }
         
         public async Task<IActionResult> Index()
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var user = await _context.ApplicationUsers.FindAsync(userId);
-
-            var compnayId = await _companyService.GetCompanyIdFromSessionOrUser();
-            var company = await _context.Companies.FindAsync(compnayId) ?? null;
+            var companyId = _claimsService.GetCompanyId();
+            var company = await _context.Companies.FindAsync(companyId) ?? null;
             
             if(company != null)
             {
                 //sends the company and sites to view
                 var sites = company.Sites.ToList();
-                ViewBag.Sites = await RefreshSites(compnayId);
+                ViewBag.Sites = await RefreshSites(companyId);
             }
 
             return View(company);
