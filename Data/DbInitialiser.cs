@@ -31,7 +31,7 @@ namespace ProRota.Data
                 await SeedUsers(_services);
                 await SeedClaims(_services);
                 await SeedShifts(_services);
-                await SeedTimeOffRequests(_services);
+                //await SeedTimeOffRequests(_services);
 
             }
             catch (Exception ex)

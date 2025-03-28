@@ -73,6 +73,40 @@ function formatTime(date) {
     return date.toTimeString().substring(0, 5);
 }
 
+function validateForm() {
+    const inputs = document.querySelectorAll('.covers-input');
+    const generateButton = document.getElementById('generateRotaButton');
+    const calendar = document.getElementById("weekEndingDate");
+
+    function validateInputs() {
+        const dateValue = calendar.value;
+        let allFilled = true;
+
+        inputs.forEach(input => {
+            if (input.value === "" || input.value === null) {
+                allFilled = false;
+            }
+        });
+
+        if (!dateValue) {
+            allFilled = false;
+        }
+
+        generateButton.disabled = !allFilled;
+    }
+
+    //Hook input & date change events
+    inputs.forEach(input => {
+        input.addEventListener('input', validateInputs);
+    });
+
+    calendar.addEventListener('change', validateInputs);
+
+    // Initial validation on page load
+    validateInputs();
+}
+
+
 function validateWeekEndingDate() {
     console.log("Running validateWeekEndingDate()...");//debugging
 

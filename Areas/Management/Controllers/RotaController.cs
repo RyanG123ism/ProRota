@@ -125,7 +125,8 @@ namespace ProRota.Areas.Management.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return View(model);
+                TempData["Error"] = $"Something went wrong while creating your rota - redirected back to a safe location";
+                return RedirectToAction("Index");
             }
 
             //get the site with the site configuration and role objects attached
@@ -295,7 +296,7 @@ namespace ProRota.Areas.Management.Controllers
 
             // Notify the site about the change
             await _newsFeedService.createAndPostNewsFeedItem(
-                $"The rota has been unpublished. Please review your shifts.", siteId);
+                $"The rota has been unpublished while we review some things. Please keep a look out for your shifts updating.", siteId);
 
             return RedirectToAction("Index");
         }

@@ -2,7 +2,7 @@
 let editedShifts = {}; // Dictionary to store new and updated shifts
 
 function setupShiftClickListeners() {
-    document.querySelectorAll(".shift-cell").forEach(cell => {
+    document.querySelectorAll(".shift-cell:not(.non-clickable)").forEach(cell => {
         cell.addEventListener("click", function () {
             let userRow = this.closest("tr");
             let userId = userRow.getAttribute("data-user-id");
@@ -12,13 +12,8 @@ function setupShiftClickListeners() {
             let shiftDate = this.getAttribute("data-date");
             let dayName = new Date(shiftDate).toLocaleDateString('en-US', { weekday: 'long' });
 
-            let shiftTimeText = this.querySelector(".shift-time")?.textContent; 
-
-            if (shiftTimeText === "HOLIDAY") return; // Prevent clicking on holiday shifts
-
-            shiftTimeText = shiftTimeText || "OFF"; // Now set default if empty
+            let shiftTimeText = this.querySelector(".shift-time")?.textContent || "OFF";
             let [startTime, endTime] = shiftTimeText.includes("-") ? shiftTimeText.split(" - ") : ["", ""];
-
 
             // Populate modal with user details
             document.getElementById("modalUserId").value = userId;
@@ -33,12 +28,14 @@ function setupShiftClickListeners() {
             document.getElementById("addShiftButton").style.display = shiftTimeText === "OFF" ? "block" : "none";
             document.getElementById("editShiftButton").style.display = shiftTimeText !== "OFF" ? "block" : "none";
             document.getElementById("editShiftButton").disabled = true;
-            document.getElementById("deleteShiftButton").style.display = shiftTimeText !== "OFF" ? "block" : "none"; // ✅ Show delete button if shift exists
+            document.getElementById("deleteShiftButton").style.display = shiftTimeText !== "OFF" ? "block" : "none";
 
             $("#shiftModal").modal("show");
         });
     });
 }
+
+
 
 // ✅ Disable "Edit/Add Shift" button if start time is equal to or later than end time
 document.getElementById("shiftStartTime").addEventListener("input", validateShiftTime);

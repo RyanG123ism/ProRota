@@ -1,0 +1,303 @@
+﻿@using ProRota.Areas.Management.ViewModels;
+@using Newtonsoft.Json
+@model AnalyticsDashboardViewModel;
+
+@{
+    ViewData["Title"] = "Analytics Dashboard";
+}
+
+<div class="container mt-5 text-white">
+    <h2 class="text-center mb-4">Rota Analytics</h2>
+    <h4 class="text-center mb-4">Date Range: @ViewBag.StartDate - @ViewBag.EndDate</h4>
+
+    <!-- Week Selector -->
+    <form asp-action="Index" asp-area="Management" asp-controller="Analytics" method="get" class="mb-4 text-center">
+        <label for="weekEndingDate" class="form-label">Select Week:</label>
+        <input type="date" id="weekEndingDate" name="dateInput" class="form-control d-inline-block w-auto mx-2"/>
+        <button type="submit" class="btn btn-primary">View Analytics</button>
+    </form>
+</div>
+
+
+    <div class="row g-4">
+        <!-- Total Hours Bar Chart -->
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Total Hours by Day</h5>
+                    <canvas id="weekHoursChart" style="height: 300px; max-height: 400px; width: 100%;"></canvas>
+                </div>
+            </div>
+        </div>
+        <!-- Role Distribution Pie Chart -->
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Staffing by Role</h5>
+                    <canvas id="rolesChart" style="height: 300px; max-height: 400px; width: 100%;"></canvas>
+                </div>
+            </div>
+        </div>
+        <!-- Hours vs Wages Line Chart -->
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Wage Expenditure vs Allocated Hours</h5>
+                    <canvas id="wageHoursChart" style="height: 300px; max-height: 400px; width: 100%;"></canvas>
+                </div>
+            </div>
+        </div>
+        <!-- Heatmap Placeholder -->
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Work Pattern Heatmap</h5>
+                    <!-- Heatmap Color Legend -->
+                    <div class="text-center mt-3">
+                        <div style="display: flex; justify-content: center; align-items: center; gap: 10px;">
+                            <span style="font-weight: bold;">Low</span>
+                            <div style="flex: 1; height: 20px; background: linear-gradient(to right, #ffffff, #FFA500); border: 1px solid #ccc;"></div>
+                            <span style="font-weight: bold;">High</span>
+                        </div>
+                        <small class="text-muted">Number of Employees Working</small>
+                    </div>
+                    <canvas id="heatmapCanvas" style="height: 500px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Load Chart.js v3.9.1 -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+
+<!-- Load Matrix Plugin (compatible with Chart.js v3) -->
+<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@1.1.0/dist/chartjs-chart-matrix.min.js"></script>
+
+<!-- Register Matrix Controller (safe fallback) -->
+<script>
+    window.addEventListener("load", function () {
+        if (Chart.controllers.hasOwnProperty('matrix')) {
+            // Already registered
+            return;
+        }
+
+        try {
+            Chart.register(Chart.registry.getController('matrix'));
+        } catch (e) {
+            console.warn("Matrix controller registration failed:", e);
+        }
+    });
+</script>
+
+
+@section Scripts {
+    <script>
+        window.addEventListener("load", function () {
+            // === Total Hours Bar Chart ===
+            const hourLabels = @Html.Raw(JsonConvert.SerializeObject(Model.TotalHoursByDay.Keys));
+            const hourData = @Html.Raw(JsonConvert.SerializeObject(Model.TotalHoursByDay.Values));
+            new Chart(document.getElementById("weekHoursChart"), {
+                type: 'bar',
+                data: {
+                    labels: hourLabels,
+                    datasets: [{
+                        label: 'Total Hours',
+                        data: hourData,
+                        backgroundColor: '#807C96',
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => `${ctx.parsed.y} hrs`
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Hours' }
+                        },
+                        x: {
+                            title: { display: true, text: 'Day of Week' }
+                        }
+                    }
+                }
+            });
+
+            // === Role Pie Chart ===
+            const roleLabels = @Html.Raw(JsonConvert.SerializeObject(Model.StaffingByRole.Keys));
+            const roleData = @Html.Raw(JsonConvert.SerializeObject(Model.StaffingByRole.Values));
+            new Chart(document.getElementById("rolesChart"), {
+                type: 'pie',
+                data: {
+                    labels: roleLabels,
+                    datasets: [{
+                        data: roleData,
+                        backgroundColor: ['#9FBA60', '#807C96', '#FFD166', '#EF476F', '#118AB2', '#073B4C', '#6A4C93', '#F8961E']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'right' },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => `${ctx.label}: ${ctx.parsed} shifts`
+                            }
+                        }
+                    }
+                }
+            });
+
+            // === Wage vs Hours Line Chart ===
+            const wageLabels = @Html.Raw(JsonConvert.SerializeObject(Model.WagesExpenditureByDay.Keys));
+            const wageData = @Html.Raw(JsonConvert.SerializeObject(Model.WagesExpenditureByDay.Values));
+            const hourLineData = @Html.Raw(JsonConvert.SerializeObject(Model.TotalHoursByDay.Values));
+            new Chart(document.getElementById("wageHoursChart"), {
+                type: 'line',
+                data: {
+                    labels: wageLabels,
+                    datasets: [
+                        {
+                            label: 'Wage Expenditure (£)',
+                            data: wageData,
+                            yAxisID: 'y1',
+                            borderColor: '#EF476F',
+                            backgroundColor: 'rgba(239, 71, 111, 0.2)',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Allocated Hours',
+                            data: hourLineData,
+                            yAxisID: 'y2',
+                            borderColor: '#118AB2',
+                            backgroundColor: 'rgba(17, 138, 178, 0.2)',
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y}${ctx.dataset.label.includes('Wage') ? ' £' : ' hrs'}`
+                            }
+                        },
+                        legend: { position: 'top' }
+                    },
+                    interaction: { mode: 'index', intersect: false },
+                    scales: {
+                        y1: {
+                            type: 'linear',
+                            position: 'left',
+                            title: { display: true, text: 'Wage (£)' },
+                            beginAtZero: true
+                        },
+                        y2: {
+                            type: 'linear',
+                            position: 'right',
+                            title: { display: true, text: 'Hours' },
+                            beginAtZero: true,
+                            grid: { drawOnChartArea: false }
+                        }
+                    }
+                }
+            });
+
+            // === Heatmap Matrix ===
+            const heatmap = @Html.Raw(JsonConvert.SerializeObject(Model.HeatmapData));
+            const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            const dataMatrix = [];
+
+            for (let h = 0; h < 24; h++) {
+                for (let d = 0; d < 7; d++) {
+                    dataMatrix.push({
+                        x: d,
+                        y: h,
+                        v: heatmap[h][d]
+                    });
+                }
+            }
+
+            new Chart(document.getElementById("heatmapCanvas"), {
+                type: 'matrix',
+                data: {
+                    datasets: [{
+                        label: 'Employee Activity',
+                        data: dataMatrix,
+                        backgroundColor(ctx) {
+                            const val = ctx.dataset.data[ctx.dataIndex].v;
+                            const maxVal = 10; // adjust based on your expected max staff per hour
+
+                            if (val === 0) return '#ffffff';
+
+                            // Calculate blend factor (0 = white, 1 = full orange)
+                            const t = Math.min(val / maxVal, 1);
+
+                            // Interpolate between white (255,255,255) and orange (255,165,0)
+                            const r = 255;
+                            const g = Math.round(255 - t * (255 - 165)); // 255 → 165
+                            const b = Math.round(255 - t * (255 - 0));   // 255 → 0
+
+                            return `rgb(${r}, ${g}, ${b})`;
+                        },
+                        width: ctx => {
+                            const chart = ctx.chart;
+                            return chart.chartArea ? chart.chartArea.width / 7 : 40;
+                        },
+                        height: ctx => {
+                            const chart = ctx.chart;
+                            return chart.chartArea ? chart.chartArea.height / 24 : 20;
+                        }
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                title: ctx => `Day: ${days[ctx[0].raw.x]}, Hour: ${ctx[0].raw.y}:00`,
+                                label: ctx => `${ctx.raw.v} employees working`
+                            }
+                        },
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            min: 0,
+                            max: 6,
+                            ticks: {
+                                callback: idx => days[idx]
+                            },
+                            title: { display: true, text: 'Day of Week' }
+                        },
+                        y: {
+                            type: 'linear',
+                            min: 0,
+                            max: 23,
+                            ticks: {
+                                callback: h => `${h}:00`
+                            },
+                            title: { display: true, text: 'Hour of Day' }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+}
+
+

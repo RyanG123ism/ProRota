@@ -12,7 +12,7 @@
     <div class="card shadow-sm p-4">
         <div class="card-header text-center">
             <h1 class="display-5">Rota Management</h1>
-            <h3>Week Commencing - <b>@weekStartingDate.ToString("dd/MM/yyyy")</b></h3>
+            <h3>Week Ending - <b>@weekEndingDate.ToString("dd/MM/yyyy")</b></h3>
         </div>
         <div class="card-body text-center">
             <div class="d-flex flex-wrap justify-content-center gap-2 mb-4">
@@ -29,8 +29,8 @@
 
                     <form asp-area="Management" asp-controller="Rota" asp-action="ViewWeeklyRota">
                             <input type="hidden" name="weekEnding" value="@weekEndingDate" />
-                            <button type="submit" class="btn btn-primary">Exit</button>               
-                    </form> 
+                    <button type="submit" class="btn btn-primary" onclick="alert('Warning: Any changes made will not be saved if you exit edit mode');">Exit</button>
+                </form> 
                     
             </div>
 
@@ -74,7 +74,8 @@
                                     var shift = (shifts ?? new List<Shift>()).FirstOrDefault(s => s.StartDateTime.HasValue && s.StartDateTime.Value.Date == currentDate.Date);
                                     var timeOffRequest = (timeOffRequests ?? new List<TimeOffRequest>()).FirstOrDefault(t => t.Date.Date == currentDate.Date);
 
-                                    <td class="shift-cell" data-date="@currentDate.ToString("yyyy-MM-dd")"
+                                    <td class="shift-cell @(timeOffRequest != null ? "non-clickable" : "")"
+                                        data-date="@currentDate.ToString("yyyy-MM-dd")"
                                         data-start-time="@(shift?.StartDateTime.HasValue == true ? shift.StartDateTime.Value.ToString("HH:mm") : "")"
                                         data-end-time="@(shift?.EndDateTime.HasValue == true ? shift.EndDateTime.Value.ToString("HH:mm") : "")">
 
