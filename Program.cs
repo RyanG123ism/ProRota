@@ -7,6 +7,7 @@ using ProRota.Data;
 using ProRota.Hubs;
 using ProRota.Models;
 using ProRota.Services;
+using Rotativa.AspNetCore;
 using Stripe;
 using System.Text.Json.Serialization;
 
@@ -87,33 +88,27 @@ var app = builder.Build();
 var stripeSettings = builder.Configuration.GetSection("Stripe");
 StripeConfiguration.ApiKey = stripeSettings["SecretKey"];
 
-// Use session
+//use session
 app.UseSession();
 
-// Get the scope factory
+//configuring rotativa for PDF downloads
+RotativaConfiguration.Setup(app.Environment.WebRootPath, "Rotativa");
+
+//get the scope factory
 using var scope = app.Services.CreateScope();
 
-// Get the service provider
+//get the service provider
 var serviceProvider = scope.ServiceProvider;
 
-// Get the DbContext
+//get the DbContext
 var dbContext = serviceProvider.GetRequiredService<ApplicationDbContext>();
 
-// Delete the existing database and create a new one
+//delete the existing database and create a new one
 dbContext.Database.EnsureDeleted();
 //dbContext.Database.EnsureCreated();
 
 // Apply migrations
 dbContext.Database.Migrate();
-
-//try
-//{
-//    dbContext.Database.Migrate();
-//}
-//catch (Exception ex)
-//{
-//    Console.WriteLine($"Database migration failed: {ex.Message}");
-//}
 
 // Create a new DatabaseInitialiser
 var databaseInitialiser = new DbInitialiser(serviceProvider);//COMMENT THIS OUT WHEN APP GOES LIVE

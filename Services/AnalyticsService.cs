@@ -167,6 +167,5 @@ namespace ProRota.Services
 
             return heatmap;
         }
-
     }
 }

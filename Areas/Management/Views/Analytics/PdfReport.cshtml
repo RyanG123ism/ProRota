@@ -1,0 +1,78 @@
+﻿@using ProRota.Areas.Management.ViewModels;
+@model AnalyticsDashboardViewModel
+
+@{
+    Layout = null; // For PDF views
+    var totalHours = Model.TotalHoursByDay;
+    var roles = Model.StaffingByRole;
+    var wages = Model.WagesExpenditureByDay;
+    var tableStyle = "border-collapse: collapse; width: 100%; margin-bottom: 30px;";
+    var thtdStyle = "border: 1px solid #fff; padding: 8px; color: white;";
+    var headingStyle = "color: white; margin-top: 40px;";
+    var bodyStyle = "background-color: #333; font-family: Arial, sans-serif; padding: 30px;";
+}
+
+<div style="@bodyStyle">
+    <h2 style="color: white; text-align: center;">Weekly Rota Analytics Report</h2>
+    <h4 class="text-center mb-4" style="color: white;">Date Range: @Model.WeekStartingDate.ToString("dd/MM/yyyy") - @Model.WeekEndingDate.ToString("dd/MM/yyyy")</h4>
+
+    <!-- Total Hours Table -->
+    <h3 style="@headingStyle">Total Hours by Day</h3>
+    <table style="@tableStyle">
+        <thead>
+            <tr>
+                <th style="@thtdStyle">Day</th>
+                <th style="@thtdStyle">Total Hours</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in totalHours)
+            {
+                <tr>
+                    <td style="@thtdStyle">@item.Key</td>
+                    <td style="@thtdStyle">@item.Value hrs</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <!-- Staffing by Role Table -->
+    <h3 style="@headingStyle">Staffing by Role</h3>
+    <table style="@tableStyle">
+        <thead>
+            <tr>
+                <th style="@thtdStyle">Role</th>
+                <th style="@thtdStyle">Shifts</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var role in roles)
+            {
+                <tr>
+                    <td style="@thtdStyle">@role.Key</td>
+                    <td style="@thtdStyle">@role.Value shifts</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <!-- Wages Table -->
+    <h3 style="@headingStyle">Wage Expenditure by Day</h3>
+    <table style="@tableStyle">
+        <thead>
+            <tr>
+                <th style="@thtdStyle">Day</th>
+                <th style="@thtdStyle">Expenditure</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in wages)
+            {
+                <tr>
+                    <td style="@thtdStyle">@item.Key</td>
+                    <td style="@thtdStyle">£@item.Value</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -174,6 +174,10 @@ namespace ProRota.Areas.Management.Controllers
                 ViewBag.ErrorMessage = $"There are no users belonging to the role {roleName} ";
             }
 
+            //sending invited users to view as well
+            var invitedUsers = await _context.ApplicationUsers.Where(u => u.SiteId == siteId && u.EmailConfirmed == false).ToListAsync();
+            ViewBag.InvitedUsers = invitedUsers;
+
             return View("ViewAllUsers", usersInRoleBySite);
         }
 

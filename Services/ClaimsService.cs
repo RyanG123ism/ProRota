@@ -49,12 +49,13 @@ namespace ProRota.Services
             if (existingClaim != null)
             {
                 //first remove any old claim then add new company ID
-                claimsIdentity.RemoveClaim(claimsIdentity.FindFirst("CompanyId"));     
+                await _userManager.RemoveClaimAsync(user, existingClaim);
             }
 
-            claimsIdentity.AddClaim(new Claim("CompanyId", companyId.ToString()));
+            // Add the new claim
+            var addResult = await _userManager.AddClaimAsync(user, new Claim("CompanyId", companyId.ToString()));
 
-            return true;
+            return addResult.Succeeded;
         }
 
         public async Task<bool> SetSiteId()
