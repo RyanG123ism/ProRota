@@ -146,6 +146,9 @@ catch (Exception ex)
 //// Seed the database
 //await databaseInitialiser.Seed();
 
+//local DB
+//"DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=ProRota_v3;Trusted_Connection=True;MultipleActiveResultSets=true",
+
 
 
 app.UseHttpsRedirection();
