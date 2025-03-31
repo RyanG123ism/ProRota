@@ -14,9 +14,18 @@ using System.Text.Json.Serialization;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+if (connectionString == null)
+{
+    Console.WriteLine("Connection string not found.");
+    throw new InvalidOperationException("Missing DefaultConnection string.");
+}
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
+
+
 
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 {
@@ -99,30 +108,32 @@ using var scope = app.Services.CreateScope();
 
 //get the service provider
 var serviceProvider = scope.ServiceProvider;
-
-//get the DbContext
-var dbContext = serviceProvider.GetRequiredService<ApplicationDbContext>();
-
-if (app.Environment.IsDevelopment())
+try
 {
-    // Dev DB setup
-    dbContext.Database.EnsureDeleted();
-    dbContext.Database.Migrate();
-    var databaseInitialiser = new DbInitialiser(serviceProvider);
-    await databaseInitialiser.Seed();
+    var dbContext = serviceProvider.GetRequiredService<ApplicationDbContext>();
 
-    // Dev-specific middleware
-    app.UseMigrationsEndPoint();
+    if (app.Environment.IsDevelopment())
+    {
+        dbContext.Database.EnsureDeleted();
+        dbContext.Database.Migrate();
+        var databaseInitialiser = new DbInitialiser(serviceProvider);
+        await databaseInitialiser.Seed();
+
+        app.UseMigrationsEndPoint();
+    }
+    else
+    {
+        dbContext.Database.Migrate();
+        app.UseExceptionHandler("/Home/Error");
+        app.UseHsts();
+    }
 }
-else
+catch (Exception ex)
 {
-    // Prod DB setup
-    dbContext.Database.Migrate();
-
-    // Prod-specific middleware
-    app.UseExceptionHandler("/Home/Error");
-    app.UseHsts();
+    Console.WriteLine("Error during database setup or migration");
+    Console.WriteLine(ex.ToString());
 }
+
 
 
 ////delete the existing database and create a new oneee
