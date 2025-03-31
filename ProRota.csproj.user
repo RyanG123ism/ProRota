@@ -18,7 +18,7 @@
     <Area_SelectedScaffolderCategoryPath>root/Common</Area_SelectedScaffolderCategoryPath>
     <WebStackScaffolding_DependencyDialogWidth>650</WebStackScaffolding_DependencyDialogWidth>
     <WebStackScaffolding_DbContextTypeFullName>ProRota.Data.ApplicationDbContext</WebStackScaffolding_DbContextTypeFullName>
-    <NameOfLastUsedPublishProfile>C:\Users\grant\OneDrive\Desktop\UNI\Year 4\Honours Project\ProRota\.github\workflows\ProRotaS2337538.yml</NameOfLastUsedPublishProfile>
+    <NameOfLastUsedPublishProfile>C:\Users\grant\OneDrive\Desktop\UNI\Year 4\Honours Project\ProRota\Properties\PublishProfiles\ProRota - Web Deploy.pubxml</NameOfLastUsedPublishProfile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DebuggerFlavor>ProjectDebugger</DebuggerFlavor>

@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "NHHY8BTU5n3No4yT1mP/fO5aS2NFyu+q2y9k5zVstpM=",
+  "Hash": "Wxk8oR/aXbRVVV44d876jq/Jg7rH612FFbl+gYXfaaU=",
   "Source": "ProRota",
   "BasePath": "_content/ProRota",
   "Mode": "Default",
@@ -2694,6 +2694,25 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\lib\\jquery-validation-unobtrusive\\LICENSE.txt"
+    },
+    {
+      "Identity": "C:\\Users\\grant\\OneDrive\\Desktop\\UNI\\Year 4\\Honours Project\\ProRota\\wwwroot\\Rotativa\\wkhtmltopdf.exe",
+      "SourceId": "ProRota",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\grant\\OneDrive\\Desktop\\UNI\\Year 4\\Honours Project\\ProRota\\wwwroot\\",
+      "BasePath": "_content/ProRota",
+      "RelativePath": "Rotativa/wkhtmltopdf.exe",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\Rotativa\\wkhtmltopdf.exe"
     }
   ]
 }
