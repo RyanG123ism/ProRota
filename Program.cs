@@ -160,4 +160,13 @@ app.MapRazorPages();
 app.MapHub<EmailConfirmationHub>("/emailConfirmationHub");
 app.MapHub<NewsFeedHub>("/newsFeedHub");
 
-app.Run();
+try
+{
+    app.Run();
+}
+catch (Exception ex)
+{
+    Console.WriteLine("Application failed to start!");
+    Console.WriteLine(ex.ToString());
+    throw; // Re-throw so Azure still registers the crash
+}
