@@ -73,9 +73,6 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true; // Required for GDPR compliance
 });
 
-// Ensure the app listens on the correct port
-//var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
-//builder.WebHost.UseUrls($"http://+:{port}");
 
 //adding service classes and interfaces
 builder.Services.AddScoped<ISiteService, SiteService>();
