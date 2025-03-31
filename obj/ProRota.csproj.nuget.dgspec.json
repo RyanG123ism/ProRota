@@ -87,10 +87,6 @@
               "target": "Package",
               "version": "[8.0.7, )"
             },
-            "Rotativa": {
-              "target": "Package",
-              "version": "[1.7.4-rc, )"
-            },
             "Rotativa.AspNetCore": {
               "target": "Package",
               "version": "[1.4.0, )"
