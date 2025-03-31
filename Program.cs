@@ -103,30 +103,42 @@ var serviceProvider = scope.ServiceProvider;
 //get the DbContext
 var dbContext = serviceProvider.GetRequiredService<ApplicationDbContext>();
 
-//delete the existing database and create a new one
-dbContext.Database.EnsureDeleted();
-//dbContext.Database.EnsureCreated();
-
-// Apply migrations
-dbContext.Database.Migrate();
-
-// Create a new DatabaseInitialiser
-var databaseInitialiser = new DbInitialiser(serviceProvider);//COMMENT THIS OUT WHEN APP GOES LIVE
-
-// Seed the database
-await databaseInitialiser.Seed();
-
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    // Dev DB setup
+    dbContext.Database.EnsureDeleted();
+    dbContext.Database.Migrate();
+    var databaseInitialiser = new DbInitialiser(serviceProvider);
+    await databaseInitialiser.Seed();
+
+    // Dev-specific middleware
     app.UseMigrationsEndPoint();
 }
 else
 {
+    // Prod DB setup
+    dbContext.Database.Migrate();
+
+    // Prod-specific middleware
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+
+////delete the existing database and create a new oneee
+//dbContext.Database.EnsureDeleted();
+////dbContext.Database.EnsureCreated();
+
+//// Apply migrations
+//dbContext.Database.Migrate();
+
+//// Create a new DatabaseInitialiser
+//var databaseInitialiser = new DbInitialiser(serviceProvider);//COMMENT THIS OUT WHEN APP GOES LIVE
+
+//// Seed the database
+//await databaseInitialiser.Seed();
+
+
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
