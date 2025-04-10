@@ -1,114 +1,132 @@
-﻿
-let editedShifts = {}; // Dictionary to store new and updated shifts
+﻿let editedShifts = {}; // Dictionary to store new and updated shifts
 
 function setupShiftClickListeners() {
     document.querySelectorAll(".shift-cell:not(.non-clickable)").forEach(cell => {
         cell.addEventListener("click", function () {
             let userRow = this.closest("tr");
-            let userId = userRow.getAttribute("data-user-id");
-            let firstName = userRow.getAttribute("data-firstname");
-            let lastName = userRow.getAttribute("data-lastname");
-            let role = userRow.getAttribute("data-role");
+            let userId = userRow?.getAttribute("data-user-id");
+            let firstName = userRow?.getAttribute("data-firstname");
+            let lastName = userRow?.getAttribute("data-lastname");
+            let role = userRow?.getAttribute("data-role");
             let shiftDate = this.getAttribute("data-date");
             let dayName = new Date(shiftDate).toLocaleDateString('en-US', { weekday: 'long' });
 
             let shiftTimeText = this.querySelector(".shift-time")?.textContent || "OFF";
             let [startTime, endTime] = shiftTimeText.includes("-") ? shiftTimeText.split(" - ") : ["", ""];
 
-            // Populate modal with user details
-            document.getElementById("modalUserId").value = userId;
-            document.getElementById("modalShiftDate").value = shiftDate;
-            document.getElementById("modalEmployeeName").textContent = `${firstName} ${lastName}`;
-            document.getElementById("modalRole").textContent = role;
-            document.getElementById("modalDay").textContent = dayName;
-            document.getElementById("modalFullDate").textContent = shiftDate;
-            document.getElementById("shiftStartTime").value = startTime;
-            document.getElementById("shiftEndTime").value = endTime;
+            if (
+                document.getElementById("modalUserId") &&
+                document.getElementById("modalShiftDate") &&
+                document.getElementById("modalEmployeeName") &&
+                document.getElementById("modalRole") &&
+                document.getElementById("modalDay") &&
+                document.getElementById("modalFullDate") &&
+                document.getElementById("shiftStartTime") &&
+                document.getElementById("shiftEndTime")
+            ) {
+                document.getElementById("modalUserId").value = userId;
+                document.getElementById("modalShiftDate").value = shiftDate;
+                document.getElementById("modalEmployeeName").textContent = `${firstName} ${lastName}`;
+                document.getElementById("modalRole").textContent = role;
+                document.getElementById("modalDay").textContent = dayName;
+                document.getElementById("modalFullDate").textContent = shiftDate;
+                document.getElementById("shiftStartTime").value = startTime;
+                document.getElementById("shiftEndTime").value = endTime;
 
-            document.getElementById("addShiftButton").style.display = shiftTimeText === "OFF" ? "block" : "none";
-            document.getElementById("editShiftButton").style.display = shiftTimeText !== "OFF" ? "block" : "none";
-            document.getElementById("editShiftButton").disabled = true;
-            document.getElementById("deleteShiftButton").style.display = shiftTimeText !== "OFF" ? "block" : "none";
+                document.getElementById("addShiftButton").style.display = shiftTimeText === "OFF" ? "block" : "none";
+                document.getElementById("editShiftButton").style.display = shiftTimeText !== "OFF" ? "block" : "none";
+                document.getElementById("editShiftButton").disabled = true;
+                document.getElementById("deleteShiftButton").style.display = shiftTimeText !== "OFF" ? "block" : "none";
 
-            $("#shiftModal").modal("show");
+                $("#shiftModal").modal("show");
+            }
         });
     });
 }
 
+// Attach validation listener only if inputs exist
+const shiftStartInput = document.getElementById("shiftStartTime");
+const shiftEndInput = document.getElementById("shiftEndTime");
 
-
-// ✅ Disable "Edit/Add Shift" button if start time is equal to or later than end time
-document.getElementById("shiftStartTime").addEventListener("input", validateShiftTime);
-document.getElementById("shiftEndTime").addEventListener("input", validateShiftTime);
+if (shiftStartInput) shiftStartInput.addEventListener("input", validateShiftTime);
+if (shiftEndInput) shiftEndInput.addEventListener("input", validateShiftTime);
 
 function validateShiftTime() {
-    let startTime = document.getElementById("shiftStartTime").value;
-    let endTime = document.getElementById("shiftEndTime").value;
+    const startTime = shiftStartInput?.value;
+    const endTime = shiftEndInput?.value;
 
-    let isValidTime = startTime < endTime;
-    document.getElementById("addShiftButton").disabled = !isValidTime;
-    document.getElementById("editShiftButton").disabled = !isValidTime;
+    const isValidTime = startTime < endTime;
+
+    const addBtn = document.getElementById("addShiftButton");
+    const editBtn = document.getElementById("editShiftButton");
+
+    if (addBtn) addBtn.disabled = !isValidTime;
+    if (editBtn) editBtn.disabled = !isValidTime;
 }
 
-// ✅ Add/Edit Shift and Update View
-document.getElementById("addShiftButton").addEventListener("click", saveShift);
-document.getElementById("editShiftButton").addEventListener("click", saveShift);
+// Add/Edit Shift
+const addShiftButton = document.getElementById("addShiftButton");
+const editShiftButton = document.getElementById("editShiftButton");
+
+if (addShiftButton) addShiftButton.addEventListener("click", saveShift);
+if (editShiftButton) editShiftButton.addEventListener("click", saveShift);
 
 function saveShift() {
-    let userId = document.getElementById("modalUserId").value;
-    let shiftDate = document.getElementById("modalShiftDate").value;
-    let startTime = document.getElementById("shiftStartTime").value;
-    let endTime = document.getElementById("shiftEndTime").value;
+    const userId = document.getElementById("modalUserId")?.value;
+    const shiftDate = document.getElementById("modalShiftDate")?.value;
+    const startTime = document.getElementById("shiftStartTime")?.value;
+    const endTime = document.getElementById("shiftEndTime")?.value;
+
+    if (!userId || !shiftDate) return;
 
     if (!editedShifts[userId]) editedShifts[userId] = {};
     editedShifts[userId][shiftDate] = { startTime, endTime };
 
-    updateTableCell(userId, shiftDate, startTime, endTime); // ✅ Update view dynamically
-
+    updateTableCell(userId, shiftDate, startTime, endTime);
     $("#shiftModal").modal("hide");
 }
 
-// ✅ Delete Shift and Update View
-document.getElementById("deleteShiftButton").addEventListener("click", function () {
-    let userId = document.getElementById("modalUserId").value;
-    let shiftDate = document.getElementById("modalShiftDate").value;
+// Delete Shift
+const deleteBtn = document.getElementById("deleteShiftButton");
+if (deleteBtn) {
+    deleteBtn.addEventListener("click", function () {
+        const userId = document.getElementById("modalUserId")?.value;
+        const shiftDate = document.getElementById("modalShiftDate")?.value;
 
-    if (!editedShifts[userId]) {
-        editedShifts[userId] = {};
-    }
+        if (!userId || !shiftDate) return;
 
-    editedShifts[userId][shiftDate] = { startTime: null, endTime: null };
+        if (!editedShifts[userId]) {
+            editedShifts[userId] = {};
+        }
 
-    updateTableCell(userId, shiftDate, null, null); // ✅ Update view to show "OFF"
+        editedShifts[userId][shiftDate] = { startTime: null, endTime: null };
 
-    $("#shiftModal").modal("hide");
-});
+        updateTableCell(userId, shiftDate, null, null);
+        $("#shiftModal").modal("hide");
+    });
+}
 
-// ✅ Update the View (Without Refreshing)
 function updateTableCell(userId, shiftDate, startTime, endTime) {
     let cell = document.querySelector(`[data-user-id="${userId}"] [data-date="${shiftDate}"]`);
     if (!cell) return;
 
     if (!startTime || !endTime) {
         cell.innerHTML = `<span class="text-muted">OFF</span>`;
-        cell.style.backgroundColor = ""; // ✅ Remove background color when deleting a shift
+        cell.style.backgroundColor = "";
     } else {
         let formattedShift = `${startTime} - ${endTime}`;
         cell.innerHTML = `<span class="shift-time">${formattedShift}</span>`;
-        cell.style.backgroundColor = "#d4edda"; // ✅ Light green for new shifts
+        cell.style.backgroundColor = "#d4edda";
     }
 }
 
-
-// Function to highlight table weekly rota cells based on their content
+// Highlight weekly rota table cells
 function highlightTableCellsforWeeklyRota() {
-    const tableRows = document.querySelectorAll("#weeklyRotaTable tbody tr");
+    const table = document.querySelector("#weeklyRotaTable");
+    if (!table) return;
 
-    tableRows.forEach(row => {
-        const cells = row.querySelectorAll("td");
-
-        cells.forEach((cell, index) => {
-            // Skip the first three columns which is the employee, role and rolecategory 
+    table.querySelectorAll("tbody tr").forEach(row => {
+        row.querySelectorAll("td").forEach((cell, index) => {
             if (index > 2) {
                 if (!cell.textContent.trim().includes("OFF")) {
                     cell.style.backgroundColor = "lightgreen";
@@ -118,21 +136,19 @@ function highlightTableCellsforWeeklyRota() {
                 }
             }
             if (index === 10) {
-                cell.style.backgroundColor = "#807C96"
+                cell.style.backgroundColor = "#807C96";
             }
         });
     });
 }
 
-// Function to highlight pending shifts table cells based on their content
+// Highlight pending shifts table cells
 function highlightTableCellsforPendingShifts() {
-    const tableRows = document.querySelectorAll("#pendingShiftsTable tbody tr");
+    const table = document.querySelector("#pendingShiftsTable");
+    if (!table) return;
 
-    tableRows.forEach(row => {
-        const cells = row.querySelectorAll("td");
-
-        cells.forEach((cell, index) => {  
-            // Skip the first column (index 0) which is the Employee column
+    table.querySelectorAll("tbody tr").forEach(row => {
+        row.querySelectorAll("td").forEach((cell, index) => {
             if (index !== 0) {
                 if (!cell.textContent.trim().includes("OFF")) {
                     cell.style.backgroundColor = "lightgreen";
@@ -146,14 +162,15 @@ function highlightTableCellsforPendingShifts() {
 }
 
 function calculateTotalHours() {
-    document.querySelectorAll("#weeklyRotaTable tbody tr").forEach(row => {
+    const table = document.querySelector("#weeklyRotaTable");
+    if (!table) return;
+
+    table.querySelectorAll("tbody tr").forEach(row => {
         let totalMinutes = 0;
 
         row.querySelectorAll(".shift-cell").forEach(cell => {
             let startTime = cell.getAttribute("data-start-time");
             let endTime = cell.getAttribute("data-end-time");
-
-            console.log(`Shift Data: Start - ${startTime}, End - ${endTime}`); // Debugging
 
             if (startTime && endTime) {
                 let start = parseTime(startTime);
@@ -161,19 +178,18 @@ function calculateTotalHours() {
 
                 if (start !== null && end !== null) {
                     let shiftDuration = end - start;
-                    if (shiftDuration < 0) shiftDuration += 24 * 60; // Handle overnight shifts
+                    if (shiftDuration < 0) shiftDuration += 24 * 60;
                     totalMinutes += shiftDuration;
                 }
             }
         });
 
-        // Convert minutes to hours (rounded to 2 decimal places)
         let totalHours = (totalMinutes / 60).toFixed(2);
-        row.querySelector(".total-hours").textContent = totalHours;
+        let totalCell = row.querySelector(".total-hours");
+        if (totalCell) totalCell.textContent = totalHours;
     });
 }
 
-// Helper function to convert "HH:mm" string to total minutes
 function parseTime(timeStr) {
     if (!timeStr || timeStr.trim() === "") return null;
     let parts = timeStr.split(":");

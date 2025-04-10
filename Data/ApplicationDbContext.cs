@@ -15,14 +15,14 @@ namespace ProRota.Data
         {
             base.OnModelCreating(modelBuilder); // Keep Identity configurations
 
-            // 🔹 Relationship: User who CREATED the news item
+            //User who CREATED the news item
             modelBuilder.Entity<NewsFeedItem>()
                 .HasOne(n => n.CreatedByUser)
                 .WithMany()
                 .HasForeignKey(n => n.CreatedByUserId)
                 .OnDelete(DeleteBehavior.Restrict); // Prevent cascade delete
 
-            // 🔹 Relationship: User who RECEIVES the news item
+            //User who RECEIVES the news item
             modelBuilder.Entity<NewsFeedItem>()
                 .HasOne(n => n.ApplicationUser)
                 .WithMany(u => u.NewsFeedItems) // Explicitly map this relationship
