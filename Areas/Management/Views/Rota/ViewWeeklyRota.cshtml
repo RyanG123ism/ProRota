@@ -101,7 +101,7 @@
                                 {
                                     var currentDate = weekStartingDate.AddDays(i);
                                     var shift = (shifts ?? new List<Shift>()).FirstOrDefault(s => s.StartDateTime.HasValue && s.StartDateTime.Value.Date == currentDate.Date);
-                                    var timeOffRequest = (timeOffRequests ?? new List<TimeOffRequest>()).FirstOrDefault(t => t.Date.Date == currentDate.Date);
+                                    var timeOffRequest = (timeOffRequests ?? new List<TimeOffRequest>()).FirstOrDefault(t => t.Date.Date == currentDate.Date && t.IsApproved == ApprovedStatus.Approved);
 
                                     <td class="shift-cell" data-date="@currentDate.ToString("yyyy-MM-dd")"
                                         data-start-time="@(shift?.StartDateTime.HasValue == true ? shift.StartDateTime.Value.ToString("HH:mm") : "")"

@@ -20,7 +20,7 @@
           "Microsoft.VisualStudio.Azure.Containers.Tools.Targets": "1.19.6",
           "Microsoft.VisualStudio.Web.CodeGeneration.Design": "8.0.7",
           "Rotativa.AspNetCore": "1.4.0",
-          "Stripe.net": "47.4.0-beta.1"
+          "Stripe.net": "48.1.0-beta.4"
         },
         "runtime": {
           "ProRota.dll": {}
@@ -1901,15 +1901,15 @@
           }
         }
       },
-      "Stripe.net/47.4.0-beta.1": {
+      "Stripe.net/48.1.0-beta.4": {
         "dependencies": {
           "Newtonsoft.Json": "13.0.3",
           "System.Configuration.ConfigurationManager": "8.0.0"
         },
         "runtime": {
           "lib/net8.0/Stripe.net.dll": {
-            "assemblyVersion": "47.4.0.0",
-            "fileVersion": "47.4.0.0"
+            "assemblyVersion": "48.1.0.0",
+            "fileVersion": "48.1.0.0"
           }
         }
       },
@@ -3214,12 +3214,12 @@
       "path": "sqlitepclraw.provider.e_sqlite3/2.1.6",
       "hashPath": "sqlitepclraw.provider.e_sqlite3.2.1.6.nupkg.sha512"
     },
-    "Stripe.net/47.4.0-beta.1": {
+    "Stripe.net/48.1.0-beta.4": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-5sKIlCaptone95pQlB34ShQPEUaJT8K/dXgTepkRUEX8rJ8r8giEF7kLaapk1Frfz5XKrnluD9JMChc856O5Lg==",
-      "path": "stripe.net/47.4.0-beta.1",
-      "hashPath": "stripe.net.47.4.0-beta.1.nupkg.sha512"
+      "sha512": "sha512-SzyR23HR9u1+jRowK+tJ7GoLYSi8KPoYUA7S39TUmKnpiyuEtnNAtzwPWxCa5lrB4XxqYOGazWznvw/P9++Puw==",
+      "path": "stripe.net/48.1.0-beta.4",
+      "hashPath": "stripe.net.48.1.0-beta.4.nupkg.sha512"
     },
     "System.ClientModel/1.0.0": {
       "type": "package",

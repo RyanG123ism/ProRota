@@ -16,10 +16,10 @@
                     <!-- Navigation Buttons -->
                     <div class="d-flex justify-content-between mb-3">
                         <div>
-                            <button id="prev-week-btn" class="btn btn-primary btn-sm me-2" onclick="navigateWeek(-1)">Previous Week</button>
-                            <button id="current-week-btn" class="btn btn-secondary btn-sm me-2" onclick="navigateToCurrentWeek(@ViewBag.Today)">Back to This Week</button>
+                            <button id="prev-week-btn" class="btn btn-primary btn-sm me-2">Previous Week</button>
+                            <button id="current-week-btn" class="btn btn-secondary btn-sm me-2">Back to This Week</button>
                         </div>
-                        <button id="next-week-btn" class="btn btn-primary btn-sm" onclick="navigateWeek(1)">Next Week</button>
+                        <button id="next-week-btn" class="btn btn-primary btn-sm">Next Week</button>
                     </div>
 
                     <!-- Shifts Table -->
@@ -43,6 +43,7 @@
                 <h3 class="text-center" style="font-weight: 500;">
                     You've taken <span style="font-weight: bold;">@ViewBag.HolidaysTaken</span> out of <span style="font-weight: bold;">@Model.HolidaysPerYear</span> paid days off.
                 </h3>
+                <!-- Create Time Off Request Button -->
                 <h5 class="text-center" style="font-weight: 500;">
                     <a href="javascript:void(0);" onclick="showCreateTimeOffRequestPopUp()">
                         Create a new Request
@@ -207,7 +208,7 @@
         highlightTableCellsforPendingShifts();
 
 
-        // Scripts for specific changes to the page
+        //Scripts for specific changes to the page
         document.getElementById("requestDate").addEventListener("change", validateRequestDate);
     }); 
 </script>

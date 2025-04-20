@@ -59,7 +59,8 @@ namespace ProRota.Areas.Management.Controllers
             {
                 //retrieve all requests that match that approval status
                 var requests = _context.TimeOffRequests.Where(t => t.IsApproved == approvalStatus)
-                    .Include(t => t.ApplicationUser).Where(t => t.ApplicationUser.SiteId == siteId).OrderByDescending(t => t.Date).ToList();
+                    .Include(t => t.ApplicationUser).Where(t => t.ApplicationUser.SiteId == siteId)
+                    .OrderByDescending(t => t.Date).ToList();
 
                 //sends tomorrows date to view
                 ViewBag.Tomorrow = DateTime.Now.AddDays(1).Date;
@@ -73,9 +74,11 @@ namespace ProRota.Areas.Management.Controllers
 
         public async Task<IActionResult> RevertTimeOffRequest(int id)
         {
-            var request = await _timeOffRequestService.ValidateTimeOffRequest(id) ?? throw new ArgumentNullException(nameof(id), "Time-off request is invalid.");
+            var request = await _timeOffRequestService.ValidateTimeOffRequest(id) 
+                ?? throw new ArgumentNullException(nameof(id), "Time-off request is invalid.");
 
-            var user = await _timeOffRequestService.ValidateUser(request.ApplicationUserId) ?? throw new ArgumentNullException(nameof(id), "User request is invalid.");
+            var user = await _timeOffRequestService.ValidateUser(request.ApplicationUserId) 
+                ?? throw new ArgumentNullException(nameof(id), "User request is invalid.");
 
             //reverts the users remaining holiday allowance depending on the status
             if (request.IsApproved == ApprovedStatus.Approved)
@@ -112,9 +115,11 @@ namespace ProRota.Areas.Management.Controllers
 
         public async Task<IActionResult> ApproveTimeOffRequest(int id)
         {
-            var request = await _timeOffRequestService.ValidateTimeOffRequest(id) ?? throw new ArgumentNullException(nameof(id), "Time-off request is invalid.");
+            var request = await _timeOffRequestService.ValidateTimeOffRequest(id) 
+                ?? throw new ArgumentNullException(nameof(id), "Time-off request is invalid.");
 
-            var user = await _timeOffRequestService.ValidateUser(request.ApplicationUserId) ?? throw new ArgumentNullException(nameof(id), "User request is invalid.");
+            var user = await _timeOffRequestService.ValidateUser(request.ApplicationUserId) 
+                ?? throw new ArgumentNullException(nameof(id), "User request is invalid.");
 
             //changes the approval status
             request.IsApproved = ApprovedStatus.Approved;
@@ -140,7 +145,8 @@ namespace ProRota.Areas.Management.Controllers
             if (user.RemainingHolidays <= 0)
             {
                 TempData["ConformationMessage"] = $"{user.FirstName} {user.LastName} " +
-                    $"has no remaining holidays left in their allowance. If this was a mistake, revert this request.";
+                    $"has no remaining holidays left in their allowance. " +
+                    $"If this was a mistake, revert this request.";
             }
             else
             {

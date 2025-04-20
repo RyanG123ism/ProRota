@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "TOPMnMwMvYI=",
+  "dgSpecHash": "MQEdOU+4oFc=",
   "success": true,
   "projectFilePath": "C:\\Users\\grant\\OneDrive\\Desktop\\UNI\\Year 4\\Honours Project\\ProRota\\ProRota.csproj",
   "expectedPackageFiles": [
@@ -153,7 +153,7 @@
     "C:\\Users\\grant\\.nuget\\packages\\sqlitepclraw.core\\2.1.6\\sqlitepclraw.core.2.1.6.nupkg.sha512",
     "C:\\Users\\grant\\.nuget\\packages\\sqlitepclraw.lib.e_sqlite3\\2.1.6\\sqlitepclraw.lib.e_sqlite3.2.1.6.nupkg.sha512",
     "C:\\Users\\grant\\.nuget\\packages\\sqlitepclraw.provider.e_sqlite3\\2.1.6\\sqlitepclraw.provider.e_sqlite3.2.1.6.nupkg.sha512",
-    "C:\\Users\\grant\\.nuget\\packages\\stripe.net\\47.4.0-beta.1\\stripe.net.47.4.0-beta.1.nupkg.sha512",
+    "C:\\Users\\grant\\.nuget\\packages\\stripe.net\\48.1.0-beta.4\\stripe.net.48.1.0-beta.4.nupkg.sha512",
     "C:\\Users\\grant\\.nuget\\packages\\system.clientmodel\\1.0.0\\system.clientmodel.1.0.0.nupkg.sha512",
     "C:\\Users\\grant\\.nuget\\packages\\system.codedom\\5.0.0\\system.codedom.5.0.0.nupkg.sha512",
     "C:\\Users\\grant\\.nuget\\packages\\system.collections.immutable\\7.0.0\\system.collections.immutable.7.0.0.nupkg.sha512",

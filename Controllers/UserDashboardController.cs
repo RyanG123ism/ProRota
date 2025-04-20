@@ -46,7 +46,6 @@ namespace ProRota.Controllers
                 .Where(u => u.Id == userId)                                     //MAKE SURE TO INCLUDE THIS once finished
                 .Include(u => u.Shifts)/*.Where(s => s.StartDateTime >= DateTime.Now.Date)*/
                 .Include(u => u.TimeOffRequests)
-                .Include(u => u.TimeOffRequests)
                 .FirstOrDefault();
 
             //reloads the current db instance to include shifts and requests added at runtime
@@ -77,7 +76,9 @@ namespace ProRota.Controllers
             }
 
             //checks for existing time off request
-            var existingReq = await _context.TimeOffRequests.Where(tr => tr.ApplicationUserId == userId && tr.Date.Date == requestDate.Date).AnyAsync();
+            var existingReq = await _context.TimeOffRequests
+                .Where(tr => tr.ApplicationUserId == userId && tr.Date.Date == requestDate.Date)
+                .AnyAsync();
 
             if(existingReq)
             {

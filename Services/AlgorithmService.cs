@@ -51,7 +51,8 @@ namespace ProRota.Services
 
             //STEP 2: calculate daily covers and assess which days to prioritise
             var weeklyCoverBreakdown = viewModel.Covers;
-            var dailyTotalCovers = CalculateDailyCoversByPriority(weeklyCoverBreakdown) ?? throw new Exception("Error calculating daily covers by priority"); ;
+            var dailyTotalCovers = CalculateDailyCoversByPriority(weeklyCoverBreakdown) 
+                ?? throw new Exception("Error calculating daily covers by priority"); ;
 
             //STEP3: calculate neccecary staff for each day
             //looping through days, starts with my significant (busiest) day
@@ -69,16 +70,13 @@ namespace ProRota.Services
                 //STEP 5: Assign shifts to users
                 var dayRota = await Task.Run(() => AllocateShifts(shiftTimes, sortedUsers)) ;
 
-                //STEP 5: Review?
-
-                //add a step here to review the algorithm and make changes where needed?
-
-                //STEP 6: Return result
+                //STEP 5: Return result
                 if(dayRota.Count > 0)
                 {
                     var (dateKey, shifts) = dayRota.First();
 
-                    if (date.Date.CompareTo(dateKey) == 0)//comparing key to actual date to make sure they match up before adding
+                    //comparing key to actual date to make sure they match up before adding
+                    if (date.Date.CompareTo(dateKey) == 0)
                     {
                         rota[date.Date] = shifts;
                     }
@@ -156,8 +154,8 @@ namespace ProRota.Services
                     .Select(r => r.RoleCategory.Name)
                     .FirstOrDefaultAsync();
 
-                // Default to "Uncategorized" if RoleCategory is not found
-                var categoryName = roleCategory ?? "Uncategorized";
+                // Default to "Uncategorised" if RoleCategory is not found
+                var categoryName = roleCategory ?? "Uncategorised";
 
                 userRoleCategories.Add((user, categoryName));
             }
@@ -242,43 +240,43 @@ namespace ProRota.Services
 
         public Dictionary<int, int> CalculateDailyEmployeeRequirmentsForRole(int minEmployees, int maxEmployees, int covers, int? maxCovers, Dictionary<int, int> coverBreakdown)
         {
-            // Validate maxCovers
+            //Validate maxCovers
             if (maxCovers == null || maxCovers == 0)
             {
                 throw new ArgumentException("maxCovers must be a valid positive number.");
             }
                 
-            // Ensure total covers does not exceed maxCovers
+            //Ensure total covers does not exceed maxCovers
             covers = Math.Min(covers, maxCovers.Value);
 
-            // Calculate the staff scaling factor (0 = min employees, 1 = max employees)
+            //Calculate the staff scaling factor from 0 - 1
             double staffScaleFactor = (double)covers / maxCovers.Value;
 
-            // Determine total employees needed for the entire day
+            //Determine total employees needed for the entire day
             int totalEmployees = (int)Math.Round(minEmployees + (maxEmployees - minEmployees) * staffScaleFactor);
 
-            // Ensure total employees are within the min-max range
+            //Ensure total employees are within the min max range
             totalEmployees = Math.Clamp(totalEmployees, minEmployees, maxEmployees);
 
-            // Calculate the total covers for the day based on breakdown
+            //Calculate the total covers for the day based on breakdown
             int totalBreakdownCovers = coverBreakdown.Values.Sum();
 
-            // Dictionary to store employee allocation per quarter
+            //Dictionary to store employee allocation per quarter
             Dictionary<int, int> employeeAllocation = new Dictionary<int, int>();
 
-            // Allocate employees based on quarter activity
+            //Allocate employees based on quarter activity
             foreach (var kvp in coverBreakdown)
             {
                 int quarter = kvp.Key;
                 int quarterCovers = kvp.Value;
 
-                // Avoid division by zero in case of no covers
+                //Avoid 0 division in case of no covers
                 double quarterCoverPercentage = totalBreakdownCovers == 0 ? 0 : (double)quarterCovers / totalBreakdownCovers;
 
-                // Distribute employees proportionally based on quarter's cover percentage
+                //Distribute employees proportionally based on quarters cover percentage
                 int quarterEmployees = (int)Math.Round(totalEmployees * quarterCoverPercentage);
 
-                // Ensure at least one employee is present during working hours
+                //Makes sure that at least one employee is present during working hours
                 quarterEmployees = Math.Max(quarterEmployees, minEmployees > 0 ? 1 : 0);
 
                 employeeAllocation[quarter] = quarterEmployees;
@@ -317,7 +315,7 @@ namespace ProRota.Services
                 List<Tuple<int, TimeSpan>> activeEmployees = new List<Tuple<int, TimeSpan>>(); // Stores <EmployeeID, StartTime>
                 int employeeCounter = 1; // Unique employee ID tracker
 
-                // Iterate through each quarter and assign shifts
+                //Iterate through each quarter and assign shifts
                 for (int i = 0; i < sortedQuarters.Count; i++)
                 {
                     int quarterIndex = sortedQuarters[i].Key;
@@ -325,14 +323,14 @@ namespace ProRota.Services
                     TimeSpan quarterStartTime = openingTime + (quarterDuration * (quarterIndex - 1));
                     TimeSpan quarterEndTime = quarterStartTime + quarterDuration;
 
-                    // If more employees are needed, add new employees
+                    //If more employees are needed, add new employees
                     while (activeEmployees.Count < employeesRequired)
                     {
-                        activeEmployees.Add(new Tuple<int, TimeSpan>(employeeCounter, quarterStartTime)); // Add employee
-                        employeeCounter++;
+                        activeEmployees.Add(new Tuple<int, TimeSpan>(employeeCounter, quarterStartTime)); //Add employee
+                        employeeCounter++; //Increment the counter
                     }
 
-                    // If fewer employees are needed in the next quarter, remove the earliest-starting ones first
+                    //If fewer employees are needed in the next quarter, remove the earliest-starting ones first
                     if (i < sortedQuarters.Count - 1)
                     {
                         int nextQuarterDemand = sortedQuarters[i + 1].Value;
@@ -340,13 +338,14 @@ namespace ProRota.Services
                         {
                             int employeesToRemove = activeEmployees.Count - nextQuarterDemand;
 
-                            // Sort by start time and remove the earliest-starting employees first
+                            //Sort by start time and remove the earliest-starting employees first
                             activeEmployees = activeEmployees
                                 .OrderBy(emp => emp.Item2)
                                 .ToList();
 
                             for (int j = 0; j < employeesToRemove; j++)
                             {
+                                //Add end time before removing
                                 var leavingEmployee = activeEmployees.First();
                                 shifts.Add(new Tuple<TimeSpan, TimeSpan>(leavingEmployee.Item2, quarterEndTime));
                                 activeEmployees.Remove(leavingEmployee);
@@ -371,7 +370,7 @@ namespace ProRota.Services
         public Dictionary<DateTime, Dictionary<string, List<Shift>>>AllocateShifts(Dictionary<DateTime, Dictionary<string, List<Tuple<TimeSpan, TimeSpan>>>> shiftTimes,
                Dictionary<string, List<ApplicationUser>> users)
         {
-            // Dictionary to store assigned shifts (Date -> UserID -> List of Shifts)
+            //(date - userID - list of shifts)
             var assignedShifts = new Dictionary<DateTime, Dictionary<string, List<Shift>>>();
 
             //tracks the assinged hours of users across the full week
@@ -394,7 +393,7 @@ namespace ProRota.Services
                     //if no users in a role categroy
                     if (!users.ContainsKey(roleCategory) || users[roleCategory].Count == 0)
                     {
-                        Console.WriteLine($"⚠ No available users for {roleCategory} on {date}");
+                        Console.WriteLine($"No available users for {roleCategory} on {date}");
                         continue;
                     }
 
@@ -407,7 +406,7 @@ namespace ProRota.Services
 
                     if (sortedUsers.Count == 0)
                     {
-                        Console.WriteLine($"⚠ No available users for {roleCategory} on {date}");
+                        Console.WriteLine($"No available users for {roleCategory} on {date}");
                         continue;
                     }
 
@@ -432,7 +431,8 @@ namespace ProRota.Services
                             }
 
                             //skip if the user would be working more than 48 hours
-                            if (weeklyAssignedHours[potentialUser.Id] + shiftDuration.TotalHours > 48)//hard coded amount - change this in future to a property within user ('max hours' for example)
+                            //hard coded amount - change this in future to a property within user ('max hours')
+                            if (weeklyAssignedHours[potentialUser.Id] + shiftDuration.TotalHours > 48)
                             {
                                 lastAssignedIndex++;
                                 attempts++;
@@ -445,8 +445,8 @@ namespace ProRota.Services
 
                         if (userToAssign == null)
                         {
-                            Console.WriteLine($"⚠ No available users for {roleCategory} on {date} (All have time-off)");
-                            continue; // Skip this shift if no one is available
+                            Console.WriteLine($"No available users for {roleCategory} on {date} (All have time-off)");
+                            continue; //Skip this shift if no one is available
                         }
 
                         //if user already has shifts - assign to excisting key

@@ -326,7 +326,6 @@ namespace ProRota.Areas.Management.Controllers
                     var userId = await _userManager.GetUserIdAsync(user);
                     await _userManager.AddToRoleAsync(user, model.Role);
                     
-                    //send email invite here
                     //generate email conformation token
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
@@ -339,6 +338,7 @@ namespace ProRota.Areas.Management.Controllers
 
                     var emailBody = _emailSender.CreateInviteEmailBody(user, model.Role, site.SiteName, callbackUrl);
 
+                    //send email invite
                     await _emailSender.SendEmailAsync(user.Email, "You're Invited to Join ProRota!", emailBody);
 
                     TempData["PopUp"] = "User Account Created and Invitation Sent!";

@@ -29,7 +29,7 @@ namespace ProRota.Services
                     client.Credentials = new NetworkCredential(smtpUser, smtpPass);
                     client.EnableSsl = true;
                     client.DeliveryMethod = SmtpDeliveryMethod.Network;
-                    client.UseDefaultCredentials = false;  // ✅ Ensure Gmail credentials are used
+                    client.UseDefaultCredentials = false; 
 
                     var mailMessage = new MailMessage
                     {
@@ -42,12 +42,12 @@ namespace ProRota.Services
                     mailMessage.To.Add(email);
 
                     await client.SendMailAsync(mailMessage);
-                    Console.WriteLine("✅ Email sent successfully!");  // Debugging
+                    Console.WriteLine("Email sent successfully!");  //debugging
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Email send failed: {ex.Message}");
+                Console.WriteLine($"Email send failed: {ex.Message}");
             }
         }
 

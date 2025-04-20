@@ -1,4 +1,5 @@
-﻿let editedShifts = {}; // Dictionary to store new and updated shifts
+﻿
+let editedShifts = {}; //dictionary to store new and updated shifts
 
 function setupShiftClickListeners() {
     document.querySelectorAll(".shift-cell:not(.non-clickable)").forEach(cell => {

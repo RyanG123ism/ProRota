@@ -19,19 +19,19 @@ namespace ProRota.Hubs
 
             if (!string.IsNullOrEmpty(userId))
             {
-                // Add the user to their personal group
+                //add the user to their personal group
                 await Groups.AddToGroupAsync(Context.ConnectionId, userId);
             }
 
             if (!string.IsNullOrEmpty(siteId))
             {
-                // Add the user to their site's group
+                //add the user to their site's group
                 await Groups.AddToGroupAsync(Context.ConnectionId, $"Site_{siteId}");
             }
 
             if (!string.IsNullOrEmpty(companyId))
             {
-                // Add the user to their company's group
+                //add the user to their company's group
                 await Groups.AddToGroupAsync(Context.ConnectionId, $"Company_{companyId}");
             }
 

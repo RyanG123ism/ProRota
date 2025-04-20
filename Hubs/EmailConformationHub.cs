@@ -16,7 +16,7 @@ namespace ProRota.Hubs
         public async Task RegisterUser(string userId)
         {
             _connections[Context.ConnectionId] = userId;
-            Console.WriteLine($"📌 SignalR Registered: {userId} -> {Context.ConnectionId}");
+            Console.WriteLine($"SignalR Registered: {userId} -> {Context.ConnectionId}");
         }
 
         public static string? GetConnectionIdByUserId(string userId)

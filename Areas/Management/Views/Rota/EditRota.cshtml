@@ -151,9 +151,9 @@
 
         document.getElementById("saveChanges").addEventListener("click", function () {
             let editedShiftsJson = JSON.stringify(editedShifts);
-            document.getElementById("editedShiftsInput").value = editedShiftsJson;
+            document.getElementById("editedShiftsInput").value = editedShiftsJson; //extract js dictionary data
 
-            document.getElementById("saveRotaForm").submit(); // ✅ Submit the form like a normal POST request
+            document.getElementById("saveRotaForm").submit();//submit the form like a normal POST request
         });
 
         let backButton = document.getElementById("backToListButton");

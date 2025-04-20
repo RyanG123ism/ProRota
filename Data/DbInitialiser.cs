@@ -31,7 +31,7 @@ namespace ProRota.Data
                 await SeedUsers(_services);
                 await SeedClaims(_services);
                 await SeedShifts(_services);
-                //await SeedTimeOffRequests(_services);
+                await SeedTimeOffRequests(_services);
 
             }
             catch (Exception ex)
@@ -73,7 +73,7 @@ namespace ProRota.Data
             var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
             var roleManager = serviceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
 
-            // Define Role Categories
+            //define Role Categories
             var roleCategories = new Dictionary<string, List<string>>
             {
                 { "FOH", new List<string> { "Front of House Assistant", "Head Waiter" } },
@@ -86,7 +86,7 @@ namespace ProRota.Data
 
             foreach (var category in roleCategories)
             {
-                // Check if RoleCategory exists, if not, create it
+                //check if RoleCategory exists, if not, create it
                 var roleCategory = await context.RoleCategories.FirstOrDefaultAsync(c => c.Name == category.Key);
                 if (roleCategory == null)
                 {
@@ -95,7 +95,7 @@ namespace ProRota.Data
                     await context.SaveChangesAsync();
                 }
 
-                // Add roles under this category
+                //add roles under this category
                 foreach (var role in category.Value)
                 {
                     if (!await roleManager.RoleExistsAsync(role))
@@ -280,7 +280,8 @@ namespace ProRota.Data
                         PhoneNumberConfirmed = true,
                         Salary = 15,
                         ContractualHours = 45,
-                        Notes = "none"
+                        Notes = "none",
+                        RemainingHolidays = 0
                     },
 
                     new ApplicationUser

@@ -1,6 +1,10 @@
 ﻿//Group of functions repsonsible for managing the pending shifts table in the user dashboard
 function initialiseUserRota(shiftsJson, timeOffRequestsJson) {
 
+    document.getElementById("prev-week-btn").addEventListener("click", () => navigateWeek(-1));
+    document.getElementById("next-week-btn").addEventListener("click", () => navigateWeek(1));
+    document.getElementById("current-week-btn").addEventListener("click", () => navigateToCurrentWeek());
+
     const shifts = shiftsJson;//json data sent from the view
     const requests = timeOffRequestsJson;//json data sent from the view
 
@@ -10,19 +14,12 @@ function initialiseUserRota(shiftsJson, timeOffRequestsJson) {
     let currentWeekStart; // Tracks the current week's Monday
     const oneWeekMilliseconds = 7 * 24 * 60 * 60 * 1000; // Number of milliseconds in a week
 
-    // Function to initialize the current week based on the earliest shift
     function initialiseWeek() {
-
-        //maps all a users shifts to an array
-        const sortedShifts = mapShifts(shifts);
-
-        //sets the first shift date to the first index position
-        const firstShiftDate = sortedShifts.length > 0 ? new Date(sortedShifts[0].StartDateTime) : new Date();
-
-        //sets the current week start date by subtracting the day of the week from the day of the month which will always give you a sunday +1
-        currentWeekStart = new Date(firstShiftDate);
-        currentWeekStart.setDate(currentWeekStart.getDate() - currentWeekStart.getDay() + 1); // Adjust to Monday
+        const today = new Date();
+        currentWeekStart = new Date(today);
+        currentWeekStart.setDate(today.getDate() - today.getDay() + 1); // Adjust to Monday
     }
+
 
     // Function to populate the table for the current week
     function populateTable() {
@@ -83,7 +80,7 @@ function initialiseUserRota(shiftsJson, timeOffRequestsJson) {
         tableBody.appendChild(row);
     }
 
-    // Function to navigate weeks
+    //navigate weeks of a users rota
     function navigateWeek(direction) {
         currentWeekStart = new Date(currentWeekStart.getTime() + direction * oneWeekMilliseconds); // Adjust week
         populateTable(); // Re-populate the table with the new week

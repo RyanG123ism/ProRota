@@ -13,7 +13,6 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 if (connectionString == null)
@@ -179,5 +178,5 @@ catch (Exception ex)
 {
     Console.WriteLine("Application failed to start!");
     Console.WriteLine(ex.ToString());
-    throw; // Re-throw so Azure still registers the crash
+    throw;
 }
